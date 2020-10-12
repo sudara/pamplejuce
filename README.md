@@ -1,12 +1,21 @@
-CMake, Catch2, 
+
 
 ## About This Repository
 
-It's meant as an example of 2020 best practices.
+This repository is meant as an example of 2020 best practices, staying current with all dependencies. 
 
-1. JUCE as a submodule, tracking the devlop branch
+1. C++20
+2. JUCE 6.x as a submodule, tracking the devlop branch
+3. CMake 3.18
+4. Catch2
+5. Github Actions for both CI and artifact building, including code signing on mac os
+6. Proper .gitignore settings given the above
 
-## How to manually setup cmake for JUCE
+## What it doesn't handle
+
+1. MacOS notarization.
+
+## How to setup cmake for a new or existing JUCE project
 
 1. [Download CMAKE](https://cmake.org/download/)
 
@@ -18,13 +27,13 @@ It's meant as an example of 2020 best practices.
 
 ```
 git submodule add --branch develop --force -- https://github.com/juce-framework/JUCE/ JUCE
-```
-
-Let's commit those changes.
-
-```
 git commit .gitmodules JUCE -m 'Adding JUCE as a submodule'
 ```
 
 5. Set the correct flags for your plugin under `juce_add_plugin`. Check out the API https://github.com/juce-framework/JUCE/blob/master/docs/CMake%20API.md
 
+
+## Resources
+
+1. [The "Modern CMake" gitbook](https://cliutils.gitlab.io/) which also has a section on [https://cliutils.gitlab.io/modern-cmake/chapters/testing/catch.html](Catch2).
+2. JUCE's announcment of [native CMake support](https://forum.juce.com/t/native-built-in-cmake-support-in-juce/38700). 
