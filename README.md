@@ -1,5 +1,3 @@
-
-
 ## About This Repository
 
 This repository is meant as an example of 2020 best practices for a JUCE app. 
@@ -34,6 +32,14 @@ git commit .gitmodules JUCE -m 'Adding JUCE as a submodule'
 
 5. Set the correct flags for your plugin under `juce_add_plugin`. Check out the API https://github.com/juce-framework/JUCE/blob/master/docs/CMake%20API.md
 
+
+## How to build the project locally 
+
+
+### MacOS
+```
+cmake -B Builds -G Xcode
+```
 
 ## Resources
 
