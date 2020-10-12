@@ -2,7 +2,9 @@
 
 This repository is meant as an example of 2020 best practices for a JUCE app. 
 
-Currently it supports:
+It's primary function is to be a template for creating plugin repositories.
+
+Currently it defaults to:
 
 1. C++20
 2. JUCE 6.x as a submodule, tracking the devlop branch
@@ -21,7 +23,7 @@ Currently it supports:
 
 2. Take a look at [JUCE's default CMakeLists.txt](https://github.com/juce-framework/JUCE/tree/master/examples/CMake/AudioPlugin) and copy it over to your new project.
 
-3. Replace `Pamplejuce` with the name of your project.
+3. Replace `AudioPluginExample` with the name of your project.
 
 4. Set JUCE path. Uncomment the `add_subdirectory` example. Let's add JUCE as a submodule. I'm assuming we want the develop branch.
 
@@ -33,7 +35,7 @@ git commit .gitmodules JUCE -m 'Adding JUCE as a submodule'
 5. Set the correct flags for your plugin under `juce_add_plugin`. Check out the API https://github.com/juce-framework/JUCE/blob/master/docs/CMake%20API.md
 
 
-## How to build the project locally 
+## Manually building the project locally 
 
 
 ### MacOS

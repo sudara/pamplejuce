@@ -1,26 +1,11 @@
-# When in doubt, use the lastest
-cmake_minimum_required(VERSION 3.158)
-
-# `project()` sets up some helpful variables that describe source/binary
-# directories, and the current project version. This is a standard CMake command.
+cmake_minimum_required(VERSION 3.18)
 
 project(PAMPLEJUCE VERSION 0.0.1)
 
-# If you've installed JUCE somehow (via a package manager, or directly using the CMake install
-# target), you'll need to tell this project that it depends on the installed copy of JUCE. If you've
-# included JUCE directly in your source tree (perhaps as a submodule), you'll need to tell CMake to
-# include that subdirectory as part of the build.
+# JUCE is a submodule
+add_subdirectory(JUCE)
 
-# find_package(JUCE CONFIG REQUIRED)        # If you've installed JUCE to your system
-# or
-# add_subdirectory(JUCE)                    # If you've put JUCE in a subdirectory called JUCE
-
-# `juce_add_plugin` adds a static library target with the name passed as the first argument
-# (Pamplejuce here). This target is a normal CMake target, but has a lot of extra properties set
-# up by default. As well as this shared code static library, this function adds targets for each of
-# the formats specified by the FORMATS arguments. This function accepts many optional arguments.
-# Check the readme at `docs/CMake API.md` in the JUCE repo for the full list.
-
+# Check the readme at `docs/CMake API.md` in the JUCE repo for full config
 juce_add_plugin(Pamplejuce
     # VERSION ...                               # Set this if the plugin version is different to the project version
     # ICON_BIG ...                              # ICON_* arguments specify a path to an image file to use as an icon for the Standalone
@@ -32,10 +17,20 @@ juce_add_plugin(Pamplejuce
     # IS_MIDI_EFFECT TRUE/FALSE                 # Is this plugin a MIDI effect?
     # EDITOR_WANTS_KEYBOARD_FOCUS TRUE/FALSE    # Does the editor need keyboard focus?
     # COPY_PLUGIN_AFTER_BUILD TRUE/FALSE        # Should the plugin be installed to a default location after building?
-    PLUGIN_MANUFACTURER_CODE Juce               # A four-character manufacturer id with at least one upper-case character
-    PLUGIN_CODE Pamp                            # A unique four-character plugin id with at least one upper-case character
+    PLUGIN_MANUFACTURER_CODE Pamp               # A four-character manufacturer id with at least one upper-case character
+    PLUGIN_CODE P001                            # A unique four-character plugin id with at least one upper-case character
     FORMATS AU VST3 AUv3	                    # The formats to build. Other valid formats are: AAX Unity VST AU AUv3
-    PRODUCT_NAME "Audio Plugin Example")        # The name of the final executable, which can differ from the target name
+    PRODUCT_NAME "Pamplejuce")        # The name of the final executable, which can differ from the target name
+
+
+target_compile_features(Pamplejuce PRIVATE cxx_std_20)
+
+# Adds all the module sources so they appear correctly in the IDE
+# https://github.com/juce-framework/JUCE/commit/6b1b4cf7f6b1008db44411f2c8887d71a3348889
+##set_property(GLOBAL PROPERTY USE_FOLDERS YES)
+option(JUCE_ENABLE_MODULE_SOURCE_GROUPS "Show all module sources in IDE projects" ON)
+
+
 
 # `juce_generate_juce_header` will create a JuceHeader.h for a given target, which will be generated
 # into your build tree. This should be included with `#include <JuceHeader.h>`. The include path for
@@ -51,8 +46,8 @@ juce_add_plugin(Pamplejuce
 # that will be built into the target. This is a standard CMake command.
 
 target_sources(Pamplejuce PRIVATE
-    PluginEditor.cpp
-    PluginProcessor.cpp)
+    Source/PluginEditor.cpp
+    Source/PluginProcessor.cpp)
 
 # `target_compile_definitions` adds some preprocessor definitions to our target. In a Projucer
 # project, these might be passed in the 'Preprocessor Definitions' field. JUCE modules also make use
@@ -85,4 +80,7 @@ target_compile_definitions(Pamplejuce
 
 target_link_libraries(Pamplejuce PRIVATE
     # AudioPluginData           # If we'd created a binary data target, we'd link to it here
-    juce::juce_audio_utils)
+    juce::juce_audio_utils
+    juce::juce_recommended_config_flags
+    juce::juce_recommended_lto_flags
+    juce::juce_recommended_warning_flags)

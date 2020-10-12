@@ -10,3 +10,5 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 **/.DS_Store
+Builds/*
+!Builds/.gitkeep
