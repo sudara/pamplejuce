@@ -2,7 +2,9 @@
 
 ## About This Repository
 
-This repository is meant as an example of 2020 best practices, staying current with all dependencies. 
+This repository is meant as an example of 2020 best practices for a JUCE app. 
+
+Currently it supports:
 
 1. C++20
 2. JUCE 6.x as a submodule, tracking the devlop branch
