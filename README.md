@@ -23,7 +23,7 @@ Currently it supports:
 
 2. Take a look at [JUCE's default CMakeLists.txt](https://github.com/juce-framework/JUCE/tree/master/examples/CMake/AudioPlugin) and copy it over to your new project.
 
-3. Replace `AudioPluginExample` with the name of your project.
+3. Replace `Pamplejuce` with the name of your project.
 
 4. Set JUCE path. Uncomment the `add_subdirectory` example. Let's add JUCE as a submodule. I'm assuming we want the develop branch.
 
