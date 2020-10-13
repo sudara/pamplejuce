@@ -27,7 +27,7 @@ target_compile_features(Pamplejuce PRIVATE cxx_std_20)
 
 # Adds all the module sources so they appear correctly in the IDE
 # https://github.com/juce-framework/JUCE/commit/6b1b4cf7f6b1008db44411f2c8887d71a3348889
-##set_property(GLOBAL PROPERTY USE_FOLDERS YES)
+set_property(GLOBAL PROPERTY USE_FOLDERS YES)
 option(JUCE_ENABLE_MODULE_SOURCE_GROUPS "Show all module sources in IDE projects" ON)
 
 
