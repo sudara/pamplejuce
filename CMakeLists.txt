@@ -2,6 +2,12 @@ cmake_minimum_required(VERSION 3.18)
 
 project(PAMPLEJUCE VERSION 0.0.1)
 
+# Adds all the module sources so they appear correctly in the IDE
+# This needs to be set before JUCE is added as a sub-dir
+# https://github.com/juce-framework/JUCE/commit/6b1b4cf7f6b1008db44411f2c8887d71a3348889
+set_property(GLOBAL PROPERTY USE_FOLDERS YES)
+option(JUCE_ENABLE_MODULE_SOURCE_GROUPS "Show all module sources in IDE projects" ON)
+
 # JUCE is a submodule
 add_subdirectory(JUCE)
 
@@ -25,13 +31,6 @@ juce_add_plugin(Pamplejuce
 
 target_compile_features(Pamplejuce PRIVATE cxx_std_20)
 
-# Adds all the module sources so they appear correctly in the IDE
-# https://github.com/juce-framework/JUCE/commit/6b1b4cf7f6b1008db44411f2c8887d71a3348889
-set_property(GLOBAL PROPERTY USE_FOLDERS YES)
-option(JUCE_ENABLE_MODULE_SOURCE_GROUPS "Show all module sources in IDE projects" ON)
-
-
-
 # `juce_generate_juce_header` will create a JuceHeader.h for a given target, which will be generated
 # into your build tree. This should be included with `#include <JuceHeader.h>`. The include path for
 # this header will be automatically added to the target. The main function of the JuceHeader is to
@@ -46,6 +45,8 @@ option(JUCE_ENABLE_MODULE_SOURCE_GROUPS "Show all module sources in IDE projects
 # that will be built into the target. This is a standard CMake command.
 
 target_sources(Pamplejuce PRIVATE
+    # Source/PluginEditor.h
+    # Source/PluginProcessor.h
     Source/PluginEditor.cpp
     Source/PluginProcessor.cpp)
 
