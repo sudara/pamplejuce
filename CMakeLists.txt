@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 3.18)
-
 project(Pamplejuce VERSION 0.0.1)
+
+# By default we don't want schemes to be made for modules, etc
+set(CMAKE_XCODE_GENERATE_SCHEME OFF)
+
+# No ZERO_CHECK target (it helps bust cache for cmake)
+set(CMAKE_SUPPRESS_REGENERATION true) 
+
 
 # Adds all the module sources so they appear correctly in the IDE
 # This needs to be set before JUCE is added as a sub-dir
@@ -55,12 +61,11 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Source FILES ${SourceFiles})
 
 # XCODE_SCHEME_EXECUTABLE
 # https://cliutils.gitlab.io/modern-cmake/chapters/features/ides.html
-set_property(TARGET Pamplejuce_AU PROPERTY FOLDER "Targets")
-set_property(TARGET Pamplejuce_AUv3 PROPERTY FOLDER "Targets")
-set_property(TARGET Pamplejuce_VST3 PROPERTY FOLDER "Targets")
-set_property(TARGET Pamplejuce_All PROPERTY FOLDER "Targets")
+set_target_properties(Pamplejuce_AU Pamplejuce_AUv3 Pamplejuce_VST3 Pamplejuce_All PROPERTIES 
+	FOLDER "Targets"
+	XCODE_GENERATE_SCHEME ON)
+	
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "Targets")
-set(CMAKE_SUPPRESS_REGENERATION true) # No ZERO_CHECK
 
 # `target_compile_definitions` adds some preprocessor definitions to our target. In a Projucer
 # project, these might be passed in the 'Preprocessor Definitions' field. JUCE modules also make use
