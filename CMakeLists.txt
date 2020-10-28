@@ -7,11 +7,15 @@ set(CMAKE_XCODE_GENERATE_SCHEME OFF)
 # No ZERO_CHECK target (it helps bust cache for cmake)
 set(CMAKE_SUPPRESS_REGENERATION true) 
 
-
 # Adds all the module sources so they appear correctly in the IDE
 # This needs to be set before JUCE is added as a sub-dir
 # https://github.com/juce-framework/JUCE/commit/6b1b4cf7f6b1008db44411f2c8887d71a3348889
 set_property(GLOBAL PROPERTY USE_FOLDERS YES)
+
+# This is a failed attempt to bury ALL_BUILD in Targets/
+set(PREDEFINED_TARGETS_FOLDER "Targets")
+
+# Create a /Modules directory with all the JUCE Module code
 option(JUCE_ENABLE_MODULE_SOURCE_GROUPS "Show all module sources in IDE projects" ON)
 
 # JUCE is a submodule
@@ -50,6 +54,7 @@ target_compile_features(Pamplejuce PRIVATE cxx_std_20)
 # although it doesn't really affect executable targets). Finally, we supply a list of source files
 # that will be built into the target. This is a standard CMake command.
 
+# All .h and .cpp files should be listed here
 set(SourceFiles
 	Source/PluginEditor.h
 	Source/PluginProcessor.h
@@ -59,13 +64,16 @@ set(SourceFiles
 target_sources(Pamplejuce PRIVATE ${SourceFiles})
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Source FILES ${SourceFiles})
 
-# XCODE_SCHEME_EXECUTABLE
+# Move the INTERFACE auto-created JUCE library stuff into its own folder
+source_group("JUCE Library Code" REGULAR_EXPRESSION "juce_")
+
+# TODO: XCODE_SCHEME_EXECUTABLE
 # https://cliutils.gitlab.io/modern-cmake/chapters/features/ides.html
+
+# Tuck the Plugin varieties in a Targets folder and make sure to generate an Xcode Scheme
 set_target_properties(Pamplejuce_AU Pamplejuce_AUv3 Pamplejuce_VST3 Pamplejuce_All PROPERTIES 
 	FOLDER "Targets"
 	XCODE_GENERATE_SCHEME ON)
-	
-set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "Targets")
 
 # `target_compile_definitions` adds some preprocessor definitions to our target. In a Projucer
 # project, these might be passed in the 'Preprocessor Definitions' field. JUCE modules also make use
