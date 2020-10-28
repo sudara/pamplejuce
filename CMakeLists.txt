@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.18)
 
-project(PAMPLEJUCE VERSION 0.0.1)
+project(Pamplejuce VERSION 0.0.1)
 
 # Adds all the module sources so they appear correctly in the IDE
 # This needs to be set before JUCE is added as a sub-dir
@@ -44,11 +44,23 @@ target_compile_features(Pamplejuce PRIVATE cxx_std_20)
 # although it doesn't really affect executable targets). Finally, we supply a list of source files
 # that will be built into the target. This is a standard CMake command.
 
-target_sources(Pamplejuce PRIVATE
-    # Source/PluginEditor.h
-    # Source/PluginProcessor.h
-    Source/PluginEditor.cpp
-    Source/PluginProcessor.cpp)
+set(SourceFiles
+	Source/PluginEditor.h
+	Source/PluginProcessor.h
+	Source/PluginEditor.cpp
+	Source/PluginProcessor.cpp)
+
+target_sources(Pamplejuce PRIVATE ${SourceFiles})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Source FILES ${SourceFiles})
+
+# XCODE_SCHEME_EXECUTABLE
+# https://cliutils.gitlab.io/modern-cmake/chapters/features/ides.html
+set_property(TARGET Pamplejuce_AU PROPERTY FOLDER "Targets")
+set_property(TARGET Pamplejuce_AUv3 PROPERTY FOLDER "Targets")
+set_property(TARGET Pamplejuce_VST3 PROPERTY FOLDER "Targets")
+set_property(TARGET Pamplejuce_All PROPERTY FOLDER "Targets")
+set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "Targets")
+set(CMAKE_SUPPRESS_REGENERATION true) # No ZERO_CHECK
 
 # `target_compile_definitions` adds some preprocessor definitions to our target. In a Projucer
 # project, these might be passed in the 'Preprocessor Definitions' field. JUCE modules also make use
@@ -79,9 +91,11 @@ target_compile_definitions(Pamplejuce
 # linked automatically. If we'd generated a binary data target above, we would need to link to it
 # here too. This is a standard CMake command.
 
-target_link_libraries(Pamplejuce PRIVATE
-    # AudioPluginData           # If we'd created a binary data target, we'd link to it here
-    juce::juce_audio_utils
-    juce::juce_recommended_config_flags
-    juce::juce_recommended_lto_flags
-    juce::juce_recommended_warning_flags)
+target_link_libraries(Pamplejuce
+	PRIVATE
+	    # AudioPluginData           # If we'd created a binary data target, we'd link to it here
+	    juce::juce_audio_utils
+	PUBLIC
+	    juce::juce_recommended_config_flags
+	    juce::juce_recommended_lto_flags
+	    juce::juce_recommended_warning_flags)

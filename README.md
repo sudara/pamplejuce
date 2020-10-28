@@ -35,13 +35,16 @@ git commit .gitmodules JUCE -m 'Adding JUCE as a submodule'
 5. Set the correct flags for your plugin under `juce_add_plugin`. Check out the API https://github.com/juce-framework/JUCE/blob/master/docs/CMake%20API.md
 
 
-## Manually building the project locally 
+## Manually building the project on MacOS
 
-
-### MacOS
 ```
 cmake -B Builds -G Xcode
 ```
+
+## Updating this repository
+
+1. Check for latest CMake version.
+2. Update JUCE with `git submodule update --remote --merge`
 
 ## Resources
 
