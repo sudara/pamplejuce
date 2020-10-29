@@ -1,17 +1,15 @@
-## About This Repository
+![PAMPLEJUCE](pamplejuce.png)
 
-This repository is meant as an example of 2020 best practices for a JUCE app. 
+This repository is a template for creating JUCE plugins with 2020 best practices.
 
-It's primary function is to be a template for creating plugin repositories.
-
-Currently it defaults to:
+Out of the box, it supports:
 
 1. C++20
-2. JUCE 6.x as a submodule, tracking the devlop branch
+2. JUCE 6.x as a submodule, tracking develop
 3. CMake 3.18
-4. Catch2
-5. Github Actions for both CI and artifact building, including code signing on mac os
-6. Proper .gitignore settings given the above
+4. Catch2 (working on this now)
+5. Github Actions for both CI and artifact building, including code signing on mac os (n)
+6. Proper .gitignore given the above
 
 ## What it doesn't handle
 
@@ -49,5 +47,5 @@ cmake -B Builds -G Xcode
 ## Resources
 
 1. [The "Modern CMake" gitbook](https://cliutils.gitlab.io/) which also has a section on [https://cliutils.gitlab.io/modern-cmake/chapters/testing/catch.html](Catch2).
-2. JUCE's announcment of [native CMake support](https://forum.juce.com/t/native-built-in-cmake-support-in-juce/38700). 
+2. JUCE's announcment of [native CMake support](https://forum.juce.com/t/native-built-in-cmake-support-in-juce/38700).
 3. [Eyalamir Music's JUCE / CMake prototype repository](https://github.com/eyalamirmusic/JUCECmakeRepoPrototype)
