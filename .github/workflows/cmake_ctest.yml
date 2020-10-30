@@ -75,31 +75,31 @@ jobs:
       uses: actions/download-artifact@v2
   
     - name: Upload Windows Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./${PROJECT_NAME}-Windows.zip
-          asset_name: ${PROJECT_NAME}-Windows.zip
-          asset_content_type: application/zip
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./${PROJECT_NAME}-Windows.zip
+        asset_name: ${PROJECT_NAME}-Windows.zip
+        asset_content_type: application/zip
 
     - name: Upload Linux Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./${PROJECT_NAME}-Linux.zip
-          asset_name: ${PROJECT_NAME}-Linux.zip
-          asset_content_type: application/zip
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./${PROJECT_NAME}-Linux.zip
+        asset_name: ${PROJECT_NAME}-Linux.zip
+        asset_content_type: application/zip
 
     - name: Upload MacOS Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./${PROJECT_NAME}-MacOS.zip
-          asset_name: ${PROJECT_NAME}-MacOS.zip
-          asset_content_type: application/zip
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./${PROJECT_NAME}-MacOS.zip
+        asset_name: ${PROJECT_NAME}-MacOS.zip
+        asset_content_type: application/zip
