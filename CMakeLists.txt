@@ -7,6 +7,10 @@ set(CMAKE_XCODE_GENERATE_SCHEME OFF)
 # No ZERO_CHECK target (it helps bust cache for cmake)
 set(CMAKE_SUPPRESS_REGENERATION true) 
 
+# Make sure catch2 CMake scripts can be found
+# https://github.com/catchorg/Catch2/issues/2026
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake.modules/")
+
 # Adds all the module sources so they appear correctly in the IDE
 # This needs to be set before JUCE is added as a sub-dir
 # https://github.com/juce-framework/JUCE/commit/6b1b4cf7f6b1008db44411f2c8887d71a3348889
@@ -62,7 +66,7 @@ set(SourceFiles
 	Source/PluginProcessor.cpp)
 
 target_sources(Pamplejuce PRIVATE ${SourceFiles})
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Source FILES ${SourceFiles})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Source PREFIX "" FILES ${SourceFiles})
 
 # Move the INTERFACE auto-created JUCE library stuff into its own folder
 source_group("JUCE Library Code" REGULAR_EXPRESSION "juce_")
@@ -89,26 +93,37 @@ target_compile_definitions(Pamplejuce
     JUCE_USE_CURL=0     # If you remove this, add `NEEDS_CURL TRUE` to the `juce_add_plugin` call
     JUCE_VST3_CAN_REPLACE_VST2=0)
 
-# If your target needs extra binary assets, you can add them here. The first argument is the name of
-# a new static library target that will include all the binary resources. There is an optional
-# `NAMESPACE` argument that can specify the namespace of the generated binary data class. Finally,
-# the SOURCES argument should be followed by a list of source files that should be built into the
-# static library. These source files can be of any kind (wav data, images, fonts, icons etc.).
-# Conversion to binary-data will happen when your target is built.
+juce_add_binary_data(Assets SOURCES pamplejuce.png)
 
-# juce_add_binary_data(AudioPluginData SOURCES ...)
+# This runs enable_testing() unless BUILD_TESTING is OFF (it's on by default)
+include(CTest) 
 
-# `target_link_libraries` links libraries and JUCE modules to other libraries or executables. Here,
-# we're linking our executable target to the `juce::juce_audio_utils` module. Inter-module
-# dependencies are resolved automatically, so `juce_core`, `juce_events` and so on will also be
-# linked automatically. If we'd generated a binary data target above, we would need to link to it
-# here too. This is a standard CMake command.
+# BUILD_TESTING is ON by default
+if(BUILD_TESTING)
+	Include(FetchContent)
+	FetchContent_Declare(
+	  Catch2
+	  GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+	  GIT_TAG        v2.13.2)
+	FetchContent_MakeAvailable(Catch2) # find_package equivelant 
+	
+	add_executable(tests tests/catch_main.cpp)
+	target_link_libraries(tests PRIVATE Catch2::Catch2)
+		
+	# Load and use the .cmake file provided by Catch2
+	# https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md#parseandaddcatchtestscmake
+	# 
+	# We have to manually provide the source directory here for now
+	# https://github.com/catchorg/Catch2/issues/2026
+	include(${Catch2_SOURCE_DIR}/contrib/ParseAndAddCatchTests.cmake)
+	ParseAndAddCatchTests(tests)
+endif()
 
 target_link_libraries(Pamplejuce
 	PRIVATE
-	    # AudioPluginData           # If we'd created a binary data target, we'd link to it here
+	    Assets
 	    juce::juce_audio_utils
 	PUBLIC
-	    juce::juce_recommended_config_flags
+		juce::juce_recommended_config_flags
 	    juce::juce_recommended_lto_flags
 	    juce::juce_recommended_warning_flags)

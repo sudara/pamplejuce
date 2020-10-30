@@ -1,0 +1,105 @@
+name: CMake
+
+on: [push]
+
+env:
+  PROJECT_NAME: Pamplejuce
+  BUILD_TYPE: Release
+  BUILD_DIR: Builds
+  INSTALL_DIR: Install
+
+# jobs are run in paralell on different machines
+# all steps run in series
+jobs:
+  build_and_test:
+	name: ${{ matrix.artifact }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+		include:
+		- os: windows-latest
+		  artifact: Windows
+		- os: ubuntu-latest
+		  artifact: Linux
+		- os: macos-latest
+		  artifact: MacOS
+    steps:
+    - name: Get latest CMake
+      uses: lukka/get-cmake@latest      
+
+	- name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Build
+      shell: bash
+      run: cmake --build -B ${BUILD_DIR} --config ${BUILD_TYPE}
+
+    - name: Test
+      shell: bash
+      run: ctest -C $BUILD_TYPE
+
+    - name: Install & Strip
+      run: cmake --install ${BUILD_DIR} --prefix ${INSTALL_DIR} --strip
+
+    - name: Zip
+      working-directory: ${INSTALL_DIR}
+      run: cmake -E tar cfv ../${PROJECT_NAME}-${{ matrix.artifact }} --format=7zip .
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        path: ./${PROJECT_NAME}-${{ matrix.artifact }}.zip
+        name: ${PROJECT_NAME}-${{ matrix.artifact }}.zip
+	  
+  release:
+    if: contains(github.ref, 'tags/v')
+    runs-on: ubuntu-latest
+    needs: build_and_test
+	outputs: 
+		upload_url: ${{ steps.create_release.outputs.upload_url }}
+		
+    steps:
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+	
+	- name: Download All Artifacts
+	  uses: actions/download-artifact@v2
+	  
+	- name: Upload Windows Asset
+	    uses: actions/upload-release-asset@v1
+	    env:
+	      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+	    with:
+	      upload_url: ${{ steps.create_release.outputs.upload_url }}
+	      asset_path: ./${PROJECT_NAME}-Windows.zip
+	      asset_name: ${PROJECT_NAME}-Windows.zip
+	      asset_content_type: application/zip
+
+	- name: Upload Linux Asset
+	    uses: actions/upload-release-asset@v1
+	    env:
+	      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+	    with:
+	      upload_url: ${{ steps.create_release.outputs.upload_url }}
+	      asset_path: ./${PROJECT_NAME}-Linux.zip
+	      asset_name: ${PROJECT_NAME}-Linux.zip
+	      asset_content_type: application/zip
+
+	- name: Upload MacOS Asset
+	    uses: actions/upload-release-asset@v1
+	    env:
+	      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+	    with:
+	      upload_url: ${{ steps.create_release.outputs.upload_url }}
+	      asset_path: ./${PROJECT_NAME}-MacOS.zip
+	      asset_name: ${PROJECT_NAME}-MacOS.zip
+	      asset_content_type: application/zip

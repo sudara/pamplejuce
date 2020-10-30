@@ -7,7 +7,7 @@ Out of the box, it supports:
 1. C++20
 2. JUCE 6.x as a submodule, tracking develop
 3. CMake 3.18
-4. Catch2 (working on this now)
+4. Catch2 2.13.2
 5. Github Actions for both CI and artifact building, including code signing on mac os (n)
 6. Proper .gitignore given the above
 
@@ -44,8 +44,16 @@ cmake -B Builds -G Xcode
 1. Check for latest CMake version.
 2. Update JUCE with `git submodule update --remote --merge`
 
-## Resources
+## FAQ 
+
+### What is CTest?
+
+
+
+## References
 
 1. [The "Modern CMake" gitbook](https://cliutils.gitlab.io/) which also has a section on [https://cliutils.gitlab.io/modern-cmake/chapters/testing/catch.html](Catch2).
 2. JUCE's announcment of [native CMake support](https://forum.juce.com/t/native-built-in-cmake-support-in-juce/38700).
 3. [Eyalamir Music's JUCE / CMake prototype repository](https://github.com/eyalamirmusic/JUCECmakeRepoPrototype)
+4. [Christian Adam's HelloWorld CMake and ccache repo](https://github.com/cristianadam/HelloWorld)
+5. [Roman Golyshev's Github Actions & Catch22 repo](https://github.com/fedochet/github-actions-cpp-test)
