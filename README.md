@@ -5,7 +5,7 @@ This repository is a template for creating JUCE plugins with 2020 best practices
 Out of the box, it supports:
 
 1. C++20
-2. JUCE 6.x include with CMake [FetchContent](https://cmake.org/cmake/help/v3.11/module/FetchContent.html), tracking develop
+2. JUCE 6.x included with CMake [FetchContent](https://cmake.org/cmake/help/v3.11/module/FetchContent.html), tracking `develop`
 3. CMake 3.18
 4. Catch2 2.13.2
 5. Github Actions for both CI and artifact building
