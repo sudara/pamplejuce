@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.18)
+include(CMakePrintHelpers)
 project(Pamplejuce VERSION 0.0.1)
 
 # By default we don't want schemes to be made for modules, etc
@@ -41,7 +42,7 @@ juce_add_plugin(Pamplejuce
     # COPY_PLUGIN_AFTER_BUILD TRUE/FALSE        # Should the plugin be installed to a default location after building?
     PLUGIN_MANUFACTURER_CODE Pamp               # A four-character manufacturer id with at least one upper-case character
     PLUGIN_CODE P001                            # A unique four-character plugin id with at least one upper-case character
-    FORMATS AU VST3 AUv3	                    # The formats to build. Other valid formats are: AAX Unity VST AU AUv3
+    FORMATS AU VST3 AUv3                      # The formats to build. Other valid formats are: AAX Unity VST AU AUv3
     PRODUCT_NAME "Pamplejuce")        # The name of the final executable, which can differ from the target name
 
 
@@ -62,10 +63,10 @@ target_compile_features(Pamplejuce PRIVATE cxx_std_20)
 
 # All .h and .cpp files should be listed here
 set(SourceFiles
-	Source/PluginEditor.h
-	Source/PluginProcessor.h
-	Source/PluginEditor.cpp
-	Source/PluginProcessor.cpp)
+    Source/PluginEditor.h
+    Source/PluginProcessor.h
+    Source/PluginEditor.cpp
+    Source/PluginProcessor.cpp)
 
 target_sources(Pamplejuce PRIVATE ${SourceFiles})
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Source PREFIX "" FILES ${SourceFiles})
@@ -76,10 +77,19 @@ source_group("JUCE Library Code" REGULAR_EXPRESSION "juce_")
 # TODO: XCODE_SCHEME_EXECUTABLE
 # https://cliutils.gitlab.io/modern-cmake/chapters/features/ides.html
 
-# Tuck the Plugin varieties in a Targets folder and make sure to generate an Xcode Scheme
-set_target_properties(Pamplejuce_AU Pamplejuce_AUv3 Pamplejuce_VST3 Pamplejuce_All PROPERTIES 
-	FOLDER "Targets"
-	XCODE_GENERATE_SCHEME ON)
+# This cleans up the folder organization, especially on Xcode.
+# It tucks the Plugin varieties into a "Targets" folder and generate an Xcode Scheme manually
+# since Xcode scheme generation is turned off to limit noise
+# Not all plugin types (au, vst) available on each build type (win, macos, linux)
+foreach(target Pamplejuce_AU Pamplejuce_AUv3 Pamplejuce_VST3 Pamplejuce_All)
+    cmake_print_variables(target)
+    if(TARGET ${target})
+        message(STATUS "ITS A TARGET!")
+        set_target_properties(${target} PROPERTIES 
+            FOLDER "Targets"
+            XCODE_GENERATE_SCHEME ON)
+    endif()
+endforeach()
 
 # `target_compile_definitions` adds some preprocessor definitions to our target. In a Projucer
 # project, these might be passed in the 'Preprocessor Definitions' field. JUCE modules also make use
@@ -97,35 +107,35 @@ target_compile_definitions(Pamplejuce
 
 juce_add_binary_data(Assets SOURCES pamplejuce.png)
 
-# This runs enable_testing() unless BUILD_TESTING is OFF (it's on by default)
+# This runs enable_testing() unless BUILD_TESTING is OFF (it's ON by default)
 include(CTest) 
 
 # BUILD_TESTING is ON by default
 if(BUILD_TESTING)
-	Include(FetchContent)
-	FetchContent_Declare(
-	  Catch2
-	  GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-	  GIT_TAG        v2.13.2)
-	FetchContent_MakeAvailable(Catch2) # find_package equivelant 
-	
-	add_executable(tests tests/catch_main.cpp)
-	target_link_libraries(tests PRIVATE Catch2::Catch2)
-		
-	# Load and use the .cmake file provided by Catch2
-	# https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md#parseandaddcatchtestscmake
-	# 
-	# We have to manually provide the source directory here for now
-	# https://github.com/catchorg/Catch2/issues/2026
-	include(${Catch2_SOURCE_DIR}/contrib/ParseAndAddCatchTests.cmake)
-	ParseAndAddCatchTests(tests)
+    Include(FetchContent)
+    FetchContent_Declare(
+        Catch2
+        GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+        GIT_TAG        v2.13.2)
+    FetchContent_MakeAvailable(Catch2) # find_package equivelant 
+
+    add_executable(tests tests/catch_main.cpp)
+    target_link_libraries(tests PRIVATE Catch2::Catch2)
+
+    # Load and use the .cmake file provided by Catch2
+    # https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md#parseandaddcatchtestscmake
+    # 
+    # We have to manually provide the source directory here for now
+    # https://github.com/catchorg/Catch2/issues/2026
+    include(${Catch2_SOURCE_DIR}/contrib/ParseAndAddCatchTests.cmake)
+    ParseAndAddCatchTests(tests)
 endif()
 
 target_link_libraries(Pamplejuce
-	PRIVATE
-	    Assets
-	    juce::juce_audio_utils
-	PUBLIC
-		juce::juce_recommended_config_flags
-	    juce::juce_recommended_lto_flags
-	    juce::juce_recommended_warning_flags)
+  PRIVATE
+    Assets
+    juce::juce_audio_utils
+  PUBLIC
+    juce::juce_recommended_config_flags
+    juce::juce_recommended_lto_flags
+    juce::juce_recommended_warning_flags)

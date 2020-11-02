@@ -15,6 +15,7 @@ jobs:
     name: ${{ matrix.artifact }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false # show all errors for each platform (vs. cancel jobs on error)
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
         include:
@@ -24,6 +25,7 @@ jobs:
           artifact: Linux
         - os: macos-latest
           artifact: MacOS
+
     steps:
     - name: Install JUCE's Linux Deps 
       if: runner.os == 'Linux'
@@ -36,7 +38,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
       with:
-        submodules: 'true' # Gotta get JUCE populated
+        submodules: true # Gotta get JUCE populated
 
     - name: Build
       shell: bash
