@@ -30,16 +30,16 @@ Out of the box, it supports:
 
 ## How to build your project on MacOS
 
-This will generate an Xcode project with a debug release defaulted. 
+This will generate an Xcode project:
 
 ```
 cmake -B Builds -G Xcode
 ```
 
-This is *instead* of compiling in release mode, which this commond does on GitHub, for example:
+You can skip the Xcode project and build Release only on the command line with: 
 
 ```
-cmake -B Builds 
+cmake -B Builds --config Release .
 ```
 
 ## Updating Pamplejuce
