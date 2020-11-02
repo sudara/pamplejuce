@@ -23,6 +23,8 @@ set(PREDEFINED_TARGETS_FOLDER "Targets")
 option(JUCE_ENABLE_MODULE_SOURCE_GROUPS "Show all module sources in IDE projects" ON)
 
 # JUCE is a submodule
+# Locally, you need to run `git submodule update --init --recursive` once
+# On Github Actions, it's managed by actions/checkout
 add_subdirectory(JUCE)
 
 # Check the readme at `docs/CMake API.md` in the JUCE repo for full config

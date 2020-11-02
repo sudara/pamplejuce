@@ -8,46 +8,44 @@ Out of the box, it supports:
 2. JUCE 6.x as a submodule, tracking develop
 3. CMake 3.18
 4. Catch2 2.13.2
-5. Github Actions for both CI and artifact building, including code signing on mac os (n)
+5. Github Actions for both CI and artifact building
 6. Proper .gitignore given the above
 
-## What it doesn't handle
+## What it doesn't handle (yet)
 
-1. MacOS notarization.
+1. MacOS code signing, packaging, notarization.
 
-## How to setup cmake for a new or existing JUCE project
+## How to use the repo for YOUR project
 
 1. [Download CMAKE](https://cmake.org/download/)
 
-2. Take a look at [JUCE's default CMakeLists.txt](https://github.com/juce-framework/JUCE/tree/master/examples/CMake/AudioPlugin) and copy it over to your new project.
+2. Fork, or clone this repo locally
 
-3. Replace `AudioPluginExample` with the name of your project.
+3. Replace `Pamplejuce` with the name of your project.
 
-4. Set JUCE path. Uncomment the `add_subdirectory` example. Let's add JUCE as a submodule. I'm assuming we want the develop branch.
+4. 
 
 ```
-git submodule add --branch develop --force -- https://github.com/juce-framework/JUCE/ JUCE
-git commit .gitmodules JUCE -m 'Adding JUCE as a submodule'
+git submodule update --init
 ```
 
 5. Set the correct flags for your plugin under `juce_add_plugin`. Check out the API https://github.com/juce-framework/JUCE/blob/master/docs/CMake%20API.md
 
 
-## Manually building the project on MacOS
+## How to build your project on MacOS
 
 ```
 cmake -B Builds -G Xcode
 ```
 
-## Updating this repository
+## Updating Pamplejuce
 
-1. Check for latest CMake version.
+1. Update with latest CMake version.
 2. Update JUCE with `git submodule update --remote --merge`
 
 ## FAQ 
 
 ### What is CTest?
-
 
 
 ## References
