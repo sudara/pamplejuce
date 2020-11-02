@@ -33,7 +33,7 @@ jobs:
 
     - name: Build
       shell: bash
-      run: cmake --build -B ${BUILD_DIR} --config ${BUILD_TYPE}
+      run: cmake -B ${BUILD_DIR} --config ${BUILD_TYPE}
 
     - name: Test
       shell: bash
