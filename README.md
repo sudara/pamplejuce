@@ -61,3 +61,5 @@ cmake -B Builds
 5. [Roman Golyshev's Github Actions & Catch2 repo](https://github.com/fedochet/github-actions-cpp-test)
 6. [Maxwell Pollack's CMake + GitHub Actions repo](https://github.com/maxwellpollack/juce-plugin-ci)
 7. [iPlug Packages and Inno Setup scripts](https://github.com/olilarkin/wdl-ol/tree/master/IPlugExamples/IPlugEffect/installer)
+8. [Surge's pkgbuild installer script](https://github.com/kurasu/surge/blob/master/installer_mac/make_installer.sh)
+9. [Chris Randall's PackageBuilder script](https://forum.juce.com/t/vst-installer/16654/15)
