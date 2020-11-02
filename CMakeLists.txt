@@ -118,8 +118,8 @@ if(BUILD_TESTING)
         GIT_TAG        v2.13.2)
     FetchContent_MakeAvailable(Catch2) # find_package equivelant 
 
-    add_executable(tests tests/catch_main.cpp)
-    target_link_libraries(tests PRIVATE Catch2::Catch2)
+    add_executable(Tests Tests/catch_main.cpp)
+    target_link_libraries(Tests PRIVATE Catch2::Catch2)
 
     # Load and use the .cmake file provided by Catch2
     # https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md#parseandaddcatchtestscmake
@@ -127,7 +127,7 @@ if(BUILD_TESTING)
     # We have to manually provide the source directory here for now
     # https://github.com/catchorg/Catch2/issues/2026
     include(${Catch2_SOURCE_DIR}/contrib/ParseAndAddCatchTests.cmake)
-    ParseAndAddCatchTests(tests)
+    ParseAndAddCatchTests(Tests)
 endif()
 
 target_link_libraries(Pamplejuce
