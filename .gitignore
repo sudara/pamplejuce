@@ -12,3 +12,4 @@ _deps
 **/.DS_Store
 Builds/*
 !Builds/.gitkeep
+Install/*

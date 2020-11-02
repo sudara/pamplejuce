@@ -3,11 +3,10 @@ name: CMake
 on: [push]
 
 env:
-  PROJECT_NAME: Pamplejuce
+  PROJECT_NAME: Pamplejuce # Must match the JUCE project name from juce_add_plugin
   BUILD_TYPE: Release
   BUILD_DIR: Builds
-  INSTALL_DIR: Install
-
+  
 # jobs are run in paralell on different machines
 # all steps run in series
 jobs:
@@ -42,18 +41,15 @@ jobs:
 
     - name: Build
       shell: bash
-      run: cmake -B ${BUILD_DIR} -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
+      run: cmake -B ${BUILD_DIR} --config ${BUILD_TYPE} .
 
     - name: Test
       shell: bash
       run: ctest -C $BUILD_TYPE
 
-    - name: Install & Strip
-      run: cmake --install ${BUILD_DIR} --prefix ${INSTALL_DIR} --strip
-
     - name: Zip
-      working-directory: ${INSTALL_DIR}
-      run: cmake -E tar cfv ../${PROJECT_NAME}-${{ matrix.artifact }} --format=7zip .
+      working-directory: ./${BUILD_DIR}/${PROJECT_NAME}_artefacts
+      run: cmake -E tar cfv ../../${PROJECT_NAME}-${{ matrix.artifact }}.zip --format=zip .
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v2
