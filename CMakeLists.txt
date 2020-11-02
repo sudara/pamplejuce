@@ -23,10 +23,17 @@ set(PREDEFINED_TARGETS_FOLDER "Targets")
 # Create a /Modules directory with all the JUCE Module code
 option(JUCE_ENABLE_MODULE_SOURCE_GROUPS "Show all module sources in IDE projects" ON)
 
-# JUCE is a submodule
-# Locally, you need to run `git submodule update --init --recursive` once
-# On Github Actions, it's managed by actions/checkout
-add_subdirectory(JUCE)
+# Include JUCE using CMake FetchContent
+include(FetchContent)
+FetchContent_Declare(
+        JUCE
+        GIT_REPOSITORY https://github.com/juce-framework/JUCE.git
+        GIT_TAG 3f78998b967979da8523030ba76e807d4431efcd
+	GIT_SHALLOW true
+	GIT_PROGRESS true
+
+)
+FetchContent_MakeAvailable(JUCE)
 
 # Check the readme at `docs/CMake API.md` in the JUCE repo for full config
 juce_add_plugin(Pamplejuce
