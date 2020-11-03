@@ -52,7 +52,7 @@ jobs:
 
     - name: Zip
       working-directory: $BUILD_DIR
-      run: cmake -E tar cfv ${PROJECT_NAME}-${{ matrix.artifact }}.zip --format=zip {PROJECT_NAME}_artefacts
+      run: cmake -E tar cfv ${PROJECT_NAME}-${{ matrix.artifact }}.zip --format=zip ${PROJECT_NAME}_artefacts
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v2
