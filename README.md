@@ -19,11 +19,11 @@ Out of the box, it supports:
 
 1. [Download CMAKE](https://cmake.org/download/)
 
-2. Fork, or clone this repo locally
+2. Fork this repo and/or clone this repo locally
 
-3. Replace `Pamplejuce` with the name of your project.
+3. Replace `Pamplejuce` with the name of your project in CMakeLists.txt
 
-4. `git submodule update --init`
+4. Get the latest JUCE via `git submodule update --init`
 
 5. Set the correct flags for your plugin under `juce_add_plugin`. Check out the API https://github.com/juce-framework/JUCE/blob/master/docs/CMake%20API.md
 

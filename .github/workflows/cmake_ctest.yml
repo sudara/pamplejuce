@@ -44,21 +44,21 @@ jobs:
 
     - name: Build
       shell: bash
-      run: cmake -B ${BUILD_DIR} --config ${BUILD_TYPE} .
+      run: cmake -B ${BUILD_DIR} --config $BUILD_TYPE .
 
     - name: Test
       shell: bash
       run: ctest -C $BUILD_TYPE
 
     - name: Zip
-      working-directory: ./${BUILD_DIR}/${PROJECT_NAME}_artefacts
-      run: cmake -E tar cfv ../../${PROJECT_NAME}-${{ matrix.artifact }}.zip --format=zip .
+      working-directory: $BUILD_DIR
+      run: cmake -E tar cfv ${PROJECT_NAME}-${{ matrix.artifact }}.zip --format=zip {PROJECT_NAME}_artefacts
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v2
       with:
-        path: ./${PROJECT_NAME}-${{ matrix.artifact }}.zip
-        name: ${PROJECT_NAME}-${{ matrix.artifact }}.zip
+        path: ./$BUILD_DIR/${PROJECT_NAME}-${{ matrix.artifact }}.zip
+        name: ${PROJECT_NAME}-${{ matrix.artifact }}
 
   release:
     if: contains(github.ref, 'tags/v')
