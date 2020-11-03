@@ -45,21 +45,21 @@ jobs:
 
     - name: Build
       shell: bash
-      run: cmake -B ${BUILD_DIR} --config $BUILD_TYPE .
+      run: cmake -B ${{ env.BUILD_DIR }} --config ${{ env.BUILD_TYPE }} .
 
     - name: Test
       shell: bash
-      run: ctest -C $BUILD_TYPE
+      run: ctest -C ${{ env.BUILD_TYPE }}
 
     - name: Zip
       working-directory: ${{ env.BUILD_DIR }}
-      run: cmake -E tar cfv ${PROJECT_NAME}-${{ matrix.artifact }}.zip --format=zip ${PROJECT_NAME}_artefacts
+      run: cmake -E tar cfv ${{ env.PROJECT_NAME }}-${{ matrix.artifact }}.zip --format=zip ${{ env.PROJECT_NAME }}_artefacts
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v2
       with:
-        path: $BUILD_DIR/${PROJECT_NAME}-${{ matrix.artifact }}.zip
-        name: ${PROJECT_NAME}-${{ matrix.artifact }}
+        path: ${{ env.BUILD_DIR }}/${{ env.PROJECT_NAME }}-${{ matrix.artifact }}.zip
+        name: ${{ env.PROJECT_NAME }}-${{ matrix.artifact }}
 
   release:
     if: contains(github.ref, 'tags/v')
@@ -85,22 +85,22 @@ jobs:
       uses: actions/upload-release-asset@v1
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./${PROJECT_NAME}-Windows.zip
-        asset_name: ${PROJECT_NAME}-Windows.zip
+        asset_path: ./${{ env.PROJECT_NAME }}-Windows.zip
+        asset_name: ${{ env.PROJECT_NAME }}-Windows.zip
         asset_content_type: application/zip
 
     - name: Upload Linux Asset
       uses: actions/upload-release-asset@v1
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./${PROJECT_NAME}-Linux.zip
-        asset_name: ${PROJECT_NAME}-Linux.zip
+        asset_path: ./${{ env.PROJECT_NAME }}-Linux.zip
+        asset_name: ${{ env.PROJECT_NAME }}-Linux.zip
         asset_content_type: application/zip
 
     - name: Upload MacOS Asset
       uses: actions/upload-release-asset@v1
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./${PROJECT_NAME}-MacOS.zip
-        asset_name: ${PROJECT_NAME}-MacOS.zip
+        asset_path: ./${{ env.PROJECT_NAME }}-MacOS.zip
+        asset_name: ${{ env.PROJECT_NAME }}-MacOS.zip
         asset_content_type: application/zip
