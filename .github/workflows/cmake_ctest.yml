@@ -6,6 +6,7 @@ env:
   PROJECT_NAME: Pamplejuce # Must match the JUCE project name from juce_add_plugin
   BUILD_TYPE: Release
   BUILD_DIR: Builds
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   
 # jobs are run in paralell on different machines
 # all steps run in series
@@ -51,7 +52,7 @@ jobs:
       run: ctest -C $BUILD_TYPE
 
     - name: Zip
-      working-directory: $BUILD_DIR
+      working-directory: ${BUILD_DIR}
       run: cmake -E tar cfv ${PROJECT_NAME}-${{ matrix.artifact }}.zip --format=zip ${PROJECT_NAME}_artefacts
 
     - name: Upload Artifact
@@ -71,8 +72,6 @@ jobs:
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ github.ref }}
         release_name: Release ${{ github.ref }}
@@ -84,8 +83,6 @@ jobs:
   
     - name: Upload Windows Asset
       uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./${PROJECT_NAME}-Windows.zip
@@ -94,8 +91,6 @@ jobs:
 
     - name: Upload Linux Asset
       uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./${PROJECT_NAME}-Linux.zip
@@ -104,8 +99,6 @@ jobs:
 
     - name: Upload MacOS Asset
       uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./${PROJECT_NAME}-MacOS.zip
