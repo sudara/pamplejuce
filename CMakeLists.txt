@@ -42,7 +42,7 @@ juce_add_plugin(Pamplejuce
     # COPY_PLUGIN_AFTER_BUILD TRUE/FALSE        # Should the plugin be installed to a default location after building?
     PLUGIN_MANUFACTURER_CODE Pamp               # A four-character manufacturer id with at least one upper-case character
     PLUGIN_CODE P001                            # A unique four-character plugin id with at least one upper-case character
-    FORMATS AU VST3 AUv3 AAX                    # The formats to build. Other valid formats are: AAX Unity VST AU AUv3
+    FORMATS AU VST3 AUv3.                       # The formats to build. Other valid formats are: AAX Unity VST AU AUv3
     PRODUCT_NAME "Pamplejuce")        # The name of the final executable, which can differ from the target name
 
 target_compile_features(Pamplejuce PRIVATE cxx_std_20)
