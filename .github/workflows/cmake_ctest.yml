@@ -43,13 +43,17 @@ jobs:
       with:
         submodules: true # Gotta get JUCE populated
 
-    - name: Build
+    - name: Configure
       shell: bash
       run: cmake -B ${{ env.BUILD_DIR }} --config ${{ env.BUILD_TYPE }} .
 
-    - name: Test
+    - name: Build
       shell: bash
-      run: ctest -C ${{ env.BUILD_TYPE }}
+      run: cmake --build ${{ env.BUILD_DIR }} --config ${{ env.BUILD_TYPE }} .
+
+    - name: Test
+      working-directory: ${{ env.BUILD_DIR }}
+      run: ctest
 
     - name: Zip
       working-directory: ${{ env.BUILD_DIR }}
