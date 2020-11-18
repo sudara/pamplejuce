@@ -17,19 +17,27 @@ Out of the box, it supports:
 
 ## How to setup the repo for YOUR project
 
+This is a template repo! Yeah, I didn't know GitHub had these either, but basically you can kickstart a new repo using this one as the base by clicking the "Use this template" button an the top of the page.
+
+After you have a copy, be sure to:
+
 1. [Download CMAKE](https://cmake.org/download/)
 
-2. Fork this repo and/or clone this repo locally
+2. Replace `Pamplejuce` with the name of your project in CMakeLists.txt
 
-3. Replace `Pamplejuce` with the name of your project in CMakeLists.txt
+3. Get the latest JUCE via `git submodule update --init`. By default this will track JUCE's develop branch.
 
-4. Get the latest JUCE via `git submodule update --init`
+4. Set the correct flags for your plugin under `juce_add_plugin`. Check out the API https://github.com/juce-framework/JUCE/blob/master/docs/CMake%20API.md and be sure to change things like `PLUGIN_CODE` and `PLUGIN_MANUFACTURER_CODE`
 
-5. Set the correct flags for your plugin under `juce_add_plugin`. Check out the API https://github.com/juce-framework/JUCE/blob/master/docs/CMake%20API.md
+
+## Conventions
+
+1. Your tests will be in "Tests"
+2. Your binary data target is called "Assets"
 
 ## Tips n' Tricks
 
-### You must always add new Source/Test files manually to CMakeLists.txt
+### Always manually add new Source/Test files to CMakeLists.txt
 
 One might think that in 2020, files added to your Sources directory would automatically added to a target.
 
