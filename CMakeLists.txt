@@ -38,14 +38,15 @@ juce_add_plugin("${PROJECT_NAME}"
     # VERSION ...                               # Set this if the plugin version is different to the project version
     # ICON_BIG ...                              # ICON_* arguments specify a path to an image file to use as an icon for the Standalone
     # ICON_SMALL ...
-    # COMPANY_NAME ...                          # Specify the name of the plugin's author
+    COMPANY_NAME Pamplejuce
+    BUNDLE_ID com.pamplejuce.pamplejuce
     # IS_SYNTH TRUE/FALSE                       # Is this a synth or an effect?
     # NEEDS_MIDI_INPUT TRUE/FALSE               # Does the plugin need midi input?
     # NEEDS_MIDI_OUTPUT TRUE/FALSE              # Does the plugin need midi output?
     # IS_MIDI_EFFECT TRUE/FALSE                 # Is this plugin a MIDI effect?
     # EDITOR_WANTS_KEYBOARD_FOCUS TRUE/FALSE    # Does the editor need keyboard focus?
-    # COPY_PLUGIN_AFTER_BUILD TRUE/FALSE        # Should the plugin be installed to a default location after building?
-    PLUGIN_MANUFACTURER_CODE Pamp               # A four-character manufacturer id with at least one upper-case character
+    COPY_PLUGIN_AFTER_BUILD TRUE 
+    PLUGIN_MANUFACTURER_CODE Pamp 
     PLUGIN_CODE P001                            # A unique four-character plugin id with at least one upper-case character
     FORMATS AU VST3 AUv3                       # The formats to build. Other valid formats are: AAX Unity VST AU AUv3
     PRODUCT_NAME "${PROJECT_NAME}")        # The name of the final executable, which can differ from the target name
@@ -126,7 +127,7 @@ add_executable(Tests ${TestFiles})
 
 # Pull in our plugin code for tests
 target_include_directories(Tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Source)
-target_link_libraries(Tests PRIVATE Catch2::Catch2)
+target_link_libraries(Tests PRIVATE Pamplejuce Catch2::Catch2 juce::juce_audio_utils)
 
 # Make an Xcode Scheme so we can run tests there
 set_target_properties(Tests PROPERTIES XCODE_GENERATE_SCHEME ON)
