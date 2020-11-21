@@ -10,6 +10,7 @@ Out of the box, it supports:
 4. Catch2 2.13.2
 5. Github Actions for both CI and artifact building
 6. Proper .gitignore given the above
+7. Mac Silicon (arm64)
 
 ## What it doesn't handle (yet)
 
@@ -144,6 +145,7 @@ It's very confusing, as the documentation is a big framented.
 * [Matt Clarkson's CMakeCatch2 repo](https://github.com/MattClarkson/CMakeCatch2)
 * [CMake Cookbook example](https://github.com/dev-cafe/cmake-cookbook/tree/master/chapter-04/recipe-02/cxx-example)
 * [Unit Testing With CTest](https://bertvandenbroucke.netlify.app/2019/12/12/unit-testing-with-ctest/)
+* [Mark's Catch2 examples from his 2020 ADC talk](https://github.com/Sinecure-Audio/TestsTalk)
 
 ### Packaging 
 
