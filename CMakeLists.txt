@@ -95,7 +95,6 @@ foreach(target Assets "${PROJECT_NAME}_AU" "${PROJECT_NAME}_AUv3" "${PROJECT_NAM
             
             # Set the default executable to AudioPluginHost (you still have to build that!)
             XCODE_SCHEME_EXECUTABLE "${CMAKE_CURRENT_SOURCE_DIR}/JUCE/extras/AudioPluginHost/Builds/MacOSX/build/Debug/AudioPluginHost.app")
-        )
     endif()
 endforeach()
 
