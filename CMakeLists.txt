@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.18)
+cmake_minimum_required(VERSION 3.19)
 
 # Change this to your project name
 set(PROJECT_NAME "Pamplejuce" CACHE INTERNAL "This is the project and target name")
@@ -106,6 +106,15 @@ target_compile_definitions("${PROJECT_NAME}"
     JUCE_WEB_BROWSER=0  # If you remove this, add `NEEDS_WEB_BROWSER TRUE` to the `juce_add_plugin` call
     JUCE_USE_CURL=0     # If you remove this, add `NEEDS_CURL TRUE` to the `juce_add_plugin` call
     JUCE_VST3_CAN_REPLACE_VST2=0)
+    
+target_link_libraries("${PROJECT_NAME}"
+    PUBLIC
+    Assets
+    juce::juce_audio_utils
+    juce::juce_recommended_config_flags
+    juce::juce_recommended_lto_flags
+    juce::juce_recommended_warning_flags)
+
 
 # BUILD_TESTING is ON by default
 # include(CTest) does this too, but adds tons of targets we don't want
@@ -120,14 +129,14 @@ Include(FetchContent)
 FetchContent_Declare(
     Catch2
     GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-    GIT_TAG        v2.13.2)
+    GIT_TAG        v2.13.3)
 FetchContent_MakeAvailable(Catch2) # find_package equivelant 
 
 add_executable(Tests ${TestFiles})
 
 # Pull in our plugin code for tests
 target_include_directories(Tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Source)
-target_link_libraries(Tests PRIVATE Pamplejuce Catch2::Catch2 juce::juce_audio_utils)
+target_link_libraries(Tests PRIVATE Pamplejuce Catch2::Catch2)
 
 # Make an Xcode Scheme so we can run tests there
 set_target_properties(Tests PROPERTIES XCODE_GENERATE_SCHEME ON)
@@ -142,12 +151,3 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Tests PREFIX "" FILES ${TestFiles}
 # https://github.com/catchorg/Catch2/issues/2026
 include(${Catch2_SOURCE_DIR}/contrib/Catch.cmake)
 catch_discover_tests(Tests)
-
-target_link_libraries("${PROJECT_NAME}"
-  PRIVATE
-    Assets
-    juce::juce_audio_utils
-  PUBLIC
-    juce::juce_recommended_config_flags
-    juce::juce_recommended_lto_flags
-    juce::juce_recommended_warning_flags)
