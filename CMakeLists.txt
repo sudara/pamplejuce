@@ -84,13 +84,18 @@ juce_add_binary_data(Assets SOURCES pamplejuce.png)
 # However that doesn't seem to be working 
 # Not all plugin types (au, vst) available on each build type (win, macos, linux)
 foreach(target Assets "${PROJECT_NAME}_AU" "${PROJECT_NAME}_AUv3" "${PROJECT_NAME}_VST3" "${PROJECT_NAME}_All")
-    # include(CMakePrintHelpers)
-    # cmake_print_variables(target)
     if(TARGET ${target})
-        # message(STATUS "ITS A TARGET!")
         set_target_properties(${target} PROPERTIES
+            
+            # Tuck the actual targets in a folder where they won't bother us
             FOLDER "Targets"
-            XCODE_GENERATE_SCHEME ON)
+            
+            # But let us actually build the target in Xcode
+            XCODE_GENERATE_SCHEME ON
+            
+            # Set the default executable to AudioPluginHost (you still have to build that!)
+            XCODE_SCHEME_EXECUTABLE "${CMAKE_CURRENT_SOURCE_DIR}/JUCE/extras/AudioPluginHost/Builds/MacOSX/build/Debug/AudioPluginHost.app")
+        )
     endif()
 endforeach()
 
@@ -133,10 +138,11 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(Catch2) # find_package equivelant 
 
 add_executable(Tests ${TestFiles})
+target_compile_features(Tests PRIVATE cxx_std_20)
 
 # Pull in our plugin code for tests
 target_include_directories(Tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Source)
-target_link_libraries(Tests PRIVATE Pamplejuce Catch2::Catch2)
+target_link_libraries(Tests PRIVATE "${PROJECT_NAME}" Catch2::Catch2)
 
 # Make an Xcode Scheme so we can run tests there
 set_target_properties(Tests PROPERTIES XCODE_GENERATE_SCHEME ON)
