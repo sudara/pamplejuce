@@ -6,11 +6,11 @@ Out of the box, it supports:
 
 1. C++20
 2. JUCE 6.x as a submodule, tracking develop
-3. CMake 3.18
-4. Catch2 2.13.2
+3. CMake 3.19
+4. Catch2 2.13.3
 5. Github Actions for both CI and artifact building
 6. Proper .gitignore given the above
-7. Mac Silicon (arm64)
+7. Mac Silicon (arm64) built on Xcode 12.2
 
 ## What it doesn't handle (yet)
 
@@ -164,5 +164,7 @@ rm -rf Builds && cmake -B Builds && cmake --build Builds --config Release
 
 ### Updating 
 
-1. Update with latest CMake version.
+1. Update with latest CMake version [listed here](https://github.com/lukka/get-cmake)
 2. Update JUCE with `git submodule update --remote --merge`
+3. Update Xcode to [latest available version](https://github.com/actions/virtual-environments/blob/main/images/macos/macos-11.0-Readme.md) and change `DEVELOPER_DIR` env var in the GitHub action.
+4. Change Catch2 version in CMakeLists.txt to [latest tag](https://github.com/catchorg/Catch2/tags)
