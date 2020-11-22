@@ -12,7 +12,7 @@ set(CMAKE_XCODE_GENERATE_SCHEME OFF)
 # No ZERO_CHECK target (it helps bust cache for cmake)
 set(CMAKE_SUPPRESS_REGENERATION true) 
 
-# Universal Binaries on MacOS
+# Universal Binaries on MacOS, requres Xcode > 12.2 on GitHub actions
 set(CMAKE_OSX_ARCHITECTURES arm64 x86_64)
 
 # Adds all the module sources so they appear correctly in the IDE
@@ -22,10 +22,10 @@ set_property(GLOBAL PROPERTY USE_FOLDERS YES)
 
 # This is a failed attempt to bury ALL_BUILD in Targets/
 # This should be called before any target is made
-# Bug? https://gitlab.kitware.com/cmake/cmake/-/issues/21383
+# Bug in Xcode? https://gitlab.kitware.com/cmake/cmake/-/issues/21383
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "Targets")
 
-# Create a /Modules directory with all the JUCE Module code
+# Create a /Modules directory in the IDE with the JUCE Module code
 option(JUCE_ENABLE_MODULE_SOURCE_GROUPS "Show all module sources in IDE projects" ON)
 
 # JUCE is a submodule
@@ -60,10 +60,9 @@ set(SourceFiles
     Source/PluginProcessor.h
     Source/PluginEditor.cpp
     Source/PluginProcessor.cpp)
-    
 target_sources("${PROJECT_NAME}" PRIVATE ${SourceFiles})
 
-# No, we don't want our source in some nested Pamplejuce/Pamplejuce folder
+# No, we don't want our source buried in extra nested folders
 set_target_properties("${PROJECT_NAME}" PROPERTIES FOLDER "")
 
 # The source tree should uhhh, still look like the source tree, yo
@@ -72,16 +71,14 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Source PREFIX "" FILES ${SourceFil
 # Move the INTERFACE auto-created JUCE library stuff into its own folder
 source_group("JUCE Library Code" REGULAR_EXPRESSION "juce_")
 
+# Setup our binary data as a target
 juce_add_binary_data(Assets SOURCES pamplejuce.png)
-
-# TODO: XCODE_SCHEME_EXECUTABLE
-# https://cliutils.gitlab.io/modern-cmake/chapters/features/ides.html
 
 # This cleans up the folder organization, especially on Xcode.
 # It tucks the Plugin varieties into a "Targets" folder and generate an Xcode Scheme manually
-# since Xcode scheme generation is turned off to limit noise
+# Xcode scheme generation is turned off globally to limit noise from other targets
 # The non-hacky way of doing this is via the global PREDEFINED_TARGETS_FOLDER propety
-# However that doesn't seem to be working 
+# However that doesn't seem to be working in Xcode
 # Not all plugin types (au, vst) available on each build type (win, macos, linux)
 foreach(target Assets "${PROJECT_NAME}_AU" "${PROJECT_NAME}_AUv3" "${PROJECT_NAME}_VST3" "${PROJECT_NAME}_All")
     if(TARGET ${target})
@@ -98,11 +95,9 @@ foreach(target Assets "${PROJECT_NAME}_AU" "${PROJECT_NAME}_AUv3" "${PROJECT_NAM
     endif()
 endforeach()
 
-# `target_compile_definitions` adds some preprocessor definitions to our target. In a Projucer
-# project, these might be passed in the 'Preprocessor Definitions' field. JUCE modules also make use
-# of compile definitions to switch certain features on/off, so if there's a particular feature you
-# need that's not on by default, check the module header for the correctvisible code, so for new
-# definitions, pick unique names that are unlikely to collide! This is a standard CMake command.
+# We'll need to link to these from our plugin as well as our tests
+set(JUCE_DEPENDENCIES
+    juce::juce_audio_utils)
 
 target_compile_definitions("${PROJECT_NAME}"
     PUBLIC
@@ -112,9 +107,10 @@ target_compile_definitions("${PROJECT_NAME}"
     JUCE_VST3_CAN_REPLACE_VST2=0)
     
 target_link_libraries("${PROJECT_NAME}"
-    PUBLIC
+    PRIVATE
     Assets
-    juce::juce_audio_utils
+    ${JUCE_DEPENDENCIES}
+    PUBLIC
     juce::juce_recommended_config_flags
     juce::juce_recommended_lto_flags
     juce::juce_recommended_warning_flags)
@@ -128,30 +124,31 @@ enable_testing()
 set(TestFiles
     Tests/CatchMain.cpp
     Tests/PluginBasics.cpp)
-
+    
+# Download the tagged version of Catch2
 Include(FetchContent)
 FetchContent_Declare(
     Catch2
     GIT_REPOSITORY https://github.com/catchorg/Catch2.git
     GIT_TAG        v2.13.3)
-FetchContent_MakeAvailable(Catch2) # find_package equivelant 
+FetchContent_MakeAvailable(Catch2)
 
+# Setup the test executable, again C++ 20 please
 add_executable(Tests ${TestFiles})
 target_compile_features(Tests PRIVATE cxx_std_20)
 
 # Pull in our plugin code for tests
 target_include_directories(Tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Source)
-target_link_libraries(Tests PRIVATE "${PROJECT_NAME}" Catch2::Catch2)
+target_link_libraries(Tests PRIVATE Catch2::Catch2 "${PROJECT_NAME}" ${JUCE_DEPENDENCIES})
 
-# Make an Xcode Scheme so we can run tests there
+# Make an Xcode Scheme for the test executable so we can run tests in the IDE
 set_target_properties(Tests PROPERTIES XCODE_GENERATE_SCHEME ON)
 
-# Organize the tests in the Tests/ folder in the IDE
+# Organize the test source in the Tests/ folder in the IDE
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Tests PREFIX "" FILES ${TestFiles})
 
 # Load and use the .cmake file provided by Catch2
 # https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md#parseandaddcatchtestscmake
-
 # We have to manually provide the source directory here for now
 # https://github.com/catchorg/Catch2/issues/2026
 include(${Catch2_SOURCE_DIR}/contrib/Catch.cmake)
