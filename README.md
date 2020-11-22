@@ -1,6 +1,6 @@
 ![PAMPLEJUCE](pamplejuce.png)
 
-Pamplejuce is a ~~template~~ lifestyle for creating JUCE plugins with 2020 best practices.
+Pamplejuce is a ~~template~~ lifestyle for creating and building JUCE plugins with 2020 best practices.
 
 Out of the box, it supports:
 
@@ -37,6 +37,8 @@ After you have a copy, be sure to:
 2. Your binary data target is called "Assets"
 
 ## Tips n' Tricks
+
+:warning: GitHub might give you 2000 or 3000 free minutes, but [they actually bill 2x the number of minutes you use on Windows and 10x on MacOS](https://docs.github.com/en/free-pro-team@latest/github/setting-up-and-managing-billing-and-payments-on-github/about-billing-for-github-actions#about-billing-for-github-actions)!
 
 ### Always manually add new Source/Test files to CMakeLists.txt
 
