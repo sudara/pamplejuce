@@ -149,15 +149,16 @@ It's very confusing, as the documentation is a big framented.
 * [Unit Testing With CTest](https://bertvandenbroucke.netlify.app/2019/12/12/unit-testing-with-ctest/)
 * [Mark's Catch2 examples from his 2020 ADC talk](https://github.com/Sinecure-Audio/TestsTalk)
 
-### Packaging 
+### Packaging & Notorization (tbd)
 
 * [iPlug Packages and Inno Setup scripts](https://github.com/olilarkin/wdl-ol/tree/master/IPlugExamples/IPlugEffect/installer)
 * [Surge's pkgbuild installer script](https://github.com/kurasu/surge/blob/master/installer_mac/make_installer.sh)
 * [Chris Randall's PackageBuilder script](https://forum.juce.com/t/vst-installer/16654/15)
+* [David Cramer's GA Workflow for signing and notarizing](https://medium.com/better-programming/indie-mac-app-devops-with-github-actions-b16764a3ebe7) and his [notarize-cli tool](https://github.com/bacongravy/notarize-cli)
 
 ## Pamplejuce dev
 
-I've been blowing away the Builds directory when altering the CMake.
+I've been blowing away the Builds directory when altering the CMake. 
 
 ```
 rm -rf Builds && cmake -B Builds -G Xcode

@@ -45,7 +45,7 @@ juce_add_plugin("${PROJECT_NAME}"
     # NEEDS_MIDI_OUTPUT TRUE/FALSE              # Does the plugin need midi output?
     # IS_MIDI_EFFECT TRUE/FALSE                 # Is this plugin a MIDI effect?
     # EDITOR_WANTS_KEYBOARD_FOCUS TRUE/FALSE    # Does the editor need keyboard focus?
-    COPY_PLUGIN_AFTER_BUILD TRUE 
+    COPY_PLUGIN_AFTER_BUILD TRUE # On MacOS, plugin will be copied to /Users/you/Library/Audio/Plug-Ins/
     PLUGIN_MANUFACTURER_CODE Pamp 
     PLUGIN_CODE P001                            # A unique four-character plugin id with at least one upper-case character
     FORMATS AU VST3 AUv3                       # The formats to build. Other valid formats are: AAX Unity VST AU AUv3
