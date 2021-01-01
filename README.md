@@ -1,6 +1,6 @@
 ![PAMPLEJUCE](pamplejuce.png)
 
-Pamplejuce is a ~~template~~ lifestyle for creating and building JUCE plugins with 2020 best practices.
+Pamplejuce is a ~~template~~ lifestyle for creating and building JUCE plugins in 2021.
 
 Out of the box, it supports:
 
@@ -10,7 +10,7 @@ Out of the box, it supports:
 4. Catch2 2.13.3
 5. Github Actions for both CI and artifact building
 6. Proper .gitignore given the above
-7. Mac Silicon (arm64) built on Xcode 12.2
+7. Building on Windows, Linux and Mac (including arm64 built with Xcode 12.2)
 
 ## What it doesn't handle (yet)
 
@@ -18,15 +18,17 @@ Out of the box, it supports:
 
 ## How to setup the repo for YOUR project
 
-This is a template repo! Yeah, I didn't know GitHub had these either, but basically you can kickstart a new repo using this one as the base by clicking the "Use this template" button an the top of the page.
+This is a template repo! 
 
-After you have a copy, be sure to:
+Yeah, I didn't know GitHub had these either. You can kickstart your new repo using this one as the base by clicking  "Use this template"  at the top of the page.
+
+After you have your own repo:
 
 1. [Download CMAKE](https://cmake.org/download/)
 
-2. Replace `Pamplejuce` with the name of your project in CMakeLists.txt
+2. Replace `Pamplejuce` with the name of your project in CMakeLists.txt line 4, where the `PROJECT_NAME` variable is set.
 
-3. Get the latest JUCE via `git submodule update --init`. By default this will track JUCE's develop branch.
+3. Get the latest JUCE by running `git submodule update --init` in your repository directory. By default this will track JUCE's `develop` branch.
 
 4. Set the correct flags for your plugin under `juce_add_plugin`. Check out the API https://github.com/juce-framework/JUCE/blob/master/docs/CMake%20API.md and be sure to change things like `PLUGIN_CODE` and `PLUGIN_MANUFACTURER_CODE`
 
@@ -38,13 +40,13 @@ After you have a copy, be sure to:
 
 ## Tips n' Tricks
 
-:warning: GitHub might give you 2000 or 3000 free minutes, but [they actually bill 2x the number of minutes you use on Windows and 10x on MacOS](https://docs.github.com/en/free-pro-team@latest/github/setting-up-and-managing-billing-and-payments-on-github/about-billing-for-github-actions#about-billing-for-github-actions)!
+:warning: GitHub might give you 2000 or 3000 free GitHub Actions "minutes" for private projects, but [they bill 2x the number of minutes you use on Windows and 10x on MacOS](https://docs.github.com/en/free-pro-team@latest/github/setting-up-and-managing-billing-and-payments-on-github/about-billing-for-github-actions#about-billing-for-github-actions)!
 
 ### Always manually add new Source/Test files to CMakeLists.txt
 
-One might think that in 2020, files added to your Sources directory would automatically added to a target.
+One might think that in 2021, files added to your Sources directory would automatically added to a target.
 
-It's true, you could use globbing technically. But ["Modern CMake" distinctly prohibits this](https://gist.github.com/mbinna/c61dbb39bca0e4fb7d1f73b0d66a4fd1#dont-use-fileglob-in-projects) — why? Because CMake has no way of knowing you've added a new file, so it won't be picked up.
+It's true, you could use globbing. But ["Modern CMake" distinctly prohibits this](https://gist.github.com/mbinna/c61dbb39bca0e4fb7d1f73b0d66a4fd1#dont-use-fileglob-in-projects) — why? Because CMake has no way of reliabily knowing you've added a new file, so it won't be picked up.
 
 ## How does this all work at a high level?
 
