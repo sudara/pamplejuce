@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.19)
+cmake_minimum_required(VERSION 3.18)
 
 # Change this to your project name
 set(PROJECT_NAME "Pamplejuce" CACHE INTERNAL "This is the project and target name")
