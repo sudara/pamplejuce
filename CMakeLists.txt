@@ -1,3 +1,4 @@
+# Latest supported by VS 2019 as of Jan 2021
 cmake_minimum_required(VERSION 3.18)
 
 # Change this to your project name
