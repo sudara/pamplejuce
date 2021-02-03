@@ -29,7 +29,7 @@ set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "Targets")
 # Create a /Modules directory in the IDE with the JUCE Module code
 option(JUCE_ENABLE_MODULE_SOURCE_GROUPS "Show all module sources in IDE projects" ON)
 
-# JUCE is a submodule
+# JUCE is setup as a submodule in the /JUCE folder
 # Locally, you need to run `git submodule update --init --recursive` once
 # On Github Actions, it's managed by actions/checkout
 add_subdirectory(JUCE)
@@ -91,7 +91,8 @@ foreach(target Assets "${PROJECT_NAME}_AU" "${PROJECT_NAME}_AUv3" "${PROJECT_NAM
             # But let us actually build the target in Xcode
             XCODE_GENERATE_SCHEME ON
             
-            # Set the default executable to AudioPluginHost (you still have to build that!)
+            # MacOS only: set the default executable that Xcode will open on build
+            # For this exact path to to work, you'd need to build the AudioPluginHost.xcodeproj in the JUCE subdir 
             XCODE_SCHEME_EXECUTABLE "${CMAKE_CURRENT_SOURCE_DIR}/JUCE/extras/AudioPluginHost/Builds/MacOSX/build/Debug/AudioPluginHost.app")
     endif()
 endforeach()
@@ -115,7 +116,6 @@ target_link_libraries("${PROJECT_NAME}"
     juce::juce_recommended_config_flags
     juce::juce_recommended_lto_flags
     juce::juce_recommended_warning_flags)
-
 
 # BUILD_TESTING is ON by default
 # include(CTest) does this too, but adds tons of targets we don't want

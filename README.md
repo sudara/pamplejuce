@@ -2,11 +2,13 @@
 
 Pamplejuce is a ~~template~~ lifestyle for creating and building JUCE plugins in 2021.
 
+[![](https://github.com/sudara/pamplejuce/workflows/CMake/badge.svg)](https://github.com/sudara/pamplejuce/actions)
+
 Out of the box, it supports:
 
 1. C++20
 2. JUCE 6.x as a submodule, tracking develop
-3. CMake 3.19
+3. CMake 3.18 (Latest bundled version in VS 2019 as of Jan 2021)
 4. Catch2 2.13.3
 5. Github Actions for both CI and artifact building
 6. Proper .gitignore given the above
@@ -141,6 +143,7 @@ It's very confusing, as the documentation is a big framented.
 
 * [Christian Adam's HelloWorld CMake and ccache repo](https://github.com/cristianadam/HelloWorld)
 * [Maxwell Pollack's JUCE CMake + GitHub Actions repo](https://github.com/maxwellpollack/juce-plugin-ci)
+* [Oli Larkin's PDSynth iPlug2 template](https://github.com/olilarkin/PDSynth)
 
 ### Catch2 & CTest
 
@@ -169,7 +172,7 @@ rm -rf Builds && cmake -B Builds && cmake --build Builds --config Release
 
 ### Updating 
 
-1. Update with latest CMake version [listed here](https://github.com/lukka/get-cmake)
+1. Update with latest CMake version [listed here](https://github.com/lukka/get-cmake). Note that VS 2019 has a bundled CMake and tends to run behind, so this might be the limiting factor for CMake versions.
 2. Update JUCE with `git submodule update --remote --merge`
 3. Update Xcode to [latest available version](https://github.com/actions/virtual-environments/blob/main/images/macos/macos-11.0-Readme.md) and change `DEVELOPER_DIR` env var in the GitHub action.
 4. Change Catch2 version in CMakeLists.txt to [latest tag](https://github.com/catchorg/Catch2/tags)
