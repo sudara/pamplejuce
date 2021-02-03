@@ -4,10 +4,13 @@ cmake_minimum_required(VERSION 3.18)
 # Change this to your project name
 set(PROJECT_NAME "Pamplejuce" CACHE INTERNAL "This is the project and target name")
 
+# Set the plugin formats you'll be building here. Valid formats: AAX Unity VST AU AUv3 Standalone
+set(FORMATS AU VST3 AUv3)
+
 # TODO: Automate/coordinate version with GitHub tagging?
 project(${PROJECT_NAME} VERSION 0.0.1)
 
-# By default we don't want schemes to be made for modules, etc
+# By default we don't want Xcode schemes to be made for modules, etc
 set(CMAKE_XCODE_GENERATE_SCHEME OFF)
 
 # No ZERO_CHECK target (it helps bust cache for cmake)
@@ -49,7 +52,7 @@ juce_add_plugin("${PROJECT_NAME}"
     COPY_PLUGIN_AFTER_BUILD TRUE # On MacOS, plugin will be copied to /Users/you/Library/Audio/Plug-Ins/
     PLUGIN_MANUFACTURER_CODE Pamp 
     PLUGIN_CODE P001                            # A unique four-character plugin id with at least one upper-case character
-    FORMATS AU VST3 AUv3                       # The formats to build. Other valid formats are: AAX Unity VST AU AUv3
+    FORMATS "${FORMATS}"
     PRODUCT_NAME "${PROJECT_NAME}")        # The name of the final executable, which can differ from the target name
 
 # C++20 please 
@@ -81,21 +84,21 @@ juce_add_binary_data(Assets SOURCES pamplejuce.png)
 # The non-hacky way of doing this is via the global PREDEFINED_TARGETS_FOLDER propety
 # However that doesn't seem to be working in Xcode
 # Not all plugin types (au, vst) available on each build type (win, macos, linux)
-foreach(target Assets "${PROJECT_NAME}_AU" "${PROJECT_NAME}_AUv3" "${PROJECT_NAME}_VST3" "${PROJECT_NAME}_All")
-    if(TARGET ${target})
-        set_target_properties(${target} PROPERTIES
-            
-            # Tuck the actual targets in a folder where they won't bother us
+foreach(target ${FORMATS} "All")
+    if(TARGET ${PROJECT_NAME}_${target})
+        set_target_properties(${PROJECT_NAME}_${target} PROPERTIES
+            # Tuck the actual plugin targets into a folder where they won't bother us
             FOLDER "Targets"
             
-            # But let us actually build the target in Xcode
-            XCODE_GENERATE_SCHEME ON
+            # MacOS only: Sets the default executable that Xcode will open on build
+            # For this exact path to to work, manually build the AudioPluginHost.xcodeproj in the JUCE subdir 
+            XCODE_SCHEME_EXECUTABLE "${CMAKE_CURRENT_SOURCE_DIR}/JUCE/extras/AudioPluginHost/Builds/MacOSX/build/Debug/AudioPluginHost.app"
             
-            # MacOS only: set the default executable that Xcode will open on build
-            # For this exact path to to work, you'd need to build the AudioPluginHost.xcodeproj in the JUCE subdir 
-            XCODE_SCHEME_EXECUTABLE "${CMAKE_CURRENT_SOURCE_DIR}/JUCE/extras/AudioPluginHost/Builds/MacOSX/build/Debug/AudioPluginHost.app")
+            # Let us build the target in Xcode 
+            XCODE_GENERATE_SCHEME ON)
     endif()
 endforeach()
+set_target_properties(Assets PROPERTIES FOLDER "Targets")
 
 # We'll need to link to these from our plugin as well as our tests
 set(JUCE_DEPENDENCIES

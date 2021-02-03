@@ -26,13 +26,15 @@ Yeah, I didn't know GitHub had these either. You can kickstart your new repo usi
 
 After you have your own repo:
 
-1. [Download CMAKE](https://cmake.org/download/)
+1. [Download CMAKE](https://cmake.org/download/) if you are on MacOs or Linux. VS 2019 has it bundled.
 
-2. Replace `Pamplejuce` with the name of your project in CMakeLists.txt line 4, where the `PROJECT_NAME` variable is set.
+2. Get the latest JUCE by running `git submodule update --init` in your repository directory. By default this will track JUCE's `develop` branch.
 
-3. Get the latest JUCE by running `git submodule update --init` in your repository directory. By default this will track JUCE's `develop` branch.
+3. Replace `Pamplejuce` with the name of your project in CMakeLists.txt line 5, where the `PROJECT_NAME` variable is set.
 
-4. Set the correct flags for your plugin under `juce_add_plugin`. Check out the API https://github.com/juce-framework/JUCE/blob/master/docs/CMake%20API.md and be sure to change things like `PLUGIN_CODE` and `PLUGIN_MANUFACTURER_CODE`
+4. Pick which formats you want built on line 8.
+
+5. Set the correct flags for your plugin under `juce_add_plugin`. Check out the API https://github.com/juce-framework/JUCE/blob/master/docs/CMake%20API.md and be sure to change things like `PLUGIN_CODE` and `PLUGIN_MANUFACTURER_CODE`
 
 
 ## Conventions
@@ -54,13 +56,13 @@ It's true, you could use globbing. But ["Modern CMake" distinctly prohibits this
 
 The `CMakeLists.txt` file describes how to configure and build the plugins as well as setup the IDE project. 
 
-As these myriad concerns are not clearly separated in the config, nor in the CLI tools nor in the CLI tool options — there's a reason CMake has the reputation it has.
+Unfortunately, these different jobs are not clearly separated or delineated by CMake's config, CLI or options. In my opinion, this is why CMake has the reputation it has: there's a lot of complexity resulting from implicit coupling between these concerns.
 
 JUCE provides cmake helpers, allowing plugin devs to call a small number of functions like `juce_add_plugin`. It sets up our project much like JUCE's Projucer did in the past, generating the IDE project and setting up all the build config files.
 
 GitHub Actions is running CMake on MacOS, Windows and Linux, therefore configuring, building and testing for each environment.
 
-CMake as a build tool is very flexible and does its various jobs for us in multiple incantations:
+CMak does its jobs for us in multiple incantations:
 
 ### 1. Configure
 
