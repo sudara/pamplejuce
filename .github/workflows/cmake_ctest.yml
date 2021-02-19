@@ -45,14 +45,13 @@ jobs:
         submodules: true # Gotta get JUCE populated
 
     - name: ccache
-      if: matrix.os != 'windows-latest'
       uses: hendrikmuhs/ccache-action@v1
       with:
         key: ${{ matrix.os }}-${{ matrix.type }}
   
     - name: Configure
       shell: bash
-      run: cmake -B ${{ env.BUILD_DIR }} --config ${{ env.BUILD_TYPE }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -D CMAKE_C_COMPILER_LAUNCHER=ccache -D CMAKE_CXX_COMPILER_LAUNCHER=ccache'.
+      run: cmake -B ${{ env.BUILD_DIR }} --config ${{ env.BUILD_TYPE }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -D CMAKE_C_COMPILER_LAUNCHER=ccache -D CMAKE_CXX_COMPILER_LAUNCHER=ccache .
 
     - name: Build
       shell: bash
