@@ -1,8 +1,9 @@
-# Latest supported by VS 2019 as of Jan 2021
-cmake_minimum_required(VERSION 3.18)
+# 3.18 is latest bundled by VS 2019 as of Jan 2021
+# 3.17.5 is latest bundled CLion as of April 2021
+cmake_minimum_required(VERSION 3.17.5)
 
 # Change this to your project name
-set(PROJECT_NAME "Pamplejuce" CACHE INTERNAL "This is the project and target name")
+set(PROJECT_NAME "Pamplejuce")
 
 # Set the plugin formats you'll be building here. Valid formats: AAX Unity VST AU AUv3 Standalone
 set(FORMATS AU VST3 AUv3)
@@ -18,6 +19,9 @@ set(CMAKE_SUPPRESS_REGENERATION true)
 
 # Universal Binaries on MacOS, requres Xcode > 12.2 on GitHub actions
 set(CMAKE_OSX_ARCHITECTURES arm64 x86_64)
+
+# clang-tidy needs this to be happy
+set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
 # Adds all the module sources so they appear correctly in the IDE
 # Must be set before JUCE is added as a sub-dir (or any targets are made)
