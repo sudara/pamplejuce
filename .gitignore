@@ -19,3 +19,6 @@ Install/*
 
 # Running CTest makes a bunch o junk
 Testing
+
+# IDE stuff is personal
+.idea
