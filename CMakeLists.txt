@@ -14,11 +14,11 @@ project(${PROJECT_NAME} VERSION 0.0.1)
 # By default we don't want Xcode schemes to be made for modules, etc
 set(CMAKE_XCODE_GENERATE_SCHEME OFF)
 
-# No ZERO_CHECK target (it helps bust cache for cmake)
+# No ZERO_CHECK target on XCode (it helps bust cache for cmake)
 set(CMAKE_SUPPRESS_REGENERATION true) 
 
-# Universal Binaries on MacOS, requres Xcode > 12.2 on GitHub actions
-set(CMAKE_OSX_ARCHITECTURES arm64 x86_64)
+# Setting this locally will increase build times
+# set(CMAKE_OSX_ARCHITECTURES arm64 x86_64)
 
 # clang-tidy needs this to be happy
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
