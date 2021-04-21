@@ -15,9 +15,11 @@ project(${PROJECT_NAME} VERSION 0.0.1)
 set(CMAKE_XCODE_GENERATE_SCHEME OFF)
 
 # No ZERO_CHECK target on XCode (it helps bust cache for cmake)
-set(CMAKE_SUPPRESS_REGENERATION true) 
+if(CMAKE_GENERATOR STREQUAL Xcode)
+    set(CMAKE_SUPPRESS_REGENERATION true)
+endif()
 
-# Setting this locally will increase build times
+# Building universals will increase build times
 # set(CMAKE_OSX_ARCHITECTURES arm64 x86_64)
 
 # clang-tidy needs this to be happy
