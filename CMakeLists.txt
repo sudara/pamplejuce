@@ -1,6 +1,6 @@
 # 3.18 is latest bundled by VS 2019 as of Jan 2021
-# 3.17.5 is latest bundled CLion as of April 2021
-cmake_minimum_required(VERSION 3.17.5)
+# 3.19 is latest bundled CLion as of 2021.1
+cmake_minimum_required(VERSION 3.18)
 
 # Change this to your project name
 set(PROJECT_NAME "Pamplejuce")
@@ -75,9 +75,6 @@ set_target_properties("${PROJECT_NAME}" PROPERTIES FOLDER "")
 
 # The source tree should uhhh, still look like the source tree, yo
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Source PREFIX "" FILES ${SourceFiles})
-
-# Move the INTERFACE auto-created JUCE library stuff into its own folder
-source_group("JUCE Library Code" REGULAR_EXPRESSION "juce_")
 
 # Setup our binary data as a target
 juce_add_binary_data(Assets SOURCES pamplejuce.png)
