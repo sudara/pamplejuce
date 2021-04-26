@@ -66,6 +66,8 @@ jobs:
       run: |
         curl -L "https://github.com/Tracktion/pluginval/releases/download/latest_release/pluginval_${{ matrix.artifact }}.zip" -o pluginval.zip
         unzip pluginval
+        ls -ahl ${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}
+        ls -ahl ${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3
         pluginval.app/Contents/MacOS/pluginval --validate-in-process --verbose --output-dir "." --validate "${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3/${{ env.PROJECT_NAME }}.vst3"
         
 
