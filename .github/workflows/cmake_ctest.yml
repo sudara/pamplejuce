@@ -60,6 +60,14 @@ jobs:
     - name: Test
       working-directory: ${{ env.BUILD_DIR }}
       run: ctest
+      
+    - name: Pluginval
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        curl -L "https://github.com/Tracktion/pluginval/releases/download/latest_release/pluginval_${{ matrix.artifact }}.zip" -o pluginval.zip
+        unzip pluginval
+        ./pluginval --validate-in-process --verbose --output-dir "." --validate "${{ env.PROJECT_NAME }}_artefacts/Debug/VST3/${{ env.PROJECT_NAME }}.vst3"
+        
 
     - name: Zip
       working-directory: ${{ env.BUILD_DIR }}
