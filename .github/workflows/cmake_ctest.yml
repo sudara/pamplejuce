@@ -62,6 +62,7 @@ jobs:
       run: ctest
       
     - name: Pluginval
+      working-directory: ${{ env.BUILD_DIR }}
       if: matrix.artifact == 'MacOS'
       run: |
         curl -L "https://github.com/Tracktion/pluginval/releases/download/latest_release/pluginval_${{ matrix.artifact }}.zip" -o pluginval.zip
