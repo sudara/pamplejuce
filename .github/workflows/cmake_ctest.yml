@@ -21,10 +21,13 @@ jobs:
         include:
         - os: windows-latest
           artifact: Windows
+          pluginval_executable: pluginval.exe
         - os: ubuntu-latest
           artifact: Linux
+          pluginval_executable: ./pluginval
         - os: macos-11.0 # TODO: change once macos-latest catches up
           artifact: MacOS
+          pluginval_executable: pluginval.app/Contents/MacOS/pluginval
 
     steps:
     - name: Install JUCE's Linux Deps and select g++ 10
@@ -62,12 +65,12 @@ jobs:
       run: ctest
       
     - name: Pluginval
-      if: matrix.os == 'ubuntu-latest'
+      if: matrix.artifact == 'MacOS'
       run: |
         sudo apt-get install libcurl3 -y
         curl -L "https://github.com/Tracktion/pluginval/releases/download/latest_release/pluginval_${{ matrix.artifact }}.zip" -o pluginval.zip
         unzip pluginval
-        ./pluginval --validate-in-process --verbose --output-dir "." --validate "${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3/${{ env.PROJECT_NAME }}.vst3"
+        ${{ pluginval_executable }} --validate-in-process --verbose --output-dir "." --validate "${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3/${{ env.PROJECT_NAME }}.vst3"
         
 
     - name: Zip
