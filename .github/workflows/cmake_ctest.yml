@@ -67,7 +67,7 @@ jobs:
         sudo apt-get install libcurl3 -y
         curl -L "https://github.com/Tracktion/pluginval/releases/download/latest_release/pluginval_${{ matrix.artifact }}.zip" -o pluginval.zip
         unzip pluginval
-        ./pluginval --validate-in-process --verbose --output-dir "." --validate "${{ env.PROJECT_NAME }}_artefacts/Debug/VST3/${{ env.PROJECT_NAME }}.vst3"
+        ./pluginval --validate-in-process --verbose --output-dir "." --validate "${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3/${{ env.PROJECT_NAME }}.vst3"
         
 
     - name: Zip
