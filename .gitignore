@@ -24,6 +24,6 @@ Testing
 .idea
 
 # clion cmake builds
-cmake-debug-build
-cmake-debug-release
-cmake-debug-relwithdebinfo
+cmake-build-debug
+cmake-build-release
+cmake-build-relwithdebinfo
