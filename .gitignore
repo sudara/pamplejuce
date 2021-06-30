@@ -20,5 +20,10 @@ Install/*
 # Running CTest makes a bunch o junk
 Testing
 
-# IDE stuff is personal
+# IDE config
 .idea
+
+# clion cmake builds
+cmake-debug-build
+cmake-debug-release
+cmake-debug-relwithdebinfo
