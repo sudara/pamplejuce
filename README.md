@@ -146,6 +146,7 @@ It's very confusing, as the documentation is a big framented.
 * [Christian Adam's HelloWorld CMake and ccache repo](https://github.com/cristianadam/HelloWorld)
 * [Maxwell Pollack's JUCE CMake + GitHub Actions repo](https://github.com/maxwellpollack/juce-plugin-ci)
 * [Oli Larkin's PDSynth iPlug2 template](https://github.com/olilarkin/PDSynth)
+* [Running pluginval in CI](https://github.com/Tracktion/pluginval/blob/develop/docs/Adding%20pluginval%20to%20CI.md)
 
 ### Catch2 & CTest
 
