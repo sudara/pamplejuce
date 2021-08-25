@@ -31,8 +31,9 @@ jobs:
       if: runner.os == 'Linux'
       # Thanks to McMartin & co https://forum.juce.com/t/list-of-juce-dependencies-under-linux/15121/44
       run: |
+        sudo apt-get remove libcurl4
         sudo add-apt-repository ppa:xapienz/curl34
-        sudo apt-get update && sudo apt install libasound2-dev libx11-dev libxinerama-dev libxext-dev libfreetype6-dev libwebkit2gtk-4.0-dev libglu1-mesa-dev libcurl4 -y
+        sudo apt-get update && sudo apt install libasound2-dev libx11-dev libxinerama-dev libxext-dev libfreetype6-dev libwebkit2gtk-4.0-dev libglu1-mesa-dev libcurl3 -y
         sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 10
         sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 10
 
@@ -76,7 +77,7 @@ jobs:
       run: |
         curl -L "https://github.com/Tracktion/pluginval/releases/download/latest_release/pluginval_${{ matrix.artifact }}.zip" -o pluginval.zip
         unzip pluginval
-        pluginval.app/Contents/MacOS/pluginval --validate-in-process --verbose --output-dir "." --validate "${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/AU/${{ env.PROJECT_NAME }}.component"
+        pluginval.app/Contents/MacOS/pluginval --validate-in-process --verbose --output-dir "." --validate "${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3/${{ env.PROJECT_NAME }}.vst3"
 
     - name: Pluginval
       working-directory: ${{ env.BUILD_DIR }}
@@ -85,7 +86,7 @@ jobs:
         powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest https://github.com/Tracktion/pluginval/releases/download/latest_release/pluginval_Windows.zip -OutFile pluginval.zip"
         powershell -Command "Expand-Archive pluginval.zip -DestinationPath ."
         pluginval.exe --validate-in-process --output-dir "./bin" --validate "${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3/${{ env.PROJECT_NAME }}.vst3"
-        if (%ERRORLEVEL% neq 0) exit /b 1
+        if (%ERRORLEVEL% neq 0) { exit /b 1 }
 
     - name: Zip
       working-directory: ${{ env.BUILD_DIR }}
