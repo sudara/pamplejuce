@@ -69,7 +69,7 @@ jobs:
         unzip pluginval
         # start xvfb in the background
         sudo /usr/bin/Xvfb $DISPLAY -screen 0 1280x1024x24 &
-        ./pluginval --strictness-level 10 --validate-in-process --verbose --output-dir "." --validate "${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3/${{ env.PROJECT_NAME }}.vst3"
+        ./pluginval --strictness-level 5 --validate-in-process --verbose --output-dir "." --validate "${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3/${{ env.PROJECT_NAME }}.vst3"
         
     - name: Pluginval Mac
       working-directory: ${{ env.BUILD_DIR }}
