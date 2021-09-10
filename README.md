@@ -7,7 +7,7 @@ Pamplejuce is a ~~template~~ lifestyle for creating and building JUCE plugins in
 Out of the box, it supports:
 
 1. C++20
-2. JUCE 6.x as a submodule, tracking develop
+2. JUCE 6.1 as a submodule, tracking develop
 3. CMake 3.18 (Latest bundled version in VS 2019 as of Jan 2021)
 4. Catch2 2.13.3
 5. Github Actions for both CI and artifact building
