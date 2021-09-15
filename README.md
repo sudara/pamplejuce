@@ -22,13 +22,15 @@ Out of the box, it supports:
 
 This is a template repo! 
 
-Yeah, I didn't know GitHub had these either. You can kickstart your new repo using this one as the base by clicking  "Use this template"  at the top of the page.
+You can kickstart your new repo using this one as the base by clicking "[Use this template](https://github.com/sudara/pamplejuce/generate)" here or at the top of the page.
 
-After you have your own repo:
+After you've created a new repo:
+
+0. `git clone` your new repo (if you make it private, see the warning below about GitHub Actions minutes)
 
 1. [Download CMAKE](https://cmake.org/download/) if you are on MacOs or Linux. VS 2019 has it bundled.
 
-2. Get the latest JUCE by running `git submodule update --init` in your repository directory. By default this will track JUCE's `develop` branch.
+2. Populate the latest JUCE by running `git submodule update --init` in your repository directory. By default this will track JUCE's `develop` branch.
 
 3. Replace `Pamplejuce` with the name of your project in CMakeLists.txt line 5, where the `PROJECT_NAME` variable is set.
 
@@ -36,6 +38,7 @@ After you have your own repo:
 
 5. Set the correct flags for your plugin under `juce_add_plugin`. Check out the API https://github.com/juce-framework/JUCE/blob/master/docs/CMake%20API.md and be sure to change things like `PLUGIN_CODE` and `PLUGIN_MANUFACTURER_CODE`
 
+6. You'll probably want to rename `AudioPluginAudioProcessor` to your plugin name
 
 ## Conventions
 
@@ -44,7 +47,7 @@ After you have your own repo:
 
 ## Tips n' Tricks
 
-:warning: GitHub might give you 2000 or 3000 free GitHub Actions "minutes" for private projects, but [they bill 2x the number of minutes you use on Windows and 10x on MacOS](https://docs.github.com/en/free-pro-team@latest/github/setting-up-and-managing-billing-and-payments-on-github/about-billing-for-github-actions#about-billing-for-github-actions)!
+:warning: GitHub gives you 2000 or 3000 free GitHub Actions "minutes" for private projects, but [they actually bill 2x the number of minutes you use on Windows and 10x on MacOS](https://docs.github.com/en/free-pro-team@latest/github/setting-up-and-managing-billing-and-payments-on-github/about-billing-for-github-actions#about-billing-for-github-actions).
 
 ### Always manually add new Source/Test files to CMakeLists.txt
 
@@ -58,11 +61,11 @@ The `CMakeLists.txt` file describes how to configure and build the plugins as we
 
 Unfortunately, these different jobs are not clearly separated or delineated by CMake's config, CLI or options. In my opinion, this is why CMake has the reputation it has: there's a lot of complexity resulting from implicit coupling between these concerns.
 
-JUCE provides cmake helpers, allowing plugin devs to call a small number of functions like `juce_add_plugin`. It sets up our project much like JUCE's Projucer did in the past, generating the IDE project and setting up all the build config files.
+JUCE provides CMake helpers, allowing plugin devs to call a small number of functions like `juce_add_plugin`. It sets up our project much like JUCE's Projucer did in the past, generating the IDE project and setting up all the build config files.
 
 GitHub Actions is running CMake on MacOS, Windows and Linux, therefore configuring, building and testing for each environment.
 
-CMak does its jobs for us in multiple incantations:
+CMake does its job for us in multiple incantations:
 
 ### 1. Configure
 
@@ -72,7 +75,6 @@ This might look something like `cmake -B Builds`
 
 The `-B` option tells CMake what folder to perform the build in, where to stick all the resultant files, etc. 
 
-
 ### 2. Generate
 
 This outputs files for system specific build tooling and IDEs to read.
@@ -81,7 +83,6 @@ Generate a VS 2019 Project file:
 ```
 cmake -B Builds -G "Visual Studio 16 2019"
 ```
-
 
 Or an Xcode project:
 ```
@@ -112,7 +113,7 @@ Testing is enabled with `enable_testing()` in a `CMakeLists.txt` file and then t
 
 ![Ctest](Docs/Catch2inCtest.jpg)
 
-When run, ctest will barfs up logs in Testing/Temporary. Thanks, ctest. 
+When run, ctest barfs up logs in Testing/Temporary. Thanks, ctest! 
 
 Since tests are an executable target, they are built and run via Xcode schemes, with results showing up in the console:
 
