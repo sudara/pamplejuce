@@ -24,6 +24,8 @@ This is a template repo!
 
 You can kickstart your new repo using this one as the base by clicking "[Use this template](https://github.com/sudara/pamplejuce/generate)" here or at the top of the page.
 
+For an example of a plugin that uses this repo, check out [Load Monster!](https://github.com/sudara/load_monster_plugin).
+
 After you've created a new repo:
 
 0. `git clone` your new repo (if you make it private, see the warning below about GitHub Actions minutes)
