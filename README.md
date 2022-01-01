@@ -34,7 +34,7 @@ After you've created a new repo:
 
 2. Populate the latest JUCE by running `git submodule update --init` in your repository directory. By default this will track JUCE's `develop` branch.
 
-3. Replace `Pamplejuce` with the name of your project in CMakeLists.txt line 5, where the `PROJECT_NAME` variable is set.
+3. Replace `Pamplejuce` with the name of your project in CMakeLists.txt line 5, where the `PROJECT_NAME` variable is set. Make this all one word, no spaces.
 
 4. Pick which formats you want built on line 8.
 
