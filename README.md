@@ -9,19 +9,24 @@ Out of the box, it supports:
 2. JUCE 6.1.4 as a submodule (tracking develop)
 3. CMake 3.21
 4. Catch2 v3 (tracking devel via FetchContent) as the test framework and runner
-5. Github Actions for CI and artifact building
-6. Proper .gitignore given the above
-7. Building on Windows, Linux and Mac (including arm64 built with Xcode 12.2)
+5. GitHub Actions config for building binaries, running Catch2 tests, running pluginval and artifact building for the Windows, Linux and MacOS platforms.
+
+It also contains:
+
+1. Proper `.gitignore` for all platforms
+2. A `.clang-format` file 
+3. A `VERSION` file that will propagate through to JUCE and your app.
 
 ## What it doesn't handle (yet)
 
 1. MacOS code signing, packaging, notarization.
+2. Windows signing
 
 ## How to use for YOUR project
 
 This is a template repo! 
 
-You can start your new repo using this one as the base by clicking "[Use this template](https://github.com/sudara/pamplejuce/generate)" here or at the top of the page.
+That means the easiest thing to do is  click "[Use this template](https://github.com/sudara/pamplejuce/generate)" here or at the top of the page to get your own repo with all the code here.
 
 For an example of a plugin that uses this repo, check out [Load Monster!](https://github.com/sudara/load_monster_plugin).
 
