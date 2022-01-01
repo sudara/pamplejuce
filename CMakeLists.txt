@@ -1,29 +1,27 @@
-# 3.18 is latest bundled by VS 2019 as of Jan 2021
-# 3.19 is latest bundled CLion as of 2021.1
-cmake_minimum_required(VERSION 3.18)
+# 3.21 is bundled in VSCode 
+# https://docs.microsoft.com/en-us/visualstudio/releases/2022/release-notes
+# 3.21 is also bundled in CLion as of 2021.3
+cmake_minimum_required(VERSION 3.21)
 
-# Change this to your project name
+# Change this to the name of your plugin
+# This cannot have spaces (but PRODUCT_NAME can)
 set(PROJECT_NAME "Pamplejuce")
 
-# Set the plugin formats you'll be building here. Valid formats: AAX Unity VST AU AUv3 Standalone
+# Set the plugin formats you'll be building here.
+# Valid formats: AAX Unity VST AU AUv3 Standalone
 set(FORMATS AU VST3 AUv3)
 
-# TODO: Automate/coordinate version with GitHub tagging?
-project(${PROJECT_NAME} VERSION 0.0.1)
+# Reads in VERSION file and sticks in it CURRENT_VERSION variable
+file(READ VERSION CURRENT_VERSION)
+
+# For simplilicity, the name of the project is also the name of the target
+project(${PROJECT_NAME} VERSION ${CURRENT_VERSION})
 
 # By default we don't want Xcode schemes to be made for modules, etc
 set(CMAKE_XCODE_GENERATE_SCHEME OFF)
 
-# No ZERO_CHECK target on XCode (it helps bust cache for cmake)
-if(CMAKE_GENERATOR STREQUAL Xcode)
-    set(CMAKE_SUPPRESS_REGENERATION true)
-endif()
-
-# Building universals will increase build times
+# Building universals increases build times
 # set(CMAKE_OSX_ARCHITECTURES arm64 x86_64)
-
-# clang-tidy needs this to be happy
-set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
 # Adds all the module sources so they appear correctly in the IDE
 # Must be set before JUCE is added as a sub-dir (or any targets are made)
@@ -64,7 +62,7 @@ juce_add_plugin("${PROJECT_NAME}"
 # C++20 please 
 target_compile_features("${PROJECT_NAME}" PRIVATE cxx_std_20)
 
-# Manually list all .h and .cpp files for the plugin, don't use globs:
+# Manually list all .h and .cpp files for the plugin (avoiding globs):
 set(SourceFiles
     Source/PluginEditor.h
     Source/PluginProcessor.h
@@ -75,7 +73,7 @@ target_sources("${PROJECT_NAME}" PRIVATE ${SourceFiles})
 # No, we don't want our source buried in extra nested folders
 set_target_properties("${PROJECT_NAME}" PROPERTIES FOLDER "")
 
-# The source tree should uhhh, still look like the source tree, yo
+# The Xcode source tree should uhhh, still look like the source tree, yo
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Source PREFIX "" FILES ${SourceFiles})
 
 # Setup our binary data as a target
@@ -85,10 +83,10 @@ juce_add_binary_data(Assets SOURCES pamplejuce.png)
 # See https://forum.juce.com/t/loading-pytorch-model-using-binarydata/39997/2
 set_target_properties(Assets PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
-# This cleans up the folder organization, especially on Xcode.
+# This cleans up the folder organization on Xcode.
 # It tucks the Plugin varieties into a "Targets" folder and generate an Xcode Scheme manually
 # Xcode scheme generation is turned off globally to limit noise from other targets
-# The non-hacky way of doing this is via the global PREDEFINED_TARGETS_FOLDER propety
+# The non-hacky way of doing this is via the global PREDEFINED_TARGETS_FOLDER property
 # However that doesn't seem to be working in Xcode
 # Not all plugin types (au, vst) available on each build type (win, macos, linux)
 foreach(target ${FORMATS} "All")
