@@ -1,4 +1,4 @@
-# 3.21 is bundled in VSCode 
+# 3.21 is bundled in VSCode 2022
 # https://docs.microsoft.com/en-us/visualstudio/releases/2022/release-notes
 # 3.21 is also bundled in CLion as of 2021.3
 cmake_minimum_required(VERSION 3.21)
@@ -125,12 +125,8 @@ target_link_libraries("${PROJECT_NAME}"
     juce::juce_recommended_lto_flags
     juce::juce_recommended_warning_flags)
 
-# BUILD_TESTING is ON by default
-# include(CTest) does this too, but adds tons of targets we don't want
-enable_testing() 
-
-# "GLOBS ARE BAD" is bad UX. Let's fix that so we can add test files easily.
-# CONFIGURE_DEPENDS (as well as Clion's CMake integration) makes globbing functional
+# "GLOBS ARE BAD" is brittle and silly UX, sorry CMake!
+# CONFIGURE_DEPENDS / Clion's CMake integration makes globbing absolutely fine
 file(GLOB_RECURSE TestFiles CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/Tests/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/Tests/*.h")
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Tests PREFIX "" FILES ${TestFiles})
 
