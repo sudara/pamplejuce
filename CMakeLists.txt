@@ -157,4 +157,3 @@ set_target_properties(Tests PROPERTIES XCODE_GENERATE_SCHEME ON)
 
 # Organize the test source in the Tests/ folder in the IDE
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Tests PREFIX "" FILES ${TestFiles})
-
