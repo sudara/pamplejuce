@@ -54,12 +54,12 @@ juce_add_plugin("${PROJECT_NAME}"
     # IS_MIDI_EFFECT TRUE/FALSE                 # Is this plugin a MIDI effect?
     # EDITOR_WANTS_KEYBOARD_FOCUS TRUE/FALSE    # Does the editor need keyboard focus?
     COPY_PLUGIN_AFTER_BUILD TRUE # On MacOS, plugin will be copied to /Users/you/Library/Audio/Plug-Ins/
-    PLUGIN_MANUFACTURER_CODE Pamp 
+    PLUGIN_MANUFACTURER_CODE Pamp
     PLUGIN_CODE P001                            # A unique four-character plugin id with at least one upper-case character
     FORMATS "${FORMATS}"
     PRODUCT_NAME "${PROJECT_NAME}")        # The name of the final executable, which can differ from the target name
 
-# C++20 please 
+# C++20 please
 target_compile_features("${PROJECT_NAME}" PRIVATE cxx_std_20)
 
 # Manually list all .h and .cpp files for the plugin (avoiding globs):
@@ -94,12 +94,12 @@ foreach(target ${FORMATS} "All")
         set_target_properties(${PROJECT_NAME}_${target} PROPERTIES
             # Tuck the actual plugin targets into a folder where they won't bother us
             FOLDER "Targets"
-            
+
             # MacOS only: Sets the default executable that Xcode will open on build
-            # For this exact path to to work, manually build the AudioPluginHost.xcodeproj in the JUCE subdir 
+            # For this exact path to to work, manually build the AudioPluginHost.xcodeproj in the JUCE subdir
             XCODE_SCHEME_EXECUTABLE "${CMAKE_CURRENT_SOURCE_DIR}/JUCE/extras/AudioPluginHost/Builds/MacOSX/build/Debug/AudioPluginHost.app"
-            
-            # Let us build the target in Xcode 
+
+            # Let us build the target in Xcode
             XCODE_GENERATE_SCHEME ON)
     endif()
 endforeach()
@@ -115,7 +115,7 @@ target_compile_definitions("${PROJECT_NAME}"
     JUCE_WEB_BROWSER=0  # If you remove this, add `NEEDS_WEB_BROWSER TRUE` to the `juce_add_plugin` call
     JUCE_USE_CURL=0     # If you remove this, add `NEEDS_CURL TRUE` to the `juce_add_plugin` call
     JUCE_VST3_CAN_REPLACE_VST2=0)
-    
+
 target_link_libraries("${PROJECT_NAME}"
     PRIVATE
     Assets
@@ -124,6 +124,12 @@ target_link_libraries("${PROJECT_NAME}"
     juce::juce_recommended_config_flags
     juce::juce_recommended_lto_flags
     juce::juce_recommended_warning_flags)
+
+
+# Required to use ctest, which is just easier for cross-platform CI
+# include(CTest) does this too, but adds tons of targets we don't want
+# You could forgo this and also call ./Tests directly from the build dir
+enable_testing()
 
 # "GLOBS ARE BAD" is brittle and silly UX, sorry CMake!
 # CONFIGURE_DEPENDS / Clion's CMake integration makes globbing absolutely fine
