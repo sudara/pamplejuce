@@ -126,9 +126,10 @@ target_link_libraries("${PROJECT_NAME}"
     juce::juce_recommended_warning_flags)
 
 
-# Required to use ctest, which is just easier for cross-platform CI
+# Required for ctest (which is just easier for cross-platform CI)
 # include(CTest) does this too, but adds tons of targets we don't want
-# You could forgo this and also call ./Tests directly from the build dir
+# See: https://github.com/catchorg/Catch2/issues/2026
+# You could forgo ctest and call ./Tests directly from the build dir
 enable_testing()
 
 # "GLOBS ARE BAD" is brittle and silly UX, sorry CMake!
@@ -159,3 +160,9 @@ set_target_properties(Tests PROPERTIES XCODE_GENERATE_SCHEME ON)
 
 # Organize the test source in the Tests/ folder in the IDE
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Tests PREFIX "" FILES ${TestFiles})
+
+# Load and use the .cmake file provided by Catch2
+# https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md
+# We have to manually provide the source directory here for now
+include(${Catch2_SOURCE_DIR}/extras/Catch.cmake)
+catch_discover_tests(Tests)
