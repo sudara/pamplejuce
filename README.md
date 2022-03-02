@@ -6,7 +6,7 @@ Pamplejuce is a ~~template~~ lifestyle for creating and building JUCE plugins in
 Out of the box, it supports:
 
 1. C++20
-2. JUCE 6.1.4 as a submodule (tracking develop)
+2. JUCE 6.1.5 as a submodule (tracking develop)
 3. CMake 3.21
 4. Catch2 v3 (tracking devel via FetchContent) as the test framework and runner
 5. GitHub Actions config for building binaries, running Catch2 tests, running pluginval and artifact building for the Windows, Linux and MacOS platforms.
@@ -17,7 +17,13 @@ It also contains:
 2. A `.clang-format` file 
 3. A `VERSION` file that will propagate through to JUCE and your app.
 
-## What it doesn't handle (yet)
+
+## How does this all work at a high level?
+
+Read up about [JUCE and CMmake on my blog!](https://melatonin.dev/blog/how-to-use-cmake-with-juce/).
+
+
+## What Pamplejuce doesn't handle (yet)
 
 1. MacOS code signing, packaging, notarization.
 2. Windows signing
@@ -59,73 +65,6 @@ After you've created a new repo:
 
 3. Catch2 will update on each CMake configure, you can lock this down if you prefer by changing the `GIT_TAG`.
 
-## How does this all work at a high level?
-
-The `CMakeLists.txt` file describes how to configure and build the plugins as well as setup the IDE project. 
-
-Unfortunately, these different jobs are not clearly separated or delineated by CMake's config, CLI or options. In my opinion, this is why CMake has the reputation it has: there's a lot of complexity resulting from implicit coupling between these concerns.
-
-JUCE provides CMake helpers, allowing plugin devs to call a small number of functions like `juce_add_plugin`. It sets up our project much like JUCE's Projucer did in the past, generating the IDE project and setting up all the build config files.
-
-GitHub Actions is running CMake on MacOS, Windows and Linux, therefore configuring, building and testing for each environment.
-
-CMake does its job for us in multiple incantations:
-
-### 1. Configure
-
-The `CMakeLists.txt` is parsed, processed and the project is configued.
-
-This might look something like `cmake -B Builds`
-
-The `-B` option tells CMake what folder to perform the build in, where to stick all the resultant files, etc. 
-
-### 2. Generate
-
-This outputs files for system specific build tooling and IDEs to read.
-
-Generate a VS 2019 Project file:
-```
-cmake -B Builds -G "Visual Studio 16 2019"
-```
-
-Or an Xcode project:
-```
-cmake -B Builds -G Xcode
-```
-
-During local JUCE development, we'd run one of the above and then trigger actual builds from our IDE rather than CMake.
-
-### 3. Build
-
-You can skip the IDE project generation but still build using the system specific build tools (such as Xcode) on the command line with: 
-
-```
-cmake --build Builds --config Release
-```
-
-This is how GitHub Actions builds.
-
-### 4. Test
-
-Again, things are messy and lines are blurred.
-
-CTest is just a unit test runner. It doesn't know anything about unit test implementation or know anything about [the executable that it will run](https://bertvandenbroucke.netlify.app/2019/12/12/unit-testing-with-ctest/). 
-
-So a test executable has to be created by CMake first, which we are doing with the help of the [Catch2 CMake integration](https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md).
-
-Testing is enabled with `enable_testing()` in a `CMakeLists.txt` file and then the `ctest` command can be run **in the *Builds* directory**
-
-![Ctest](Docs/Catch2inCtest.jpg)
-
-When run, ctest barfs up logs in Testing/Temporary. Thanks, ctest! 
-
-Since tests are an executable target, they are built and run via Xcode schemes, with results showing up in the console:
-
-![Xcode](Docs/Catch2inXcode.jpg)
-
-### 5. Package
-
-TBD.
 
 ## How do variables work in GitHub Actions?
 
