@@ -3,10 +3,6 @@
 # 3.21 is also bundled in CLion as of 2021.3
 cmake_minimum_required(VERSION 3.21)
 
-# Color our warnings and errors
-add_compile_options(-fdiagnostics-color=always) # gcc
-add_compile_options (-fcolor-diagnostics) # clang
-
 # Change this to the name of your plugin
 # This cannot have spaces (but PRODUCT_NAME can)
 set(PROJECT_NAME "Pamplejuce")
@@ -130,7 +126,6 @@ target_link_libraries("${PROJECT_NAME}"
     juce::juce_recommended_lto_flags
     juce::juce_recommended_warning_flags)
 
-
 # Required for ctest (which is just easier for cross-platform CI)
 # include(CTest) does this too, but adds tons of targets we don't want
 # See: https://github.com/catchorg/Catch2/issues/2026
@@ -171,3 +166,10 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Tests PREFIX "" FILES ${TestFiles}
 # We have to manually provide the source directory here for now
 include(${Catch2_SOURCE_DIR}/extras/Catch.cmake)
 catch_discover_tests(Tests)
+
+# Color our warnings and errors
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+   add_compile_options (-fdiagnostics-color=always)
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+   add_compile_options (-fcolor-diagnostics)
+endif ()
