@@ -3,6 +3,10 @@
 # 3.21 is also bundled in CLion as of 2021.3
 cmake_minimum_required(VERSION 3.21)
 
+# Color our warnings and errors
+add_compile_options(-fdiagnostics-color=always) # gcc
+add_compile_options (-fcolor-diagnostics) # clang
+
 # Change this to the name of your plugin
 # This cannot have spaces (but PRODUCT_NAME can)
 set(PROJECT_NAME "Pamplejuce")
@@ -37,7 +41,8 @@ set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "Targets")
 option(JUCE_ENABLE_MODULE_SOURCE_GROUPS "Show all module sources in IDE projects" ON)
 
 # JUCE is setup as a submodule in the /JUCE folder
-# Locally, you need to run `git submodule update --init --recursive` once
+# Locally, you'll need to run `git submodule update --init --recursive` once
+# and `git submodule update --remote --merge` to keep it up to date
 # On Github Actions, it's managed by actions/checkout
 add_subdirectory(JUCE)
 
