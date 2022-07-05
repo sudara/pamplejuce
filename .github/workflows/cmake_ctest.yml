@@ -3,7 +3,7 @@ name: CMake
 on: [push]
 
 env:
-  PROJECT_NAME: pluginval
+  PROJECT_NAME: Pamplejuce
   BUILD_TYPE: Release
   BUILD_DIR: Builds
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
