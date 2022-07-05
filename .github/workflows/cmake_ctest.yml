@@ -70,6 +70,7 @@ jobs:
       
     - name: Pluginval Linux
       working-directory: ${{ env.BUILD_DIR }}
+      continue-on-error: true
       if: matrix.name == 'Linux'
       run: |
         curl -L "https://github.com/Tracktion/pluginval/releases/download/v0.3.0/pluginval_${{ matrix.name }}.zip" -o pluginval.zip
@@ -83,6 +84,7 @@ jobs:
         
     - name: Pluginval Mac
       working-directory: ${{ env.BUILD_DIR }}
+      continue-on-error: true
       if: matrix.name == 'MacOS'
       run: |
         curl -L "https://github.com/Tracktion/pluginval/releases/download/v0.3.0/pluginval_${{ matrix.name }}.zip" -o pluginval.zip
@@ -92,6 +94,7 @@ jobs:
     - name: Pluginval Windows
       shell: cmd
       working-directory: ${{ env.BUILD_DIR }}
+      continue-on-error: true
       if: matrix.name == 'Windows'
       run: |
         powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest https://github.com/Tracktion/pluginval/releases/download/v0.3.0/pluginval_Windows.zip -OutFile pluginval.zip"
