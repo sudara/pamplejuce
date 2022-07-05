@@ -19,12 +19,12 @@ jobs:
       fail-fast: false # show all errors for each platform (vs. cancel jobs on error)
       matrix:
         include: 
+          - name: Linux
+            os: ubuntu-22.04
+          - name: MacOS
+            os: macos-12 # TODO: change once macos-latest catches up
           - name: Windows
             os: windows-latest
-          - name: Linux
-            os: ubuntu-latest
-          - name: MacOS
-            os: macos-11.0 # TODO: change once macos-latest catches up
 
     steps:
     - name: Install JUCE's Linux Deps and select g++ 10
@@ -45,7 +45,7 @@ jobs:
       run: |
         VERSION=$(cat VERSION)
         echo "VERSION=$VERSION" >> $GITHUB_ENV
-        echo "ARTIFACTS_PATH=${{ env.BUILD_DIR }}/${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }} >> $GITHUB_ENV
+        echo "ARTIFACTS_PATH=${{ env.BUILD_DIR }}/${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}" >> $GITHUB_ENV
         echo "VST3_PATH=${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3/${{ env.PROJECT_NAME }}.vst3" >> $GITHUB_ENV
         echo "AU_PATH=${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/AU/${{ env.PROJECT_NAME }}.component" >> $GITHUB_ENV
         echo "AUV3_PATH=${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/AUv3/${{ env.PROJECT_NAME }}.appex" >> $GITHUB_ENV
