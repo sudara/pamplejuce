@@ -124,6 +124,10 @@ jobs:
         ln -s /Library/Audio/Plug-Ins/VST3 "Your Mac's VST3 Directory"
         ln -s /Library/Audio/Plug-Ins/Components "Your Mac's Component Directory'"
         rm libPamplejuce_SharedCode.a
+        mv ${{ env.VST3_PATH }} .
+        mv ${{ env.AU_PATH }} . 
+        rm -rf VST3
+        rm -rf AU
         hdiutil create -volname ${{ env.PROJECT_NAME }} -srcfolder . ${{ env.PROJECT_NAME }}.dmg
         xcrun notarytool submit  ${{ env.PROJECT_NAME }}.dmg --apple-id ${{ secrets.NOTARIZATION_USERNAME }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --team-id ${{ secrets.TEAM_ID }} --wait
         xcrun stapler staple ${{ env.PROJECT_NAME }}.dmg
