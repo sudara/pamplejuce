@@ -117,7 +117,7 @@ jobs:
         codesign --force -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" -v ${{ env.VST3_PATH }} --deep --strict --options=runtime --timestamp
         codesign --force -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" -v ${{ env.AU_PATH }} --deep --strict --options=runtime --timestamp
     
-    - name: "Create DMG, Notarize and Staple (macOS)"
+    - name: Create DMG, Notarize and Staple (macOS)
       if: ${{ matrix.name == 'macOS' }}
       working-directory: ${{ env.ARTIFACTS_PATH }}
       run: |
@@ -142,21 +142,20 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: ${{ env.PROJECT_NAME }}-${{ matrix.name }}
-        path: ${{ env.ARTIFACT_PATH }}/${{ env.PROJECT_NAME }}-${{ matrix.name }}.zip
+        path: '${{ github.workspace }}/${{ env.ARTIFACTS_PATH }}/${{ env.PROJECT_NAME }}-${{ matrix.name }}.zip'
         
     - name: Upload DMG (MacOS)
-      if: ${{ matrix.name != 'macOS' }}
+      if: ${{ matrix.name == 'macOS' }}
       uses: actions/upload-artifact@v3
       with:
         name: ${{ env.PROJECT_NAME }}-${{ matrix.name }}
-        path: ${{ env.ARTIFACT_PATH }}/${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg
+        path: '${{ github.workspace }}/${{ env.ARTIFACTS_PATH }}/${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg'
         
 
   release:
     if: contains(github.ref, 'tags/v')
     runs-on: ubuntu-latest
     needs: build_and_test
-
 
     steps:
     - name: Get Artifacts
