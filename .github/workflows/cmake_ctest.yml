@@ -156,10 +156,12 @@ jobs:
     if: contains(github.ref, 'tags/v')
     runs-on: ubuntu-latest
     needs: build_and_test
-    outputs: 
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
+
 
     steps:
+    - name: Get Artifacts
+      uses: actions/download-artifact@v3
+
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
