@@ -1,7 +1,9 @@
 name: CMake
 
-on: [push]
-
+on: 
+  push:
+  workflow_dispatch:
+    
 env:
   PROJECT_NAME: Pamplejuce
   BUILD_TYPE: Release
@@ -131,14 +133,24 @@ jobs:
         xcrun stapler staple ${{ env.PROJECT_NAME }}.dmg
         
     - name: Zip
+      if: ${{ matrix.name != 'macOS' }}
       working-directory: ${{ env.ARTIFACTS_PATH }}
       run: 7z a -tzip ${{ env.PROJECT_NAME }}-${{ matrix.name }}.zip .
 
-    - name: Upload Artifact
+    - name: Upload Artifacts (Linux/Windows)
+      if: ${{ matrix.name != 'macOS' }}
       uses: actions/upload-artifact@v3
       with:
         name: ${{ env.PROJECT_NAME }}-${{ matrix.name }}
         path: ${{ env.ARTIFACT_PATH }}/${{ env.PROJECT_NAME }}-${{ matrix.name }}.zip
+        
+    - name: Upload DMG (MacOS)
+      if: ${{ matrix.name != 'macOS' }}
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ env.PROJECT_NAME }}-${{ matrix.name }}
+        path: ${{ env.ARTIFACT_PATH }}/${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg
+        
 
   release:
     if: contains(github.ref, 'tags/v')
@@ -149,37 +161,12 @@ jobs:
 
     steps:
     - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
+      uses: softprops/action-gh-release@v1
       with:
         tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        draft: false
-        prerelease: false
-
-    - name: Download All Artifacts
-      uses: actions/download-artifact@v3
-  
-    - name: Upload Windows Asset
-      uses: actions/upload-release-asset@v1
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./${{ env.PROJECT_NAME }}-Windows.zip
-        asset_name: ${{ env.PROJECT_NAME }}-Windows.zip
-        asset_content_type: application/zip
-
-    - name: Upload Linux Asset
-      uses: actions/upload-release-asset@v1
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./${{ env.PROJECT_NAME }}-Linux.zip
-        asset_name: ${{ env.PROJECT_NAME }}-Linux.zip
-        asset_content_type: application/zip
-
-    - name: Upload macOS Asset
-      uses: actions/upload-release-asset@v1
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./${{ env.PROJECT_NAME }}-macOS.zip
-        asset_name: ${{ env.PROJECT_NAME }}-macOS.zip
-        asset_content_type: application/zip
+        name: ${{ github.ref }}
+        draft: true
+        files: |
+          ${{ env.PROJECT_NAME }}-Linux.zip/*
+          ${{ env.PROJECT_NAME }}-Windows.zip/*
+          ${{ env.PROJECT_NAME }}-macOS.dmg/*
