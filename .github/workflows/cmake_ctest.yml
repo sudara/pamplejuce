@@ -22,18 +22,16 @@ jobs:
           - name: Linux
             os: ubuntu-22.04
           - name: macOS
-            os: macos-12 # TODO: change once macos-latest catches up
+            os: macos-12
           - name: Windows
             os: windows-latest
 
     steps:
-    - name: Install JUCE's Linux Deps and select g++ 10
+    - name: Install JUCE's Linux Deps
       if: runner.os == 'Linux'
       # Thanks to McMartin & co https://forum.juce.com/t/list-of-juce-dependencies-under-linux/15121/44
       run: |
         sudo apt-get update && sudo apt install libasound2-dev libx11-dev libxinerama-dev libxext-dev libfreetype6-dev libwebkit2gtk-4.0-dev libglu1-mesa-dev xvfb fluxbox
-        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 10
-        sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 10
 
     - name: Checkout code
       uses: actions/checkout@v3
