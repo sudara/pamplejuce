@@ -121,6 +121,9 @@ jobs:
       if: ${{ matrix.name == 'macOS' }}
       working-directory: ${{ env.ARTIFACTS_PATH }}
       run: |
+        ln -s /Library/Audio/Plug-Ins/VST3 .
+        ln -s /Library/Audio/Plug-Ins/Components .
+        rm libPamplejuce_SharedCode.a
         hdiutil create -volname ${{ env.PROJECT_NAME }} -srcfolder . ${{ env.PROJECT_NAME }}.dmg
         xcrun notarytool submit  ${{ env.PROJECT_NAME }}.dmg --apple-id ${{ secrets.NOTARIZATION_USERNAME }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --team-id ${{ secrets.TEAM_ID }} --wait
         xcrun stapler staple ${{ env.PROJECT_NAME }}.dmg
