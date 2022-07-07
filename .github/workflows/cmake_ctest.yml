@@ -21,7 +21,7 @@ jobs:
         include: 
           - name: Linux
             os: ubuntu-22.04
-          - name: MacOS
+          - name: macOS
             os: macos-12 # TODO: change once macos-latest catches up
           - name: Windows
             os: windows-latest
@@ -79,13 +79,13 @@ jobs:
         sudo /usr/bin/Xvfb $DISPLAY &
         sleep 0.5 # let Xvfb start up
         # we'll also need a window manager for JUCE to be happy
-        fluxbox &
+        fluxbox & 
         ./pluginval --strictness-level 10 --validate-in-process --verbose --validate "${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3/${{ env.PROJECT_NAME }}.vst3"
         
     - name: Pluginval Mac
       working-directory: ${{ env.BUILD_DIR }}
       continue-on-error: true
-      if: matrix.name == 'MacOS'
+      if: matrix.name == 'macOS'
       run: |
         curl -L "https://github.com/Tracktion/pluginval/releases/download/v0.3.0/pluginval_${{ matrix.name }}.zip" -o pluginval.zip
         unzip pluginval
@@ -102,6 +102,13 @@ jobs:
         pluginval.exe --strictness-level 10 --validate-in-process --output-dir "./bin" --validate "${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3/${{ env.PROJECT_NAME }}.vst3"
         if %ERRORLEVEL% neq 0 { exit /b 1 }
         
+    - name: Import Certificates
+      uses: apple-actions/import-codesign-certs@v1
+      if: ${{ matrix.name == 'macOS' }}
+      with:
+        p12-file-base64: ${{ secrets.DEV_ID_APP_CERT }}
+        p12-password: ${{ secrets.DEV_ID_APP_PASSWORD }}
+            
     - name: Codesign (macOS)
       working-directory: ${{ env.BUILD_DIR }}
       if: ${{ matrix.name == 'macOS' }}
@@ -164,10 +171,10 @@ jobs:
         asset_name: ${{ env.PROJECT_NAME }}-Linux.zip
         asset_content_type: application/zip
 
-    - name: Upload MacOS Asset
+    - name: Upload macOS Asset
       uses: actions/upload-release-asset@v1
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./${{ env.PROJECT_NAME }}-MacOS.zip
-        asset_name: ${{ env.PROJECT_NAME }}-MacOS.zip
+        asset_path: ./${{ env.PROJECT_NAME }}-macOS.zip
+        asset_name: ${{ env.PROJECT_NAME }}-macOS.zip
         asset_content_type: application/zip
