@@ -67,7 +67,7 @@ jobs:
 
     - name: Build
       shell: bash
-      run: cmake --build ${{ env.BUILD_DIR }} --config ${{ env.BUILD_TYPE }}
+      run: cmake --build ${{ env.BUILD_DIR }} --config ${{ env.BUILD_TYPE }} --parallel 4
 
     - name: Test
       working-directory: ${{ env.BUILD_DIR }}

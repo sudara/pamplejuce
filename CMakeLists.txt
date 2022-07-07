@@ -20,7 +20,8 @@ project(${PROJECT_NAME} VERSION ${CURRENT_VERSION})
 # By default we don't want Xcode schemes to be made for modules, etc
 set(CMAKE_XCODE_GENERATE_SCHEME OFF)
 
-# Building universals increases build times
+# Building universal binaries increases build times
+# This only affects local builds, GitHub actions always builds Universals
 # set(CMAKE_OSX_ARCHITECTURES arm64 x86_64)
 
 # Adds all the module sources so they appear correctly in the IDE
