@@ -128,9 +128,9 @@ jobs:
         mv AU/${{ env.PROJECT_NAME }}.component . 
         rm -rf VST3
         rm -rf AU
-        hdiutil create -volname ${{ env.PROJECT_NAME }} -srcfolder . ${{ env.PROJECT_NAME }}.dmg
-        xcrun notarytool submit  ${{ env.PROJECT_NAME }}.dmg --apple-id ${{ secrets.NOTARIZATION_USERNAME }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --team-id ${{ secrets.TEAM_ID }} --wait
-        xcrun stapler staple ${{ env.PROJECT_NAME }}.dmg
+        hdiutil create -volname ${{ env.PROJECT_NAME }} -srcfolder . ${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg
+        xcrun notarytool submit  ${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg --apple-id ${{ secrets.NOTARIZATION_USERNAME }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --team-id ${{ secrets.TEAM_ID }} --wait
+        xcrun stapler staple ${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg
         
     - name: Zip
       if: ${{ matrix.name != 'macOS' }}
