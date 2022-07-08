@@ -120,7 +120,7 @@ jobs:
     - name: Create DMG, Notarize and Staple (macOS)
       if: ${{ matrix.name == 'macOS' }}
       run: |
-        npm install appdmg
+        npm install -g appdmg
         mkdir -p appdmg/dmg
         mv ${{ env.ARTIFACTS_PATH }}/VST3/${{ env.PROJECT_NAME }}.vst3 appdmg/dmg
         mv ${{ env.ARTIFACTS_PATH }}/AU/${{ env.PROJECT_NAME }}.component appdmg/dmg 
