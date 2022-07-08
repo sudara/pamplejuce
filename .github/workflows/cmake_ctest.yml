@@ -26,7 +26,7 @@ jobs:
           - name: macOS
             os: macos-12
           - name: Windows
-            os: windows-latest
+            os: windows-202
 
     steps:
     - name: Install JUCE's Linux Deps
@@ -119,18 +119,15 @@ jobs:
     
     - name: Create DMG, Notarize and Staple (macOS)
       if: ${{ matrix.name == 'macOS' }}
-      working-directory: ${{ env.ARTIFACTS_PATH }}
       run: |
-        ln -s /Library/Audio/Plug-Ins/VST3 "Your Mac's VST3 Directory"
-        ln -s /Library/Audio/Plug-Ins/Components "Your Mac's Component Directory'"
-        rm libPamplejuce_SharedCode.a
-        mv VST3/${{ env.PROJECT_NAME }}.vst3 .
-        mv AU/${{ env.PROJECT_NAME }}.component . 
-        rm -rf VST3
-        rm -rf AU
-        hdiutil create -volname ${{ env.PROJECT_NAME }} -srcfolder . ${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg
-        xcrun notarytool submit  ${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg --apple-id ${{ secrets.NOTARIZATION_USERNAME }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --team-id ${{ secrets.TEAM_ID }} --wait
-        xcrun stapler staple ${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg
+        npm install appdmg
+        mkdir -p appdmg/dmg
+        mv ${{ env.ARTIFACTS_PATH }}/VST3/${{ env.PROJECT_NAME }}.vst3 appdmg/dmg
+        mv ${{ env.ARTIFACTS_PATH }}/AU/${{ env.PROJECT_NAME }}.component appdmg/dmg 
+        cd appdmg && appdmg dmg.json ${{ env.PROJECT_NAME }}.dmg
+        # hdiutil create -volname ${{ env.PROJECT_NAME }} -srcfolder . ${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg
+        xcrun notarytool submit ${{ env.PROJECT_NAME }}.dmg --apple-id ${{ secrets.NOTARIZATION_USERNAME }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --team-id ${{ secrets.TEAM_ID }} --wait
+        xcrun stapler staple ${{ env.PROJECT_NAME }}.dmg
         
     - name: Zip
       if: ${{ matrix.name != 'macOS' }}
