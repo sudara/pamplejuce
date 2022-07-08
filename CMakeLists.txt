@@ -24,8 +24,7 @@ set(CMAKE_XCODE_GENERATE_SCHEME OFF)
 # This only affects local builds, GitHub actions always builds Universals
 # set(CMAKE_OSX_ARCHITECTURES arm64 x86_64)
 
-# Target for macOS down to High Sierra
-set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE)
+set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "Support macOS down to High Sierra")
 
 # Adds all the module sources so they appear correctly in the IDE
 # Must be set before JUCE is added as a sub-dir (or any targets are made)
