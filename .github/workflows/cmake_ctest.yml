@@ -124,10 +124,10 @@ jobs:
         mkdir -p appdmg/dmg
         mv ${{ env.ARTIFACTS_PATH }}/VST3/${{ env.PROJECT_NAME }}.vst3 appdmg/dmg
         mv ${{ env.ARTIFACTS_PATH }}/AU/${{ env.PROJECT_NAME }}.component appdmg/dmg 
-        cd appdmg && appdmg dmg.json ${{ env.PROJECT_NAME }}.dmg
+        cd appdmg && appdmg dmg.json ${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg
         # hdiutil create -volname ${{ env.PROJECT_NAME }} -srcfolder . ${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg
-        xcrun notarytool submit ${{ env.PROJECT_NAME }}.dmg --apple-id ${{ secrets.NOTARIZATION_USERNAME }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --team-id ${{ secrets.TEAM_ID }} --wait
-        xcrun stapler staple ${{ env.PROJECT_NAME }}.dmg
+        xcrun notarytool submit ${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg --apple-id ${{ secrets.NOTARIZATION_USERNAME }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --team-id ${{ secrets.TEAM_ID }} --wait
+        xcrun stapler staple ${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg
         
     - name: Zip
       if: ${{ matrix.name != 'macOS' }}
@@ -146,7 +146,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: ${{ env.PROJECT_NAME }}-${{ matrix.name }}
-        path: '${{ github.workspace }}/${{ env.ARTIFACTS_PATH }}/${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg'
+        path: appdmg/${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg
         
 
   release:
