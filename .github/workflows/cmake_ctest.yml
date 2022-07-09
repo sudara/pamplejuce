@@ -51,17 +51,16 @@ jobs:
         echo "AU_PATH=${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/AU/${{ env.PROJECT_NAME }}.component" >> $GITHUB_ENV
         echo "AUV3_PATH=${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/AUv3/${{ env.PROJECT_NAME }}.appex" >> $GITHUB_ENV
       
-    - name: Install Ninja (MacOS)
+    - name: Install Ninja (macOS)
       if: ${{ matrix.name == 'macOS' }}
       run: bHOMEBREW_NO_INSTALL_CLEANUP=true brew install ninja
       
     - name: ccache
-      if: matrix.os != 'windows-latest'
       uses: hendrikmuhs/ccache-action@v1.2
       with:
         key: ${{ matrix.os }}-${{ matrix.type }}
         
-    - name: Import Certificates
+    - name: Import Certificates (macOS)
       uses: apple-actions/import-codesign-certs@v1
       if: ${{ matrix.name == 'macOS' }}
       with:
