@@ -114,10 +114,12 @@ jobs:
       if: ${{ matrix.name == 'macOS' }}
       working-directory: ${{ env.BUILD_DIR }}
       run: |
-        mkdir -p ${{ env.VST3_PATH }}/Contents/Resources && cp ../appdmg/pamplejuce.icns ${{ env.VST3_PATH }}/Contents/Resources/Icons.icns
-        cp ../appdmg/pamplejuce.icns ${{ env.AU_PATH }}/Contents/Resources/Icons.icns        
-        ruby -i -pe 'sub(/\<string\>/, "<string>Icons.icns") if $p=~/CFBundleIconFile/;$p=$_' ${{ env.VST3_PATH }}/Contents/Info.plist 
-        ruby -i -pe 'sub(/\<string\>/, "<string>Icons.icns") if $p=~/CFBundleIconFile/;$p=$_' ${{ env.AU_PATH }}/Contents/Info.plist 
+        sips -i ../appdmg/pamplejuce.icns # add the icns as its own icon resource (meta!)
+        DeRez -only icns ../appdmg/pamplejuce.icns > /tmp/icons # Grab the icons resource, put in tempfile
+        Rez -a /tmp/icons -o ${{ env.VST3_PATH }}/Icon$'\r' # Stuff the resource into the strange Icon? file's resource fork
+        Rez -a /tmp/icons -o ${{ env.AU_PATH }}/Icon$'\r' # Same for the AU
+        SetFile -a C ${{ env.VST3_PATH }} # Set custom icon attribute
+        SetFile -a C ${{ env.AU_PATH }}
       
     - name: Add Icons & Codesign (macOS)
       working-directory: ${{ env.BUILD_DIR }}
