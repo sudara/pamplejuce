@@ -132,6 +132,10 @@ jobs:
         Rez -a /tmp/icons -o ${{ env.VST3_PATH }}/Icon$'\r' 
         Rez -a /tmp/icons -o ${{ env.AU_PATH }}/Icon$'\r'
         
+        # Set custom icon attribute
+        SetFile -a C Pamplejuce_artefacts/Release/VST3/Pamplejuce.vst3
+        SetFile -a C Pamplejuce_artefacts/Release/AU/Pamplejuce.component
+        
     - name: Create DMG, Notarize and Staple (macOS)
       if: ${{ matrix.name == 'macOS' }}
       run: |
