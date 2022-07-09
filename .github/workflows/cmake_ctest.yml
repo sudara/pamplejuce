@@ -143,8 +143,8 @@ jobs:
       run: |
         npm install -g appdmg
         mkdir -p appdmg/dmg
-        # need to create these directories for the dmg symlinks to be droppable 
-        mkdir -p /Library/Audio/Plug-Ins/Components && mkdir -p /Library/Audio/Plug-Ins/VST3
+        # Create directories for the dmg symlinks to be droppable 
+        sudo mkdir -p /Library/Audio/Plug-Ins/Components && sudo mkdir -p /Library/Audio/Plug-Ins/VST3
         mv ${{ env.ARTIFACTS_PATH }}/VST3/${{ env.PROJECT_NAME }}.vst3 appdmg/dmg
         mv ${{ env.ARTIFACTS_PATH }}/AU/${{ env.PROJECT_NAME }}.component appdmg/dmg 
         cd appdmg && appdmg dmg.json ${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg
