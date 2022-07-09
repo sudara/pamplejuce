@@ -109,19 +109,8 @@ jobs:
         powershell -Command "Expand-Archive pluginval.zip -DestinationPath ."
         pluginval.exe --strictness-level 10 --validate-in-process --output-dir "./bin" --validate "${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3/${{ env.PROJECT_NAME }}.vst3"
         if %ERRORLEVEL% neq 0 { exit /b 1 }
-    
-    - name: Add Icons (macOS)
-      if: ${{ matrix.name == 'macOS' }}
-      working-directory: ${{ env.BUILD_DIR }}
-      run: |
-        sips -i ../appdmg/pamplejuce.icns # add the icns as its own icon resource (meta!)
-        DeRez -only icns ../appdmg/pamplejuce.icns > /tmp/icons # Grab the icons resource, put in tempfile
-        Rez -a /tmp/icons -o ${{ env.VST3_PATH }}/Icon$'\r' # Stuff the resource into the strange Icon? file's resource fork
-        Rez -a /tmp/icons -o ${{ env.AU_PATH }}/Icon$'\r' # Same for the AU
-        SetFile -a C ${{ env.VST3_PATH }} # Set custom icon attribute
-        SetFile -a C ${{ env.AU_PATH }}
       
-    - name: Add Icons & Codesign (macOS)
+    - name: Codesign (macOS)
       working-directory: ${{ env.BUILD_DIR }}
       if: ${{ matrix.name == 'macOS' }}
       run: |
@@ -129,6 +118,20 @@ jobs:
         codesign --force -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" -v ${{ env.VST3_PATH }} --deep --strict --options=runtime --timestamp
         codesign --force -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" -v ${{ env.AU_PATH }} --deep --strict --options=runtime --timestamp
     
+    - name: Add Icons (macOS)
+      if: ${{ matrix.name == 'macOS' }}
+      working-directory: ${{ env.BUILD_DIR }}
+      run: |
+        # add the icns as its own icon resource (meta!)
+        sips -i ../appdmg/pamplejuce.icns 
+        
+        # Grab the resource, put in tempfile
+        DeRez -only icns ../appdmg/pamplejuce.icns > /tmp/icons
+        
+        # Stuff the resource into the strange Icon? file's resource fork
+        Rez -a /tmp/icons -o ${{ env.VST3_PATH }}/Icon$'\r' 
+        Rez -a /tmp/icons -o ${{ env.AU_PATH }}/Icon$'\r'
+        
     - name: Create DMG, Notarize and Staple (macOS)
       if: ${{ matrix.name == 'macOS' }}
       run: |
