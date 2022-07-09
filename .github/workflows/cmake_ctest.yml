@@ -78,6 +78,7 @@ jobs:
     - name: Test
       working-directory: ${{ env.BUILD_DIR }}
       run: ctest -output-on-failure
+      continue-on-error: true
       
     - name: Pluginval Linux
       working-directory: ${{ env.BUILD_DIR }}
