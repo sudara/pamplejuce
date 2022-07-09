@@ -1,4 +1,4 @@
-name: CMake
+name: Pamplejuce
 
 on: 
   push:
@@ -10,7 +10,8 @@ env:
   BUILD_DIR: Builds
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   DISPLAY: :0 # linux pluginval needs this
-
+  CMAKE_BUILD_PARALLEL_LEVEL: 3 # Use up to 3 cpus to build juceaide, etc
+  
 # jobs are run in paralell on different machines
 # all steps run in series
 jobs:
@@ -108,8 +109,17 @@ jobs:
         powershell -Command "Expand-Archive pluginval.zip -DestinationPath ."
         pluginval.exe --strictness-level 10 --validate-in-process --output-dir "./bin" --validate "${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3/${{ env.PROJECT_NAME }}.vst3"
         if %ERRORLEVEL% neq 0 { exit /b 1 }
-        
-    - name: Codesign (macOS)
+    
+    - name: Add Icons (macOS)
+      if: ${{ matrix.name == 'macOS' }}
+      working-directory: ${{ env.BUILD_DIR }}
+      run: |
+        mkdir -p ${{ env.VST3_PATH }}/Contents/Resources && cp ../appdmg/pamplejuce.icns ${{ env.VST3_PATH }}/Contents/Resources/Icons.icns
+        cp ../appdmg/pamplejuce.icns ${{ env.AU_PATH }}/Contents/Resources/Icons.icns        
+        ruby -i -pe 'sub(/\<string\>/, "<string>Icons.icns") if $p=~/CFBundleIconFile/;$p=$_' ${{ env.VST3_PATH }}/Contents/Info.plist 
+        ruby -i -pe 'sub(/\<string\>/, "<string>Icons.icns") if $p=~/CFBundleIconFile/;$p=$_' ${{ env.AU_PATH }}/Contents/Info.plist 
+      
+    - name: Add Icons & Codesign (macOS)
       working-directory: ${{ env.BUILD_DIR }}
       if: ${{ matrix.name == 'macOS' }}
       run: |
@@ -125,7 +135,6 @@ jobs:
         mv ${{ env.ARTIFACTS_PATH }}/VST3/${{ env.PROJECT_NAME }}.vst3 appdmg/dmg
         mv ${{ env.ARTIFACTS_PATH }}/AU/${{ env.PROJECT_NAME }}.component appdmg/dmg 
         cd appdmg && appdmg dmg.json ${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg
-        # hdiutil create -volname ${{ env.PROJECT_NAME }} -srcfolder . ${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg
         xcrun notarytool submit ${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg --apple-id ${{ secrets.NOTARIZATION_USERNAME }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --team-id ${{ secrets.TEAM_ID }} --wait
         xcrun stapler staple ${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg
         
