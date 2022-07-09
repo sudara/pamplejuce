@@ -53,7 +53,7 @@ jobs:
       
     - name: Install Ninja (macOS)
       if: ${{ matrix.name == 'macOS' }}
-      run: bHOMEBREW_NO_INSTALL_CLEANUP=true brew install ninja
+      run: HOMEBREW_NO_INSTALL_CLEANUP=true brew install ninja
       
     - name: ccache
       uses: hendrikmuhs/ccache-action@v1.2
