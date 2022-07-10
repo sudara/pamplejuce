@@ -14,8 +14,8 @@
   },
   "contents": [
     { "x": 250, "y": 245, "type": "file", "path": "dmg/Pamplejuce.component" },
-    { "x": 480, "y": 245, "type": "link", "name": "Your Mac's AU folder", "path": "/Library/Audio/Plug-Ins/Components" },
+    { "x": 480, "y": 245, "type": "file", "path": "dmg/Your Mac's Component Folder" },
     { "x": 250, "y": 405, "type": "file", "path": "dmg/Pamplejuce.vst3" },
-    { "x": 480, "y": 405, "type": "link", "name": "Your Mac's VST3 folder", "path": "/Library/Audio/Plug-Ins/VST3" }
+    { "x": 480, "y": 405, "type": "file", "path": "dmg/Your Mac's VST3 Folder" }
   ]
 }
