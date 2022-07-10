@@ -25,12 +25,18 @@ jobs:
         include: 
           - name: Linux
             os: ubuntu-22.04
+            ninja: -G Ninja
           - name: macOS
             os: macos-12
+            ninja: -G Ninja
           - name: Windows
             os: windows-latest
+            ninja: 
 
     steps:
+    - name: Set up Clang
+      uses: egor-tensin/setup-clang@v1
+      
     - name: Install JUCE's Linux Deps
       if: runner.os == 'Linux'
       # Thanks to McMartin & co https://forum.juce.com/t/list-of-juce-dependencies-under-linux/15121/44
@@ -70,7 +76,7 @@ jobs:
         
     - name: Configure
       shell: bash
-      run: cmake -B ${{ env.BUILD_DIR }} -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" .
+      run: cmake -B ${{ env.BUILD_DIR }} ${{ matrix.ninja }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" .
 
     - name: Build
       shell: bash
@@ -147,15 +153,17 @@ jobs:
         npm install -g appdmg
         mkdir -p appdmg/dmg
         # Create directories for the dmg symlinks to be droppable 
-        sudo mkdir -m 775 -p /Library/Audio/Plug-Ins/Components && sudo mkdir -m 775 -p /Library/Audio/Plug-Ins/VST3
+        ls -ahl /Library/Audio/Plug-Ins/ 
+        sudo mkdir -m 755 -p /Library/Audio/Plug-Ins/Components && sudo mkdir -m 755 -p /Library/Audio/Plug-Ins/VST3
         mkdir -m 755 -p ~/Library/Audio/Plugins/VST3
         ls -ahl /Library/Audio/Plug-Ins/ 
         # Use relative macOS Aliases, see https://developer.apple.com/library/archive/technotes/tn/tn1188.html#Section3
-        mkalias -r /Library/Audio/Plug-Ins/Components "appdmg/dmg/Your Mac's Component folder"
+        sudo mkalias -r /Library/Audio/Plug-Ins/Components "appdmg/dmg/Your Mac's Component folder"
         mkalias -r ~/Library/Audio/Plug-Ins/VST3 "appdmg/dmg/Your Mac's VST3 folder" 
         mv ${{ env.ARTIFACTS_PATH }}/VST3/${{ env.PROJECT_NAME }}.vst3 appdmg/dmg
         mv ${{ env.ARTIFACTS_PATH }}/AU/${{ env.PROJECT_NAME }}.component appdmg/dmg 
         cd appdmg && appdmg dmg.json ${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg
+        codesign --force -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" -v ${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg --options=runtime --timestamp
         xcrun notarytool submit ${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg --apple-id ${{ secrets.NOTARIZATION_USERNAME }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --team-id ${{ secrets.TEAM_ID }} --wait
         xcrun stapler staple ${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg
         
