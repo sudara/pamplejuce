@@ -147,7 +147,8 @@ jobs:
         npm install -g appdmg
         mkdir -p appdmg/dmg
         # Create directories for the dmg symlinks to be droppable 
-        # sudo mkdir -m 775 -p /Library/Audio/Plug-Ins/Components && sudo mkdir -m 775 -p /Library/Audio/Plug-Ins/VST3
+        sudo mkdir -m 775 -p /Library/Audio/Plug-Ins/Components && sudo mkdir -m 775 -p /Library/Audio/Plug-Ins/VST3
+        mkdir -m 755 -p ~/Library/Audio/Plugins/VST3
         ls -ahl /Library/Audio/Plug-Ins/ 
         # Use relative macOS Aliases, see https://developer.apple.com/library/archive/technotes/tn/tn1188.html#Section3
         mkalias -r /Library/Audio/Plug-Ins/Components "dmg/Your Mac's Components folder"
