@@ -36,6 +36,7 @@ jobs:
     steps:
     - name: Set up Clang
       uses: egor-tensin/setup-clang@v1
+      if: ${{ matrix.name != 'macOS' }}
       
     - name: Install JUCE's Linux Deps
       if: runner.os == 'Linux'
@@ -65,7 +66,7 @@ jobs:
     - name: ccache
       uses: hendrikmuhs/ccache-action@v1.2
       with:
-        key: ${{ matrix.os }}-${{ matrix.type }}
+        key: v2-${{ matrix.os }}-${{ matrix.type }}
         
     - name: Import Certificates (macOS)
       uses: apple-actions/import-codesign-certs@v1
