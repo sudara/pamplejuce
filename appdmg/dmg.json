@@ -14,7 +14,6 @@
   },
   "format": "UDZO",
   "contents": [
-    { "x": 50, "y": 50, "type": "file", "path": "dmg/readme.txt" },
     { "x": 250, "y": 245, "type": "file", "path": "dmg/Pamplejuce.component" },
     { "x": 480, "y": 245, "type": "file", "path": "dmg/Your Mac's Component Folder" },
     { "x": 250, "y": 405, "type": "file", "path": "dmg/Pamplejuce.vst3" },
