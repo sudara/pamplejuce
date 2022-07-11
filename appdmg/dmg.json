@@ -12,6 +12,7 @@
       "height": 520
     }
   },
+  "format": "UDZO",
   "contents": [
     { "x": 50, "y": 50, "type": "file", "path": "dmg/readme.txt" },
     { "x": 250, "y": 245, "type": "file", "path": "dmg/Pamplejuce.component" },
