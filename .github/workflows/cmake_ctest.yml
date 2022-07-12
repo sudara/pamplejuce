@@ -1,8 +1,8 @@
 name: Pamplejuce
 
-on: 
-  push:
+on:
   workflow_dispatch:
+  push:
     
 env:
   PROJECT_NAME: Pamplejuce
@@ -25,10 +25,13 @@ jobs:
         include: 
           - name: Linux
             os: ubuntu-22.04
+            pluginval-binary: ./pluginval
           - name: macOS
             os: macos-12
+            pluginval-binary: pluginval.app/Contents/MacOS/pluginval
           - name: Windows
             os: windows-latest
+            pluginval-binary: ./pluginval.exe
 
     steps:
     - name: Set up Clang
@@ -40,6 +43,7 @@ jobs:
       # Thanks to McMartin & co https://forum.juce.com/t/list-of-juce-dependencies-under-linux/15121/44
       run: |
         sudo apt-get update && sudo apt install libasound2-dev libx11-dev libxinerama-dev libxext-dev libfreetype6-dev libwebkit2gtk-4.0-dev libglu1-mesa-dev xvfb fluxbox ninja-build
+        sudo /usr/bin/Xvfb $DISPLAY &
      
     - name: Install macOS Deps
       if: ${{ matrix.name == 'macOS' }}
@@ -83,41 +87,13 @@ jobs:
     - name: Test
       working-directory: ${{ env.BUILD_DIR }}
       run: ctest -output-on-failure
-      continue-on-error: true
       
-    - name: Pluginval Linux
-      working-directory: ${{ env.BUILD_DIR }}
-      continue-on-error: true
-      if: matrix.name == 'Linux'
+    - name: Pluginval
+      shell: bash
       run: |
-        curl -L "https://github.com/Tracktion/pluginval/releases/download/v0.3.0/pluginval_${{ matrix.name }}.zip" -o pluginval.zip
-        unzip pluginval
-        # start xvfb in the background
-        sudo /usr/bin/Xvfb $DISPLAY &
-        sleep 0.5 # let Xvfb start up
-        # we'll also need a window manager for JUCE to be happy
-        fluxbox & 
-        ./pluginval --strictness-level 10 --validate-in-process --verbose --validate "${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3/${{ env.PROJECT_NAME }}.vst3"
-        
-    - name: Pluginval Mac
-      working-directory: ${{ env.BUILD_DIR }}
-      continue-on-error: true
-      if: matrix.name == 'macOS'
-      run: |
-        curl -L "https://github.com/Tracktion/pluginval/releases/download/v0.3.0/pluginval_${{ matrix.name }}.zip" -o pluginval.zip
-        unzip pluginval
-        pluginval.app/Contents/MacOS/pluginval --strictness-level 10 --validate-in-process --verbose --output-dir "." --validate "${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3/${{ env.PROJECT_NAME }}.vst3"
-
-    - name: Pluginval Windows
-      shell: cmd
-      working-directory: ${{ env.BUILD_DIR }}
-      continue-on-error: true
-      if: matrix.name == 'Windows'
-      run: |
-        powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest https://github.com/Tracktion/pluginval/releases/download/v0.3.0/pluginval_Windows.zip -OutFile pluginval.zip"
-        powershell -Command "Expand-Archive pluginval.zip -DestinationPath ."
-        pluginval.exe --strictness-level 10 --validate-in-process --output-dir "./bin" --validate "${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3/${{ env.PROJECT_NAME }}.vst3"
-        if %ERRORLEVEL% neq 0 { exit /b 1 }
+        curl -LO "https://github.com/Tracktion/pluginval/releases/download/v1.0.0-beta4/pluginval_${{ matrix.name }}.zip"
+        7z x pluginval_${{ matrix.name }}.zip
+        ${{ matrix.pluginval-binary }} --strictness-level 10 --validate-in-process --verbose --validate "${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3/${{ env.PROJECT_NAME }}.vst3"
       
     - name: Codesign (macOS)
       working-directory: ${{ env.BUILD_DIR }}
