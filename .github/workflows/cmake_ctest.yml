@@ -127,18 +127,12 @@ jobs:
       run: |
         npm install -g appdmg
         mkdir -p appdmg/dmg
-        # Create directories for the dmg symlinks to be droppable 
-        ls -ahl /Library/Audio/Plug-Ins/ 
-        sudo mkdir -m 755 -p /Library/Audio/Plug-Ins/Components && sudo mkdir -m 755 -p /Library/Audio/Plug-Ins/VST3
-        mkdir -m 755 -p ~/Library/Audio/Plugins/VST3
-        ls -ahl /Library/Audio/Plug-Ins/ 
-        # Use relative macOS Aliases, see https://developer.apple.com/library/archive/technotes/tn/tn1188.html#Section3
+        mkdir -p ~/Library/Audio/Plugins/VST3
         sudo mkalias -r /Library/Audio/Plug-Ins/Components "appdmg/dmg/Your Mac's Component folder"
-        mkalias -r ~/Library/Audio/Plug-Ins/VST3 "appdmg/dmg/Your Mac's VST3 folder" 
+        sudo mkalias -r /Library/Audio/Plug-Ins/VST3 "appdmg/dmg/Your Mac's VST3 folder" 
         mv ${{ env.ARTIFACTS_PATH }}/VST3/${{ env.PROJECT_NAME }}.vst3 appdmg/dmg
         mv ${{ env.ARTIFACTS_PATH }}/AU/${{ env.PROJECT_NAME }}.component appdmg/dmg 
         cd appdmg && appdmg dmg.json ${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg
-        codesign  -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" --timestamp -i com.pamplejuce.pamplejuce --force ${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg
         xcrun notarytool submit ${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg --apple-id ${{ secrets.NOTARIZATION_USERNAME }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --team-id ${{ secrets.TEAM_ID }} --wait
         xcrun stapler staple ${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg
         
