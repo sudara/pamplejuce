@@ -3,7 +3,7 @@ name: Pamplejuce
 on:
   workflow_dispatch:
   push:
-    
+
 env:
   PROJECT_NAME: Pamplejuce
   BUILD_TYPE: Release
@@ -12,7 +12,7 @@ env:
   DISPLAY: :0 # linux pluginval needs this
   CMAKE_BUILD_PARALLEL_LEVEL: 3 # Use up to 3 cpus to build juceaide, etc
   HOMEBREW_NO_INSTALL_CLEANUP: 1
-  
+
 # jobs are run in paralell on different machines
 # all steps run in series
 jobs:
@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false # show all errors for each platform (vs. cancel jobs on error)
       matrix:
-        include: 
+        include:
           - name: Linux
             os: ubuntu-22.04
             pluginval-binary: ./pluginval
@@ -37,45 +37,44 @@ jobs:
     - name: Set up Clang
       uses: egor-tensin/setup-clang@v1
       if: ${{ matrix.name != 'macOS' }}
-      
+
     - name: Install JUCE's Linux Deps
       if: runner.os == 'Linux'
       # Thanks to McMartin & co https://forum.juce.com/t/list-of-juce-dependencies-under-linux/15121/44
       run: |
         sudo apt-get update && sudo apt install libasound2-dev libx11-dev libxinerama-dev libxext-dev libfreetype6-dev libwebkit2gtk-4.0-dev libglu1-mesa-dev xvfb fluxbox ninja-build
         sudo /usr/bin/Xvfb $DISPLAY &
-     
+
     - name: Install macOS Deps
       if: ${{ matrix.name == 'macOS' }}
       run: brew install ninja osxutils
-             
+
     - name: Checkout code
       uses: actions/checkout@v3
       with:
         submodules: true # Gotta get JUCE populated
-        
+
     - name: Setup Environment Variables
       shell: bash
       run: |
         VERSION=$(cat VERSION)
         echo "VERSION=$VERSION" >> $GITHUB_ENV
-        echo "ARTIFACTS_PATH=${{ env.BUILD_DIR }}/${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}" >> $GITHUB_ENV
         echo "VST3_PATH=${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3/${{ env.PROJECT_NAME }}.vst3" >> $GITHUB_ENV
         echo "AU_PATH=${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/AU/${{ env.PROJECT_NAME }}.component" >> $GITHUB_ENV
         echo "AUV3_PATH=${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/AUv3/${{ env.PROJECT_NAME }}.appex" >> $GITHUB_ENV
-      
+
     - name: ccache
       uses: hendrikmuhs/ccache-action@v1.2
       with:
         key: v2-${{ matrix.os }}-${{ matrix.type }}
-        
+
     - name: Import Certificates (macOS)
       uses: apple-actions/import-codesign-certs@v1
       if: ${{ matrix.name == 'macOS' }}
       with:
         p12-file-base64: ${{ secrets.DEV_ID_APP_CERT }}
         p12-password: ${{ secrets.DEV_ID_APP_PASSWORD }}
-        
+
     - name: Configure
       shell: bash
       run: cmake -B ${{ env.BUILD_DIR }} -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" .
@@ -87,7 +86,7 @@ jobs:
     - name: Test
       working-directory: ${{ env.BUILD_DIR }}
       run: ctest -output-on-failure
-      
+
     - name: Pluginval
       working-directory: ${{ env.BUILD_DIR }}
       shell: bash
@@ -95,7 +94,7 @@ jobs:
         curl -LO "https://github.com/Tracktion/pluginval/releases/download/v1.0.0-beta4/pluginval_${{ matrix.name }}.zip"
         7z x pluginval_${{ matrix.name }}.zip
         ${{ matrix.pluginval-binary }} --strictness-level 10 --validate-in-process --verbose --validate "${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3/${{ env.PROJECT_NAME }}.vst3"
-      
+
     - name: Codesign (macOS)
       working-directory: ${{ env.BUILD_DIR }}
       if: ${{ matrix.name == 'macOS' }}
@@ -103,39 +102,45 @@ jobs:
         # Each plugin must be code signed
         codesign --force -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" -v ${{ env.VST3_PATH }} --deep --strict --options=runtime --timestamp
         codesign --force -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" -v ${{ env.AU_PATH }} --deep --strict --options=runtime --timestamp
-    
+
     - name: Add Icons (macOS)
       if: ${{ matrix.name == 'macOS' }}
       working-directory: ${{ env.BUILD_DIR }}
       run: |
         # add the icns as its own icon resource (meta!)
-        sips -i ../appdmg/pamplejuce.icns 
-        
+        sips -i ../appdmg/pamplejuce.icns
+
         # Grab the resource, put in tempfile
         DeRez -only icns ../appdmg/pamplejuce.icns > /tmp/icons
-        
+
         # Stuff the resource into the strange Icon? file's resource fork
-        Rez -a /tmp/icons -o ${{ env.VST3_PATH }}/Icon$'\r' 
+        Rez -a /tmp/icons -o ${{ env.VST3_PATH }}/Icon$'\r'
         Rez -a /tmp/icons -o ${{ env.AU_PATH }}/Icon$'\r'
-        
+
         # Set custom icon attribute
         SetFile -a C Pamplejuce_artefacts/Release/VST3/Pamplejuce.vst3
         SetFile -a C Pamplejuce_artefacts/Release/AU/Pamplejuce.component
-        
+
     - name: Create DMG, Notarize and Staple (macOS)
       if: ${{ matrix.name == 'macOS' }}
       run: |
         npm install -g appdmg
         mkdir -p appdmg/dmg
-        mkdir -p ~/Library/Audio/Plugins/VST3
+        # Create directories for the dmg symlinks to be droppable
+        ls -ahl /Library/Audio/Plug-Ins/
+        sudo mkdir -m 755 -p /Library/Audio/Plug-Ins/Components && sudo mkdir -m 755 -p /Library/Audio/Plug-Ins/VST3
+        mkdir -m 755 -p ~/Library/Audio/Plugins/VST3
+        ls -ahl /Library/Audio/Plug-Ins/
+        # Use relative macOS Aliases, see https://developer.apple.com/library/archive/technotes/tn/tn1188.html#Section3
         sudo mkalias -r /Library/Audio/Plug-Ins/Components "appdmg/dmg/Your Mac's Component folder"
-        sudo mkalias -r /Library/Audio/Plug-Ins/VST3 "appdmg/dmg/Your Mac's VST3 folder" 
+        mkalias -r ~/Library/Audio/Plug-Ins/VST3 "appdmg/dmg/Your Mac's VST3 folder"
         mv ${{ env.ARTIFACTS_PATH }}/VST3/${{ env.PROJECT_NAME }}.vst3 appdmg/dmg
-        mv ${{ env.ARTIFACTS_PATH }}/AU/${{ env.PROJECT_NAME }}.component appdmg/dmg 
+        mv ${{ env.ARTIFACTS_PATH }}/AU/${{ env.PROJECT_NAME }}.component appdmg/dmg
         cd appdmg && appdmg dmg.json ${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg
+        codesign  -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" --timestamp -i com.pamplejuce.pamplejuce --force ${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg
         xcrun notarytool submit ${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg --apple-id ${{ secrets.NOTARIZATION_USERNAME }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --team-id ${{ secrets.TEAM_ID }} --wait
         xcrun stapler staple ${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg
-        
+
     - name: Zip
       if: ${{ matrix.name != 'macOS' }}
       working-directory: ${{ env.ARTIFACTS_PATH }}
@@ -147,14 +152,14 @@ jobs:
       with:
         name: ${{ env.PROJECT_NAME }}-${{ matrix.name }}
         path: '${{ github.workspace }}/${{ env.ARTIFACTS_PATH }}/${{ env.PROJECT_NAME }}-${{ matrix.name }}.zip'
-        
+
     - name: Upload DMG (MacOS)
       if: ${{ matrix.name == 'macOS' }}
       uses: actions/upload-artifact@v3
       with:
         name: ${{ env.PROJECT_NAME }}-${{ matrix.name }}
         path: appdmg/${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg
-        
+
 
   release:
     if: contains(github.ref, 'tags/v')

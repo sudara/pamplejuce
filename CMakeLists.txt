@@ -12,29 +12,24 @@ set(PROJECT_NAME "Pamplejuce")
 set(FORMATS AU VST3 AUv3)
 
 # Reads in VERSION file and sticks in it CURRENT_VERSION variable
-file(READ VERSION CURRENT_VERSION)
+# Be sure the file has no newlines
+file(STRINGS VERSION CURRENT_VERSION)
 
-# For simplilicity, the name of the project is also the name of the target
+# For simplicity, the name of the project is also the name of the target
 project(${PROJECT_NAME} VERSION ${CURRENT_VERSION})
 
 # By default we don't want Xcode schemes to be made for modules, etc
 set(CMAKE_XCODE_GENERATE_SCHEME OFF)
 
-# Building universal binaries increases build times
+# Enable to build universal binaries on macOS, increasing build time
 # This only affects local builds, GitHub actions always builds Universals
 # set(CMAKE_OSX_ARCHITECTURES arm64 x86_64)
-
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "Support macOS down to High Sierra")
 
 # Adds all the module sources so they appear correctly in the IDE
 # Must be set before JUCE is added as a sub-dir (or any targets are made)
 # https://github.com/juce-framework/JUCE/commit/6b1b4cf7f6b1008db44411f2c8887d71a3348889
 set_property(GLOBAL PROPERTY USE_FOLDERS YES)
-
-# This is a failed attempt to bury ALL_BUILD in Targets/
-# This should be called before any target is made
-# Bug in Xcode? https://gitlab.kitware.com/cmake/cmake/-/issues/21383
-set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "Targets")
 
 # Create a /Modules directory in the IDE with the JUCE Module code
 option(JUCE_ENABLE_MODULE_SOURCE_GROUPS "Show all module sources in IDE projects" ON)
@@ -66,7 +61,7 @@ juce_add_plugin("${PROJECT_NAME}"
 # C++20 please
 target_compile_features("${PROJECT_NAME}" PRIVATE cxx_std_20)
 
-# Manually list all .h and .cpp files for the plugin (avoiding globs):
+# Manually list all .h and .cpp files for the plugin
 set(SourceFiles
     Source/PluginEditor.h
     Source/PluginProcessor.h
