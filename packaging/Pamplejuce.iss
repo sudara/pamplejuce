@@ -3,9 +3,11 @@
 
 [Setup]
 AppName=Pamplejuce
+OutputBaseFilename=Pamplejuce-Installer-v{#Version}
 AppCopyright=Copyright (C) {#Year} Melatonin
 AppPublisher=Melatonin
-AppVersion={#MyAppVersion}
+AppVersion={#Version}
+DefaultDirName="{commoncf64}\VST3"
 
 [Files]
-Source: "..\Builds\Pamplejuce_artefacts\Release\VST3\Pamplejuce.vst3\*.*"; DestDir: "{commoncf64}\VST3\Pamplejuce.vst3\"; Check: Is64BitInstallMode; Flags: overwritereadonly ignoreversion; Attribs: hidden system;
+Source: "{src}..\Builds\Pamplejuce_artefacts\Release\VST3\Pamplejuce.vst3\*.*"; DestDir: "{commoncf64}\VST3\Pamplejuce.vst3\"; Check: Is64BitInstallMode; Flags: external overwritereadonly ignoreversion; Attribs: hidden system;
