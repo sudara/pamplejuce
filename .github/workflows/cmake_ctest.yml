@@ -152,6 +152,7 @@ jobs:
       run: 7z a -tzip ${{ env.PRODUCT_NAME }}.zip .
 
     - name: Generate Installer and Sign with EV cert on Azure (Windows)
+      if: ${{ matrix.name == 'Windows' }}
       shell: bash
       run: |
         iscc "packaging\installer.iss"
