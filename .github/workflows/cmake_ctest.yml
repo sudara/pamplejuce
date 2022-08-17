@@ -4,6 +4,11 @@ on:
   workflow_dispatch:
   push:
 
+# When pushing new commits, cancel any running builds on that branch
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+  
 env:
   PROJECT_NAME: Pamplejuce
   BUILD_TYPE: Release
