@@ -3,7 +3,7 @@
 
 [Setup]
 AppName=Pamplejuce
-OutputBaseFilename=Pamplejuce-Installer-v{#Version}
+OutputBaseFilename=Pamplejuce-{#Version}-Windows
 AppCopyright=Copyright (C) {#Year} Melatonin
 AppPublisher=Melatonin
 AppVersion={#Version}
