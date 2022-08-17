@@ -103,15 +103,15 @@ jobs:
         codesign --force -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" -v ${{ env.VST3_PATH }} --deep --strict --options=runtime --timestamp
         codesign --force -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" -v ${{ env.AU_PATH }} --deep --strict --options=runtime --timestamp
 
-    - name: Add Icons (macOS)
+    - name: Add Custom Icons (macOS)
       if: ${{ matrix.name == 'macOS' }}
       working-directory: ${{ env.BUILD_DIR }}
       run: |
         # add the icns as its own icon resource (meta!)
-        sips -i ../appdmg/pamplejuce.icns
+        sips -i ../packaging/pamplejuce.icns
 
         # Grab the resource, put in tempfile
-        DeRez -only icns ../appdmg/pamplejuce.icns > /tmp/icons
+        DeRez -only icns ../packaging/pamplejuce.icns > /tmp/icons
 
         # Stuff the resource into the strange Icon? file's resource fork
         Rez -a /tmp/icons -o ${{ env.VST3_PATH }}/Icon$'\r'
@@ -125,19 +125,18 @@ jobs:
       if: ${{ matrix.name == 'macOS' }}
       run: |
         npm install -g appdmg
-        mkdir -p appdmg/dmg
-        # Create directories for the dmg symlinks to be droppable
-        ls -ahl /Library/Audio/Plug-Ins/
+        mkdir -p packaging/dmg
+        
+        # Create directories for the dmg symlinks
         sudo mkdir -m 755 -p /Library/Audio/Plug-Ins/Components && sudo mkdir -m 755 -p /Library/Audio/Plug-Ins/VST3
-        mkdir -m 755 -p ~/Library/Audio/Plugins/VST3
-        ls -ahl /Library/Audio/Plug-Ins/
-        # Use relative macOS Aliases, see https://developer.apple.com/library/archive/technotes/tn/tn1188.html#Section3
-        sudo mkalias -r /Library/Audio/Plug-Ins/Components "appdmg/dmg/Your Mac's Component folder"
-        mkalias -r ~/Library/Audio/Plug-Ins/VST3 "appdmg/dmg/Your Mac's VST3 folder"
-        mv ${{ env.ARTIFACTS_PATH }}/VST3/${{ env.PROJECT_NAME }}.vst3 appdmg/dmg
-        mv ${{ env.ARTIFACTS_PATH }}/AU/${{ env.PROJECT_NAME }}.component appdmg/dmg
-        cd appdmg && appdmg dmg.json ${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg
-        codesign  -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" --timestamp -i com.pamplejuce.pamplejuce --force ${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg
+        ln -s /Library/Audio/Plug-Ins/Components "packaging/dmg/Your Mac's Component folder"
+        ln -s /Library/Audio/Plug-Ins/VST3 "packaging/dmg/Your Mac's VST3 folder"
+        mv ${{ env.ARTIFACTS_PATH }}/VST3/${{ env.PROJECT_NAME }}.vst3 packaging/dmg
+        mv ${{ env.ARTIFACTS_PATH }}/AU/${{ env.PROJECT_NAME }}.component packaging/dmg
+        
+        # Run appdmg to create the .dmg
+        cd packaging && appdmg dmg.json ${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg
+        codesign -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" --timestamp -i com.pamplejuce.pamplejuce --force ${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg
         xcrun notarytool submit ${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg --apple-id ${{ secrets.NOTARIZATION_USERNAME }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --team-id ${{ secrets.TEAM_ID }} --wait
         xcrun stapler staple ${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg
 
@@ -158,7 +157,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: ${{ env.PROJECT_NAME }}-${{ matrix.name }}
-        path: appdmg/${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg
+        path: packaging/${{ env.PROJECT_NAME }}-${{ matrix.name }}.dmg
 
 
   release:
