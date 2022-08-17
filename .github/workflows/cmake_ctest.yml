@@ -1,14 +1,14 @@
 name: Pamplejuce
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: # lets you run a build from the UI
   push:
 
 # When pushing new commits, cancel any running builds on that branch
 concurrency:
   group: ${{ github.ref }}
   cancel-in-progress: true
-  
+
 env:
   PROJECT_NAME: Pamplejuce
   BUILD_TYPE: Release
@@ -163,7 +163,7 @@ jobs:
         iscc "${{ env.GITHUB_WORKSPACE }}\packaging\installer.iss"
         mv "${{ env.GITHUB_WORKSPACE }}\packaging\${{ PRODUCT_NAME }}.exe" .
         dotnet tool install --global AzureSignTool 
-        AzureSignTool sign -kvu "${{ secrets.AZURE_KEY_VAULT_URI }}" -kvi "${{ secrets.AZURE_CLIENT_ID }}" -kvt "${{ secrets.AZURE_TENANT_ID }}"-kvs "${{ secrets.AZURE_CLIENT_SECRET }}" -kvc ${{ secrets.AZURE_KEY_VAULT_NAME }} -tr http://timestamp.digicert.com -v ${{ PRODUCT_NAME }}.exe
+        AzureSignTool sign -kvu "${{ secrets.AZURE_KEY_VAULT_URI }}" -kvi "${{ secrets.AZURE_CLIENT_ID }}" -kvt "${{ secrets.AZURE_TENANT_ID }}"-kvs "${{ secrets.AZURE_CLIENT_SECRET }}" -kvc ${{ secrets.AZURE_KEY_VAULT_NAME }} -tr http://timestamp.digicert.com -v ${{ env.PRODUCT_NAME }}.exe
 
     - name: Upload Exe (Windows)
       if: ${{ matrix.name == 'Windows' }}
