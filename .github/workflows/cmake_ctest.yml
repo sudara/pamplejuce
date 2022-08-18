@@ -1,148 +1,203 @@
-name: CMake
+name: Pamplejuce
 
-on: [push]
+on:
+  workflow_dispatch: # lets you run a build from the UI
+  push:
+
+# When pushing new commits, cancel any running builds on that branch
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
 
 env:
-  PROJECT_NAME: Pamplejuce # Must match the JUCE project name from juce_add_plugin
+  PROJECT_NAME: Pamplejuce
   BUILD_TYPE: Release
   BUILD_DIR: Builds
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   DISPLAY: :0 # linux pluginval needs this
+  CMAKE_BUILD_PARALLEL_LEVEL: 3 # Use up to 3 cpus to build juceaide, etc
+  HOMEBREW_NO_INSTALL_CLEANUP: 1
 
 # jobs are run in paralell on different machines
 # all steps run in series
 jobs:
   build_and_test:
-    name: ${{ matrix.artifact }}
+    name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false # show all errors for each platform (vs. cancel jobs on error)
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-11.0]
         include:
-        - os: windows-latest
-          artifact: Windows
-        - os: ubuntu-latest
-          artifact: Linux
-        - os: macos-11.0 # TODO: change once macos-latest catches up
-          artifact: MacOS
+          - name: Linux
+            os: ubuntu-22.04
+            pluginval-binary: ./pluginval
+          - name: macOS
+            os: macos-12
+            pluginval-binary: pluginval.app/Contents/MacOS/pluginval
+          - name: Windows
+            os: windows-latest
+            pluginval-binary: ./pluginval.exe
 
     steps:
-    - name: Install JUCE's Linux Deps and select g++ 10
+    - name: Set up Clang
+      uses: egor-tensin/setup-clang@v1
+      if: ${{ matrix.name != 'macOS' }}
+
+    - name: Install JUCE's Linux Deps
       if: runner.os == 'Linux'
       # Thanks to McMartin & co https://forum.juce.com/t/list-of-juce-dependencies-under-linux/15121/44
       run: |
-        sudo apt-get update && sudo apt install libasound2-dev libx11-dev libxinerama-dev libxext-dev libfreetype6-dev libwebkit2gtk-4.0-dev libglu1-mesa-dev ccache xvfb fluxbox
-        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 10
-        sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 10
+        sudo apt-get update && sudo apt install libasound2-dev libx11-dev libxinerama-dev libxext-dev libfreetype6-dev libwebkit2gtk-4.0-dev libglu1-mesa-dev xvfb fluxbox ninja-build
+        sudo /usr/bin/Xvfb $DISPLAY &
 
-    - name: Get latest CMake
-      uses: lukka/get-cmake@latest      
+    - name: Install macOS Deps
+      if: ${{ matrix.name == 'macOS' }}
+      run: brew install ninja osxutils
 
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         submodules: true # Gotta get JUCE populated
 
+    - name: Setup Environment Variables
+      shell: bash
+      run: |
+        VERSION=$(cat VERSION)
+        echo "ARTIFACTS_PATH=${{ env.BUILD_DIR }}/${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}" >> $GITHUB_ENV
+        echo "VST3_PATH=${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3/${{ env.PROJECT_NAME }}.vst3" >> $GITHUB_ENV
+        echo "AU_PATH=${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/AU/${{ env.PROJECT_NAME }}.component" >> $GITHUB_ENV
+        echo "AUV3_PATH=${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/AUv3/${{ env.PROJECT_NAME }}.appex" >> $GITHUB_ENV
+        echo "PRODUCT_NAME=${{ env.PROJECT_NAME }}-$VERSION-${{ matrix.name }}" >> $GITHUB_ENV
+
     - name: ccache
-      if: matrix.os != 'windows-latest'
-      uses: hendrikmuhs/ccache-action@v1
+      uses: hendrikmuhs/ccache-action@v1.2
       with:
-        key: ${{ matrix.os }}-${{ matrix.type }}
-  
+        key: v2-${{ matrix.os }}-${{ matrix.type }}
+
+    - name: Import Certificates (macOS)
+      uses: apple-actions/import-codesign-certs@v1
+      if: ${{ matrix.name == 'macOS' }}
+      with:
+        p12-file-base64: ${{ secrets.DEV_ID_APP_CERT }}
+        p12-password: ${{ secrets.DEV_ID_APP_PASSWORD }}
+
     - name: Configure
       shell: bash
-      run: cmake -B ${{ env.BUILD_DIR }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" .
+      run: cmake -B ${{ env.BUILD_DIR }} -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" .
 
     - name: Build
       shell: bash
-      run: cmake --build ${{ env.BUILD_DIR }} --config ${{ env.BUILD_TYPE }}
+      run: cmake --build ${{ env.BUILD_DIR }} --config ${{ env.BUILD_TYPE }} --parallel 4
 
     - name: Test
       working-directory: ${{ env.BUILD_DIR }}
-      run: ctest
-      
-    - name: Pluginval Linux
-      working-directory: ${{ env.BUILD_DIR }}
-      if: matrix.artifact == 'Linux'
-      run: |
-        curl -L "https://github.com/Tracktion/pluginval/releases/download/v0.3.0/pluginval_${{ matrix.artifact }}.zip" -o pluginval.zip
-        unzip pluginval
-        # start xvfb in the background
-        sudo /usr/bin/Xvfb $DISPLAY &
-        sleep 0.5 # let Xvfb start up
-        # we'll also need a window manager for JUCE to be happy
-        fluxbox &
-        ./pluginval --strictness-level 10 --validate-in-process --verbose --validate "${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3/${{ env.PROJECT_NAME }}.vst3"
-        
-    - name: Pluginval Mac
-      working-directory: ${{ env.BUILD_DIR }}
-      if: matrix.artifact == 'MacOS'
-      run: |
-        curl -L "https://github.com/Tracktion/pluginval/releases/download/v0.3.0/pluginval_${{ matrix.artifact }}.zip" -o pluginval.zip
-        unzip pluginval
-        pluginval.app/Contents/MacOS/pluginval --strictness-level 10 --validate-in-process --verbose --output-dir "." --validate "${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3/${{ env.PROJECT_NAME }}.vst3"
+      run: ctest -output-on-failure
 
-    - name: Pluginval Windows
-      shell: cmd
+    - name: Pluginval
       working-directory: ${{ env.BUILD_DIR }}
-      if: matrix.artifact == 'Windows'
+      shell: bash
       run: |
-        powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest https://github.com/Tracktion/pluginval/releases/download/v0.3.0/pluginval_Windows.zip -OutFile pluginval.zip"
-        powershell -Command "Expand-Archive pluginval.zip -DestinationPath ."
-        pluginval.exe --strictness-level 10 --validate-in-process --output-dir "./bin" --validate "${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3/${{ env.PROJECT_NAME }}.vst3"
-        if %ERRORLEVEL% neq 0 { exit /b 1 }
+        curl -LO "https://github.com/Tracktion/pluginval/releases/download/v1.0.1/pluginval_${{ matrix.name }}.zip"
+        7z x pluginval_${{ matrix.name }}.zip
+        ${{ matrix.pluginval-binary }} --strictness-level 10 --validate-in-process --verbose --validate "${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3/${{ env.PROJECT_NAME }}.vst3"
+
+    - name: Codesign (macOS)
+      working-directory: ${{ env.BUILD_DIR }}
+      if: ${{ matrix.name == 'macOS' }}
+      run: |
+        # Each plugin must be code signed
+        codesign --force -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" -v ${{ env.VST3_PATH }} --deep --strict --options=runtime --timestamp
+        codesign --force -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" -v ${{ env.AU_PATH }} --deep --strict --options=runtime --timestamp
+
+    - name: Add Custom Icons (macOS)
+      if: ${{ matrix.name == 'macOS' }}
+      working-directory: ${{ env.BUILD_DIR }}
+      run: |
+        # add the icns as its own icon resource (meta!)
+        sips -i ../packaging/pamplejuce.icns
+
+        # Grab the resource, put in tempfile
+        DeRez -only icns ../packaging/pamplejuce.icns > /tmp/icons
+
+        # Stuff the resource into the strange Icon? file's resource fork
+        Rez -a /tmp/icons -o ${{ env.VST3_PATH }}/Icon$'\r'
+        Rez -a /tmp/icons -o ${{ env.AU_PATH }}/Icon$'\r'
+
+        # Set custom icon attribute
+        SetFile -a C Pamplejuce_artefacts/Release/VST3/Pamplejuce.vst3
+        SetFile -a C Pamplejuce_artefacts/Release/AU/Pamplejuce.component
+
+    - name: Create DMG, Notarize and Staple (macOS)
+      if: ${{ matrix.name == 'macOS' }}
+      run: |
+        npm install -g appdmg
+        mkdir -p packaging/dmg
+        
+        # Create directories for the dmg symlinks
+        sudo mkdir -m 755 -p /Library/Audio/Plug-Ins/Components && sudo mkdir -m 755 -p /Library/Audio/Plug-Ins/VST3
+        ln -s /Library/Audio/Plug-Ins/Components "packaging/dmg/Your Mac's Component folder"
+        ln -s /Library/Audio/Plug-Ins/VST3 "packaging/dmg/Your Mac's VST3 folder"
+        mv ${{ env.ARTIFACTS_PATH }}/VST3/${{ env.PROJECT_NAME }}.vst3 packaging/dmg
+        mv ${{ env.ARTIFACTS_PATH }}/AU/${{ env.PROJECT_NAME }}.component packaging/dmg
+        
+        # Run appdmg to create the .dmg
+        cd packaging && appdmg dmg.json ${{ env.PRODUCT_NAME}}.dmg
+        codesign -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" --timestamp -i com.pamplejuce.pamplejuce --force ${{ env.PRODUCT_NAME }}.dmg
+        xcrun notarytool submit ${{ env.PRODUCT_NAME }}.dmg --apple-id ${{ secrets.NOTARIZATION_USERNAME }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --team-id ${{ secrets.TEAM_ID }} --wait
+        xcrun stapler staple ${{ env.PRODUCT_NAME }}.dmg
 
     - name: Zip
-      working-directory: ${{ env.BUILD_DIR }}
-      run: cmake -E tar cfv ${{ env.PROJECT_NAME }}-${{ matrix.artifact }}.zip --format=zip ${{ env.PROJECT_NAME }}_artefacts
+      if: ${{ matrix.name == 'Linux' }}
+      working-directory: ${{ env.ARTIFACTS_PATH }}
+      run: 7z a -tzip ${{ env.PRODUCT_NAME }}.zip .
 
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v2
+    - name: Generate Installer and Sign with EV cert on Azure (Windows)
+      if: ${{ matrix.name == 'Windows' }}
+      shell: bash
+      run: |
+        iscc "packaging\installer.iss"
+        mv "packaging/Output/${{ env.PRODUCT_NAME }}.exe" ${{ env.ARTIFACTS_PATH }}/
+        dotnet tool install --global AzureSignTool 
+        AzureSignTool sign -kvu "${{ secrets.AZURE_KEY_VAULT_URI }}" -kvi "${{ secrets.AZURE_CLIENT_ID }}" -kvt "${{ secrets.AZURE_TENANT_ID }}" -kvs "${{ secrets.AZURE_CLIENT_SECRET }}" -kvc ${{ secrets.AZURE_CERT_NAME }} -tr http://timestamp.digicert.com -v "${{ env.ARTIFACTS_PATH }}/${{ env.PRODUCT_NAME }}.exe"
+
+    - name: Upload Exe (Windows)
+      if: ${{ matrix.name == 'Windows' }}
+      uses: actions/upload-artifact@v3
       with:
-        path: ${{ env.BUILD_DIR }}/${{ env.PROJECT_NAME }}-${{ matrix.artifact }}.zip
-        name: ${{ env.PROJECT_NAME }}-${{ matrix.artifact }}
+        name: ${{ env.PRODUCT_NAME }}.exe
+        path: '${{ env.ARTIFACTS_PATH }}/${{ env.PRODUCT_NAME }}.exe'
+
+    - name: Upload Zip (Linux)
+      if: ${{ matrix.name == 'Linux' }}
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ env.PRODUCT_NAME }}.zip
+        path: '${{ env.ARTIFACTS_PATH }}/${{ env.PRODUCT_NAME }}.zip'
+
+    - name: Upload DMG (MacOS)
+      if: ${{ matrix.name == 'macOS' }}
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ env.PRODUCT_NAME }}.dmg
+        path: packaging/${{ env.PRODUCT_NAME }}.dmg
+
 
   release:
     if: contains(github.ref, 'tags/v')
     runs-on: ubuntu-latest
     needs: build_and_test
-    outputs: 
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
 
     steps:
+    - name: Get Artifacts
+      uses: actions/download-artifact@v3
+
     - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
+      uses: softprops/action-gh-release@v1
       with:
         tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        draft: false
-        prerelease: false
-
-    - name: Download All Artifacts
-      uses: actions/download-artifact@v2
-  
-    - name: Upload Windows Asset
-      uses: actions/upload-release-asset@v1
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./${{ env.PROJECT_NAME }}-Windows.zip
-        asset_name: ${{ env.PROJECT_NAME }}-Windows.zip
-        asset_content_type: application/zip
-
-    - name: Upload Linux Asset
-      uses: actions/upload-release-asset@v1
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./${{ env.PROJECT_NAME }}-Linux.zip
-        asset_name: ${{ env.PROJECT_NAME }}-Linux.zip
-        asset_content_type: application/zip
-
-    - name: Upload MacOS Asset
-      uses: actions/upload-release-asset@v1
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./${{ env.PROJECT_NAME }}-MacOS.zip
-        asset_name: ${{ env.PROJECT_NAME }}-MacOS.zip
-        asset_content_type: application/zip
+        name: ${{ github.ref }}
+        draft: true
+        files: |
+          ${{ env.PROJECT_NAME }}-Linux.zip/*
+          ${{ env.PROJECT_NAME }}-Windows.zip/*
+          ${{ env.PROJECT_NAME }}-macOS.dmg/*
