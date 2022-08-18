@@ -10,7 +10,7 @@ Out of the box, it supports:
 3. CMake 3.21 for building cross-platform
 4. [Catch2](https://github.com/catchorg/Catch2) v3.1.0 as the test framework and runner
 5. [pluginval](http://github.com/tracktion/pluginval) 1.x for plugin validation  
-6. GitHub Actions config for building binaries, running Catch2 tests and pluginval,artifact building on the Windows, Linux and macOS platforms (including code signing and notarization on macOS).
+6. GitHub Actions config for building binaries, running Catch2 tests and pluginval,artifact building on the Windows, Linux and macOS platforms, including code signing and notarization on macOS and Windows EV/OV code signing via Azure Key Vault
 
 It also contains:
 
@@ -22,9 +22,6 @@ It also contains:
 
 Read up about [JUCE and CMmake on my blog!](https://melatonin.dev/blog/how-to-use-cmake-with-juce/).
 
-## What Pamplejuce doesn't handle (yet)
-
-1. Windows EV/OV code signing 
 
 ## How to use for YOUR project
 
@@ -50,7 +47,7 @@ After you've created a new repo:
 
 6. Rename `AudioPluginAudioProcessor` to your plugin name in the code.
 
-7. If you want to codesign and notarize on macOS, 
+7. If you are packaging and code signing, you'll want to take a look at the packaging/ directory and add assets and config that match your product. Otherwise you can delete the steps which do this. 
 
 ## Conventions
 
