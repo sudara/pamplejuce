@@ -197,5 +197,9 @@ jobs:
         tag_name: ${{ github.ref }}
         name: ${{ github.ref }}
         draft: prelease
+        # download-artifact puts these files in their own dirs...
+        # Using globs sidesteps having to pass the version around
         files: |
-          ${{ env.PROJECT_NAME }}*.*
+          */*.exe
+          */*.zip
+          */*.dmg
