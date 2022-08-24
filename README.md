@@ -69,6 +69,8 @@ git push --tags
 
 I'll work on making this less awkward...
 
+Releases are set to `prerelease`, which means that uploaded release assets are visible to other users, but it's not explicitly listed as the latest release until changed in the GitHub UI.
+
 ## Code signing and Notarization
 
 This repo [codesigns Windows via Azure Key Vault, read more about how to do that on my blog](https://melatonin.dev/blog/how-to-code-sign-windows-installers-with-an-ev-cert-on-github-actions/).
