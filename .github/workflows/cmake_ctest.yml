@@ -194,9 +194,7 @@ jobs:
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: ${{ github.ref }}
-        name: ${{ github.ref }}
-        draft: prelease
+        prerelease: true
         # download-artifact puts these files in their own dirs...
         # Using globs sidesteps having to pass the version around
         files: |
