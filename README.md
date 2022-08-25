@@ -23,7 +23,7 @@ It also contains:
 Read up about [JUCE and CMmake on my blog!](https://melatonin.dev/blog/how-to-use-cmake-with-juce/).
 
 
-## How to use for YOUR project
+## Setting up for YOUR project
 
 This is a template repo! 
 
@@ -47,12 +47,36 @@ After you've created a new repo:
 
 6. Rename `AudioPluginAudioProcessor` to your plugin name in the code.
 
-7. If you are packaging and code signing, you'll want to take a look at the packaging/ directory and add assets and config that match your product. Otherwise you can delete the steps which do this. 
+7. If you are packaging and code signing, you'll want to take a look at the packaging/ directory and add assets and config that match your product. Otherwise you can delete the steps which do this.
 
 ## Conventions
 
 1. Your tests will be in "Tests" and you can just add new .cpp files there.
 2. Your binary data target is called "Assets"
+
+## Releases
+
+You can cut a release with downloadable assets by creating a tag starting with `v` and pushing it to GitHub. Note that you currently *must push the tag along with an actual commit*.
+
+I recommend the workflow of bumping the VERSION file and then pushing that as a release, like so:
+
+```
+# edit VERSION
+git commit -m "Releasing v0.0.2"
+git tag v0.0.2
+git push --tags
+```
+
+I'll work on making this less awkward...
+
+Releases are set to `prerelease`, which means that uploaded release assets are visible to other users, but it's not explicitly listed as the latest release until changed in the GitHub UI.
+
+## Code signing and Notarization
+
+This repo [codesigns Windows via Azure Key Vault, read more about how to do that on my blog](https://melatonin.dev/blog/how-to-code-sign-windows-installers-with-an-ev-cert-on-github-actions/).
+
+It also code signs and notarizes macOS, blog article coming soon, but there are many more examples of this in the wild.
+
 
 ## Tips n' Tricks
 
@@ -60,8 +84,7 @@ After you've created a new repo:
 
 2. There's a `VERSION` file in the root that you can treat as the main place to bump the version.
 
-3. Catch2 will update on each CMake configure, you can lock this down if you prefer by changing the `GIT_TAG`.
-
+3. You might feel disincentivized to push to a private repo due to burning minutes. You can push a commit with `[ci skip]` in the message if you are doing things like updating the README. You have a few other big picture options, like doing testing/pluginval only on linux and moving everything else to release. The tradeoff is you won't be sure everything is happy on all platforms until the time you are releasing, which is the last place you really want friction. By default, multiple commits in quick succession will cancel the earlier builds.
 
 ## How do variables work in GitHub Actions?
 
@@ -78,6 +101,7 @@ It can be confusing, as the documentation is a big fragmented.
 
 1. Update with the latest CMake version [listed here](https://github.com/lukka/get-cmake), or the latest version supported by your toolchain like VS or Clion.
 2. Update JUCE with `git submodule update --remote --merge`
+3. (unfortunately) to get updates to the CMakesList.txt you'll have to manually compare, as I assume you made a bunch of changes. In the future, I may move most of the cmake magic into helpers to keep the main CMakesList.txt cleaner. 
 
 ## References & Inspiration
 

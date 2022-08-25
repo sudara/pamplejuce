@@ -40,8 +40,8 @@ jobs:
 
     steps:
     - name: Set up Clang
-      uses: egor-tensin/setup-clang@v1
       if: ${{ matrix.name != 'macOS' }}
+      uses: egor-tensin/setup-clang@v1
 
     - name: Install JUCE's Linux Deps
       if: runner.os == 'Linux'
@@ -91,7 +91,7 @@ jobs:
 
     - name: Test
       working-directory: ${{ env.BUILD_DIR }}
-      run: ctest -output-on-failure
+      run: ctest --output-on-failure -j4
 
     - name: Pluginval
       working-directory: ${{ env.BUILD_DIR }}
@@ -99,7 +99,7 @@ jobs:
       run: |
         curl -LO "https://github.com/Tracktion/pluginval/releases/download/v1.0.1/pluginval_${{ matrix.name }}.zip"
         7z x pluginval_${{ matrix.name }}.zip
-        ${{ matrix.pluginval-binary }} --strictness-level 10 --validate-in-process --verbose --validate "${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3/${{ env.PROJECT_NAME }}.vst3"
+        ${{ matrix.pluginval-binary }} --strictness-level 10 --verbose --validate "${{ env.VST3_PATH }}"
 
     - name: Codesign (macOS)
       working-directory: ${{ env.BUILD_DIR }}
@@ -156,7 +156,7 @@ jobs:
       shell: bash
       run: |
         iscc "packaging\installer.iss"
-        mv "packaging/Output/${{ env.PRODUCT_NAME }}.exe" ${{ env.ARTIFACTS_PATH }}/
+        mv "packaging/Output/${{ env.PRODUCT_NAME }}.exe" "${{ env.ARTIFACTS_PATH }}/"
         dotnet tool install --global AzureSignTool 
         AzureSignTool sign -kvu "${{ secrets.AZURE_KEY_VAULT_URI }}" -kvi "${{ secrets.AZURE_CLIENT_ID }}" -kvt "${{ secrets.AZURE_TENANT_ID }}" -kvs "${{ secrets.AZURE_CLIENT_SECRET }}" -kvc ${{ secrets.AZURE_CERT_NAME }} -tr http://timestamp.digicert.com -v "${{ env.ARTIFACTS_PATH }}/${{ env.PRODUCT_NAME }}.exe"
 
@@ -196,8 +196,10 @@ jobs:
       with:
         tag_name: ${{ github.ref }}
         name: ${{ github.ref }}
-        draft: true
+        draft: prelease
+        # download-artifact puts these files in their own dirs...
+        # Using globs sidesteps having to pass the version around
         files: |
-          ${{ env.PROJECT_NAME }}-Linux.zip/*
-          ${{ env.PROJECT_NAME }}-Windows.zip/*
-          ${{ env.PROJECT_NAME }}-macOS.dmg/*
+          */*.exe
+          */*.zip
+          */*.dmg
