@@ -124,8 +124,8 @@ jobs:
         Rez -a /tmp/icons -o ${{ env.AU_PATH }}/Icon$'\r'
 
         # Set custom icon attribute
-        SetFile -a C Pamplejuce_artefacts/Release/VST3/Pamplejuce.vst3
-        SetFile -a C Pamplejuce_artefacts/Release/AU/Pamplejuce.component
+        SetFile -a C ${{ env.VST3_PATH }}
+        SetFile -a C ${{ env.AU_PATH }}
 
     - name: Create DMG, Notarize and Staple (macOS)
       if: ${{ matrix.name == 'macOS' }}
@@ -137,8 +137,8 @@ jobs:
         sudo mkdir -m 755 -p /Library/Audio/Plug-Ins/Components && sudo mkdir -m 755 -p /Library/Audio/Plug-Ins/VST3
         ln -s /Library/Audio/Plug-Ins/Components "packaging/dmg/Your Mac's Component folder"
         ln -s /Library/Audio/Plug-Ins/VST3 "packaging/dmg/Your Mac's VST3 folder"
-        mv ${{ env.ARTIFACTS_PATH }}/VST3/${{ env.PROJECT_NAME }}.vst3 packaging/dmg
-        mv ${{ env.ARTIFACTS_PATH }}/AU/${{ env.PROJECT_NAME }}.component packaging/dmg
+        mv "${{ env.ARTIFACTS_PATH }}/VST3/${{ env.PROJECT_NAME }}.vst3" packaging/dmg
+        mv "${{ env.ARTIFACTS_PATH }}/AU/${{ env.PROJECT_NAME }}.component" packaging/dmg
         
         # Run appdmg to create the .dmg
         cd packaging && appdmg dmg.json ${{ env.PRODUCT_NAME}}.dmg
