@@ -49,7 +49,22 @@ jobs:
       run: |
         sudo apt-get update && sudo apt install libasound2-dev libx11-dev libxinerama-dev libxext-dev libfreetype6-dev libwebkit2gtk-4.0-dev libglu1-mesa-dev xvfb fluxbox ninja-build
         sudo /usr/bin/Xvfb $DISPLAY &
+    
+    - name: Cache IPP
+      if: runner.os == 'Windows'
+      uses: actions/cache@v2
+      with:
+        key: ipp-v1
+        path: |
+            C:\Program Files (x86)\Intel\oneAPI\ipp
 
+    - name: Install IPP
+      if: (runner.os == 'Windows') && (steps.cache-install.outputs.cache-hit != 'true')
+      run: |
+        curl --output oneapi.exe https://registrationcenter-download.intel.com/akdlm/irc_nas/19078/w_BaseKit_p_2023.0.0.25940_offline.exe
+        ./oneapi.exe -s -x -f oneapi
+        ./oneapi/bootstrapper.exe -s -c --action install --components=intel.oneapi.win.ipp.devel --eula=accept -p=NEED_VS2022_INTEGRATION=1 --log-dir=.
+        
     - name: Install macOS Deps
       if: ${{ matrix.name == 'macOS' }}
       run: brew install ninja osxutils
