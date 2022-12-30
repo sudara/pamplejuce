@@ -21,6 +21,12 @@ project(${PROJECT_NAME} VERSION ${CURRENT_VERSION})
 # By default we don't want Xcode schemes to be made for modules, etc
 set(CMAKE_XCODE_GENERATE_SCHEME OFF)
 
+# Use Intel IPP for performance on Windows
+if(MSVC)
+  list(APPEND CMAKE_MODULE_PATH "C:\Program Files (x86)\Intel\oneAPI\ipp\latest\lib\cmake\ipp")
+  find_package(IPP REQUIRED)
+endif(MSVC)
+
 # Enable to build universal binaries on macOS, increasing build time
 # This only affects local builds, GitHub actions always builds Universals
 # set(CMAKE_OSX_ARCHITECTURES arm64 x86_64)
@@ -123,6 +129,10 @@ target_link_libraries("${PROJECT_NAME}"
     juce::juce_recommended_config_flags
     juce::juce_recommended_lto_flags
     juce::juce_recommended_warning_flags)
+
+if(MSVC)
+  target_link_libraries("${PROJECT_NAME}" ${IPP_LIBRARIES})
+endif(MSVC)
 
 # Required for ctest (which is just easier for cross-platform CI)
 # include(CTest) does this too, but adds tons of targets we don't want
