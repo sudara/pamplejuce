@@ -21,9 +21,9 @@ project(${PROJECT_NAME} VERSION ${CURRENT_VERSION})
 # By default we don't want Xcode schemes to be made for modules, etc
 set(CMAKE_XCODE_GENERATE_SCHEME OFF)
 
-# Use Intel IPP for performance on Windows
+# When present, such as on CI, use Intel IPP for performance on Windows
 if(MSVC)
-  find_package(IPP REQUIRED)
+  find_package(IPP)
 endif(MSVC)
 
 # Enable to build universal binaries on macOS, increasing build time
@@ -132,6 +132,8 @@ target_link_libraries("${PROJECT_NAME}"
 if(IPP_FOUND)
     target_link_libraries("${PROJECT_NAME}" PUBLIC IPP::ippcore IPP::ipps)
     message("IPP LIBRARIES FOUND")
+elseif(MSVC)
+    message("IPP LIBRARIES *NOT* FOUND")
 endif()
 
 # Required for ctest (which is just easier for cross-platform CI)
