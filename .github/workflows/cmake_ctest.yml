@@ -86,7 +86,7 @@ jobs:
         echo "PRODUCT_NAME=${{ env.PROJECT_NAME }}-$VERSION-${{ matrix.name }}" >> $GITHUB_ENV
 
     - name: ccache
-      uses: hendrikmuhs/ccache-action@1.2.8
+      uses: hendrikmuhs/ccache-action@main
       with:
         key: v3-${{ matrix.os }}-${{ matrix.type }}
         variant: sccache # needed for windows
