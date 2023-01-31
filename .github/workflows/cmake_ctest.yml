@@ -49,10 +49,10 @@ jobs:
       run: |
         sudo apt-get update && sudo apt install libasound2-dev libx11-dev libxinerama-dev libxext-dev libfreetype6-dev libwebkit2gtk-4.0-dev libglu1-mesa-dev xvfb fluxbox ninja-build
         sudo /usr/bin/Xvfb $DISPLAY &
-    
+
     - name: Cache IPP
       if: runner.os == 'Windows'
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         key: ipp-v1
         path: |
@@ -60,11 +60,12 @@ jobs:
 
     - name: Install IPP
       if: (runner.os == 'Windows') && (steps.cache-install.outputs.cache-hit != 'true')
+      shell: bash
       run: |
         curl --output oneapi.exe https://registrationcenter-download.intel.com/akdlm/irc_nas/19078/w_BaseKit_p_2023.0.0.25940_offline.exe
         ./oneapi.exe -s -x -f oneapi
         ./oneapi/bootstrapper.exe -s -c --action install --components=intel.oneapi.win.ipp.devel --eula=accept -p=NEED_VS2022_INTEGRATION=1 --log-dir=.
-        
+
     - name: Install macOS Deps
       if: ${{ matrix.name == 'macOS' }}
       run: brew install ninja osxutils
@@ -85,9 +86,10 @@ jobs:
         echo "PRODUCT_NAME=${{ env.PROJECT_NAME }}-$VERSION-${{ matrix.name }}" >> $GITHUB_ENV
 
     - name: ccache
-      uses: hendrikmuhs/ccache-action@v1.2
+      uses: hendrikmuhs/ccache-action@latest
       with:
-        key: v2-${{ matrix.os }}-${{ matrix.type }}
+        key: v3-${{ matrix.os }}-${{ matrix.type }}
+        variant: sccache # needed for windows
 
     - name: Import Certificates (macOS)
       uses: apple-actions/import-codesign-certs@v1
