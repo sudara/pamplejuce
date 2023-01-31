@@ -23,7 +23,7 @@ set(CMAKE_XCODE_GENERATE_SCHEME OFF)
 
 # Use Intel IPP for performance on Windows
 if(MSVC)
-  list(APPEND CMAKE_MODULE_PATH "C:\Program Files (x86)\Intel\oneAPI\ipp\latest\lib\cmake\ipp")
+  list(APPEND CMAKE_MODULE_PATH "C:\\Program Files (x86)\\Intel\\oneAPI\\ipp\\latest\\lib\\cmake\\ipp")
   find_package(IPP REQUIRED)
 endif(MSVC)
 
@@ -124,15 +124,16 @@ target_compile_definitions("${PROJECT_NAME}"
 target_link_libraries("${PROJECT_NAME}"
     PRIVATE
     Assets
+    IPP::ipps
     ${JUCE_DEPENDENCIES}
     PUBLIC
     juce::juce_recommended_config_flags
     juce::juce_recommended_lto_flags
     juce::juce_recommended_warning_flags)
 
-if(MSVC)
-  target_link_libraries("${PROJECT_NAME}" ${IPP_LIBRARIES})
-endif(MSVC)
+if(IPP_FOUND)
+    message("IPP LIBRARIES FOUND")
+endif()
 
 # Required for ctest (which is just easier for cross-platform CI)
 # include(CTest) does this too, but adds tons of targets we don't want

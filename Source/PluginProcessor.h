@@ -2,6 +2,10 @@
 
 #include <juce_audio_processors/juce_audio_processors.h>
 
+#if (MSVC)
+#include "ipps.h"
+#endif
+
 class AudioPluginAudioProcessor : public juce::AudioProcessor
 {
 public:
