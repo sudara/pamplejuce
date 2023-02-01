@@ -75,7 +75,7 @@ jobs:
         key: v2-${{ matrix.os }}-${{ matrix.type }}
 
     - name: Import Certificates (macOS)
-      uses: apple-actions/import-codesign-certs@v1
+      uses: slidoapp/import-codesign-certs@v1.0.5
       if: ${{ matrix.name == 'macOS' }}
       with:
         p12-file-base64: ${{ secrets.DEV_ID_APP_CERT }}
