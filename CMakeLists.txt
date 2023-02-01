@@ -130,7 +130,7 @@ target_link_libraries("${PROJECT_NAME}"
     juce::juce_recommended_warning_flags)
 
 if(IPP_FOUND)
-    target_link_libraries("${PROJECT_NAME}" PUBLIC IPP::ippcore IPP::ipps)
+    target_link_libraries("${PROJECT_NAME}" PUBLIC IPP::ipps IPP::ippcore IPP::ippi IPP::ippcv)
     message("IPP LIBRARIES FOUND")
 elseif(MSVC)
     message("IPP LIBRARIES *NOT* FOUND")
