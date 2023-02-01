@@ -70,8 +70,8 @@ jobs:
         ./oneapi/bootstrapper.exe -s -c --action install --components=intel.oneapi.win.ipp.devel --eula=accept -p=NEED_VS2022_INTEGRATION=1 --log-dir=.
 
     - name: Save IPP cache even on job fail
-      if: runner.os == 'Windows'
-      uses: action/cache/save@v3 && (steps.cache-install.outputs.cache-hit != 'true')
+      if: runner.os == 'Windows' && (steps.cache-install.outputs.cache-hit != 'true')
+      uses: action/cache/save@v3
       with:
         path: C:\Program Files (x86)\Intel\oneAPI\ipp
         key: ipp-v1
