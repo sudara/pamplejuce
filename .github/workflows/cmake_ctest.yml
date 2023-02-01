@@ -58,8 +58,7 @@ jobs:
       uses: actions/cache@v3
       with:
         key: ipp-v1
-        path: |
-            "C:\Program Files (x86)\Intel\oneAPI\ipp"
+        path: C:\Program Files (x86)\Intel\oneAPI\ipp
 
     - name: Install IPP
       if: (runner.os == 'Windows') && (steps.cache-install.outputs.cache-hit != 'true')

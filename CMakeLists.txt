@@ -21,14 +21,13 @@ project(${PROJECT_NAME} VERSION ${CURRENT_VERSION})
 # By default we don't want Xcode schemes to be made for modules, etc
 set(CMAKE_XCODE_GENERATE_SCHEME OFF)
 
-# When present, such as on CI, use Intel IPP for performance on Windows
-if(MSVC)
-  find_package(IPP)
-endif(MSVC)
+# Build universal binaries on macOS, increasing build time
+# This should is set on CI but not during local dev
+if ((DEFINED ENV{CI}) AND (CMAKE_BUILD_TYPE STREQUAL "Release"))
+  message("Building for Apple Silicon and x86_64")
+  set(CMAKE_OSX_ARCHITECTURES arm64 x86_64)
+endif ()
 
-# Enable to build universal binaries on macOS, increasing build time
-# This only affects local builds, GitHub actions always builds Universals
-# set(CMAKE_OSX_ARCHITECTURES arm64 x86_64)
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "Support macOS down to High Sierra")
 
 # Adds all the module sources so they appear correctly in the IDE
@@ -128,6 +127,11 @@ target_link_libraries("${PROJECT_NAME}"
     juce::juce_recommended_config_flags
     juce::juce_recommended_lto_flags
     juce::juce_recommended_warning_flags)
+
+# When present, such as on CI, use Intel IPP for performance on Windows
+if(MSVC)
+    find_package(IPP)
+endif(MSVC)
 
 if(IPP_FOUND)
     target_link_libraries("${PROJECT_NAME}" PUBLIC IPP::ipps IPP::ippcore IPP::ippi IPP::ippcv)
