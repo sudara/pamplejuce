@@ -73,7 +73,7 @@ jobs:
       if: runner.os == 'Windows'
       uses: action/cache/save@v3 && (steps.cache-install.outputs.cache-hit != 'true')
       with:
-        path: "C:\Program Files (x86)\Intel\oneAPI\ipp"
+        path: C:\Program Files (x86)\Intel\oneAPI\ipp
         key: ipp-v1
 
     - name: Verify IPP
