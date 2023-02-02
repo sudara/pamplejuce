@@ -76,14 +76,6 @@ jobs:
         path: C:\Program Files (x86)\Intel\oneAPI\ipp
         key: ipp-v1
 
-    - name: Verify IPP
-      if: (runner.os == 'Windows')
-      shell: bash
-      run: |
-        ls -l "C:\Program Files (x86)\Intel\oneAPI\ipp"
-        ls -l "C:\Program Files (x86)\Intel\oneAPI\ipp\latest"
-        cat "C:\Program Files (x86)\Intel\oneAPI\ipp\latest\lib\cmake\ipp\ipp-config.cmake"
-
     - name: Install macOS Deps
       if: ${{ matrix.name == 'macOS' }}
       run: brew install ninja osxutils
