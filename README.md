@@ -7,10 +7,10 @@ Out of the box, it supports:
 
 1. C++20
 2. JUCE 7.x as a submodule tracking develop
-3. CMake 3.21 for building cross-platform
+3. CMake 3.24.1 and higher for building cross-platform
 4. [Catch2](https://github.com/catchorg/Catch2) v3.1.0 as the test framework and runner
-5. [pluginval](http://github.com/tracktion/pluginval) 1.x for plugin validation  
-6. GitHub Actions config for building binaries, running Catch2 tests and pluginval,artifact building on the Windows, Linux and macOS platforms, including code signing and notarization on macOS and Windows EV/OV code signing via Azure Key Vault
+5. [pluginval](http://github.com/tracktion/pluginval) 1.x for plugin validation
+6. GitHub Actions config for [installing Intel IPP](https://www.intel.com/content/www/us/en/developer/tools/oneapi/ipp.html), building binaries, running Catch2 tests and pluginval, artifact building on the Windows, Linux and macOS platforms, including [code signing and notarization on macOS](https://melatonin.dev/blog/how-to-code-sign-and-notarize-macos-audio-plugins-in-ci/) and [Windows EV/OV code signing via Azure Key Vault](https://melatonin.dev/blog/how-to-code-sign-windows-installers-with-an-ev-cert-on-github-actions/)
 
 It also contains:
 
@@ -96,12 +96,12 @@ It can be confusing, as the documentation is a big fragmented.
 4. Reading those variables is done with the [env context](https://docs.github.com/en/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#env-context) when you are inside a `with`, `name`, or `if`: `${{ env.SOME_VARIABLE }}`
 5. Inside of `run`, you have access to bash ENV variables *in addition* to contexts/expressions. That means `$SOME_VARIABLE` or `${SOME_VARIABLE}` will work but *only when using bash* and [not while using powershell on windows](https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-syntax-for-github-actions#using-a-specific-shell). The version with curly braces (variable expansion) is often used [when the variable is forming part of a larger string to avoid ambiguity](https://stackoverflow.com/questions/8748831/when-do-we-need-curly-braces-around-shell-variables). Be sure that the ENV variable was set properly in the workflow/job/step before you use it. And if you need the variable to be os-agnostic, use the env context.
 
-
 ## How to update a repo based on Pamplejuce
 
 1. Update with the latest CMake version [listed here](https://github.com/lukka/get-cmake), or the latest version supported by your toolchain like VS or Clion.
 2. Update JUCE with `git submodule update --remote --merge`
-3. (unfortunately) to get updates to the CMakesList.txt you'll have to manually compare, as I assume you made a bunch of changes. In the future, I may move most of the cmake magic into helpers to keep the main CMakesList.txt cleaner. 
+3. Check for an [IPP update from Intel](https://github.com/oneapi-src/oneapi-ci/blob/master/.github/workflows/build_all.yml#L10).
+4. You'll have to manually compare CMakeLists.txt, as I assume you made a changes. In the future, I may move most of the cmake magic into helpers to keep the main CMakesList.txt cleaner. 
 
 ## References & Inspiration
 
