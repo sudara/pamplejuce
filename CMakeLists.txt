@@ -1,9 +1,8 @@
-# 3.21 is bundled in VSCode 2022
-# https://docs.microsoft.com/en-us/visualstudio/releases/2022/release-notes
-# 3.21 is also bundled in CLion as of 2021.3
-cmake_minimum_required(VERSION 3.21)
+# 3.24.1 is bundled in Visual Studio 2022 v17.4
+# 3.24.1 is also bundled in CLion as of 2023
+cmake_minimum_required(VERSION 3.24.1)
 
-# Change this to the name of your plugin
+# This is the name of your plugin
 # This cannot have spaces (but PRODUCT_NAME can)
 set(PROJECT_NAME "Pamplejuce")
 
@@ -21,9 +20,13 @@ project(${PROJECT_NAME} VERSION ${CURRENT_VERSION})
 # By default we don't want Xcode schemes to be made for modules, etc
 set(CMAKE_XCODE_GENERATE_SCHEME OFF)
 
-# Enable to build universal binaries on macOS, increasing build time
-# This only affects local builds, GitHub actions always builds Universals
-# set(CMAKE_OSX_ARCHITECTURES arm64 x86_64)
+# Building universal binaries on macOS increases build time
+# This is set on CI but not during local dev
+if ((DEFINED ENV{CI}) AND (CMAKE_BUILD_TYPE STREQUAL "Release"))
+  message("Building for Apple Silicon and x86_64")
+  set(CMAKE_OSX_ARCHITECTURES arm64 x86_64)
+endif ()
+
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "Support macOS down to High Sierra")
 
 # Adds all the module sources so they appear correctly in the IDE
@@ -58,7 +61,7 @@ juce_add_plugin("${PROJECT_NAME}"
     FORMATS "${FORMATS}"
     PRODUCT_NAME "${PROJECT_NAME}")        # The name of the final executable, which can differ from the target name
 
-# C++20 please
+# C++20, please
 target_compile_features("${PROJECT_NAME}" PRIVATE cxx_std_20)
 
 # Manually list all .h and .cpp files for the plugin
@@ -82,7 +85,7 @@ juce_add_binary_data(Assets SOURCES pamplejuce.png)
 # See https://forum.juce.com/t/loading-pytorch-model-using-binarydata/39997/2
 set_target_properties(Assets PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
-# This cleans up the folder organization on Xcode.
+# Clean up folder organization on Xcode.
 # It tucks the Plugin varieties into a "Targets" folder and generate an Xcode Scheme manually
 # Xcode scheme generation is turned off globally to limit noise from other targets
 # The non-hacky way of doing this is via the global PREDEFINED_TARGETS_FOLDER property
@@ -124,13 +127,25 @@ target_link_libraries("${PROJECT_NAME}"
     juce::juce_recommended_lto_flags
     juce::juce_recommended_warning_flags)
 
+# When present, use Intel IPP for performance on Windows
+if(MSVC)
+    find_package(IPP)
+    if(IPP_FOUND)
+        target_link_libraries("${PROJECT_NAME}" PUBLIC IPP::ipps IPP::ippcore IPP::ippi IPP::ippcv)
+        message("IPP LIBRARIES FOUND")
+        target_compile_definitions("${PROJECT_NAME}" PUBLIC PAMPLEJUCE_IPP=1)
+    else()
+        message("IPP LIBRARIES *NOT* FOUND")
+    endif()
+endif()
+
 # Required for ctest (which is just easier for cross-platform CI)
 # include(CTest) does this too, but adds tons of targets we don't want
 # See: https://github.com/catchorg/Catch2/issues/2026
-# You could forgo ctest and call ./Tests directly from the build dir
+# You also could forgo ctest and call ./Tests directly from the build dir
 enable_testing()
 
-# "GLOBS ARE BAD" is brittle and silly UX, sorry CMake!
+# "GLOBS ARE BAD" is brittle and silly dev UX, sorry CMake!
 # CONFIGURE_DEPENDS / Clion's CMake integration makes globbing absolutely fine
 file(GLOB_RECURSE TestFiles CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/Tests/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/Tests/*.h")
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Tests PREFIX "" FILES ${TestFiles})
