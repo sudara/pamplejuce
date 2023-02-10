@@ -80,10 +80,11 @@ jobs:
         key: ipp-v1
         
     # This lets us use sscache on Windows
+    # We need to install ccache here for Windows to grab the right version
     - name: Install Ninja (Windows)
       if: runner.os == 'Windows'
       shell: bash
-      run: choco install ninja
+      run: choco install ninja ccache
 
     - name: Install macOS Deps
       if: ${{ matrix.name == 'macOS' }}
