@@ -81,6 +81,7 @@ jobs:
         
     # This lets us use sscache on Windows
     - name: Install Ninja (Windows)
+      if: runner.os == 'Windows'
       shell: bash
       run: choco install ninja
 
