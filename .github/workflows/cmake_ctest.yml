@@ -42,7 +42,7 @@ jobs:
             ccache: sccache
 
     steps:
-      
+
     # This is just easier than debugging different compilers on different platforms
     - name: Set up Clang
       if: ${{ matrix.name != 'macOS' }}
@@ -61,8 +61,8 @@ jobs:
       id: cache-ipp
       uses: actions/cache@v3
       with:
-        key: ipp-v1
-        path: C:\Program Files (x86)\Intel\oneAPI\ipp
+        key: intel-v2
+        path: C:\Program Files (x86)\Intel\oneAPI
 
     - name: Install IPP (Windows)
       if: (runner.os == 'Windows') && (steps.cache-ipp.outputs.cache-hit != 'true')
@@ -70,15 +70,15 @@ jobs:
       run: |
         curl --output oneapi.exe https://registrationcenter-download.intel.com/akdlm/irc_nas/19078/w_BaseKit_p_2023.0.0.25940_offline.exe
         ./oneapi.exe -s -x -f oneapi
-        ./oneapi/bootstrapper.exe -s -c --action install --components=intel.oneapi.win.ipp.devel --eula=accept -p=NEED_VS2022_INTEGRATION=1 --log-dir=.
-
+        ./oneapi/bootstrapper.exe -s -c --action install --components=intel.oneapi.win.ipp.devel:intel.oneapi.win.mkl.devel --eula=accept -p=NEED_VS2022_INTEGRATION=1 --log-dir=.
+        ./oneapi/bootstrapper.exe --list-components
     - name: Save IPP cache even on job fail
       if: runner.os == 'Windows' && (steps.cache-ipp.outputs.cache-hit != 'true')
       uses: actions/cache/save@v3
       with:
         path: C:\Program Files (x86)\Intel\oneAPI\ipp
-        key: ipp-v1
-        
+        key: intel-v2
+
     # This lets us use sscache on Windows
     # We need to install ccache here for Windows to grab the right version
     - name: Install Ninja (Windows)
