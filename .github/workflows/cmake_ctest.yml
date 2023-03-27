@@ -42,7 +42,7 @@ jobs:
             ccache: sccache
 
     steps:
-      
+
     # This is just easier than debugging different compilers on different platforms
     - name: Set up Clang
       if: ${{ matrix.name != 'macOS' }}
@@ -78,7 +78,7 @@ jobs:
       with:
         path: C:\Program Files (x86)\Intel\oneAPI\ipp
         key: ipp-v1
-        
+
     # This lets us use sscache on Windows
     # We need to install ccache here for Windows to grab the right version
     - name: Install Ninja (Windows)
@@ -128,7 +128,7 @@ jobs:
 
     - name: Test
       working-directory: ${{ env.BUILD_DIR }}
-      run: ctest --output-on-failure -j4
+      run: ctest --output-on-failure -j4 -VV
 
     - name: Pluginval
       working-directory: ${{ env.BUILD_DIR }}
