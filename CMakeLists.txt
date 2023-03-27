@@ -107,9 +107,6 @@ foreach(target ${FORMATS} "All")
 endforeach()
 set_target_properties(Assets PROPERTIES FOLDER "Targets")
 
-# We'll need to link to these from our plugin as well as our tests
-set(JUCE_DEPENDENCIES
-    juce::juce_audio_utils)
 
 target_compile_definitions("${PROJECT_NAME}"
     PUBLIC
@@ -121,8 +118,9 @@ target_compile_definitions("${PROJECT_NAME}"
 target_link_libraries("${PROJECT_NAME}"
     PRIVATE
     Assets
-    ${JUCE_DEPENDENCIES}
     PUBLIC
+    juce::juce_audio_utils
+    juce::juce_audio_processors
     juce::juce_recommended_config_flags
     juce::juce_recommended_lto_flags
     juce::juce_recommended_warning_flags)
@@ -166,7 +164,12 @@ target_compile_features(Tests PRIVATE cxx_std_20)
 
 # Our test executable also wants to know about our plugin code...
 target_include_directories(Tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Source)
-target_link_libraries(Tests PRIVATE Catch2::Catch2WithMain "${PROJECT_NAME}" ${JUCE_DEPENDENCIES})
+target_link_libraries(Tests PRIVATE Catch2::Catch2WithMain "${PROJECT_NAME}")
+
+# We can't link again to the shared juce target without ODL violations
+# However, we can steal its include dirs and compile definitions to use in tests!
+target_compile_definitions(Tests INTERFACE $<TARGET_PROPERTY:${PROJECT_NAME},INTERFACE_COMPILE_DEFINITIONS>)
+target_include_directories(Tests INTERFACE $<TARGET_PROPERTY:${PROJECT_NAME},INCLUDE_DIRECTORIES>)
 
 # Make an Xcode Scheme for the test executable so we can run tests in the IDE
 set_target_properties(Tests PROPERTIES XCODE_GENERATE_SCHEME ON)
