@@ -126,7 +126,7 @@ target_link_libraries("${PROJECT_NAME}"
     juce::juce_recommended_warning_flags)
 
 # When present, use Intel IPP for performance on Windows
-if(MSVC)
+if(MSVC OR CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC")
     find_package(IPP)
     if(IPP_FOUND)
         target_link_libraries("${PROJECT_NAME}" PUBLIC IPP::ipps IPP::ippcore IPP::ippi IPP::ippcv)
