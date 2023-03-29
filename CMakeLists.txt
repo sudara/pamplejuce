@@ -125,6 +125,16 @@ target_link_libraries("${PROJECT_NAME}"
     juce::juce_recommended_lto_flags
     juce::juce_recommended_warning_flags)
 
+
+if(MSVC)
+message("----MSVC ya'll!!!!")
+endif()
+
+if(CMAKE_CXX_SIMULATE_ID)
+message("----CMAKE_CXX_SIMULATE_ID: ${CMAKE_CXX_SIMULATE_ID}")
+endif()
+
+if ()
 # When present, use Intel IPP for performance on Windows
 if(!APPLE)
     find_package(IPP)
