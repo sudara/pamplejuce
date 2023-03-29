@@ -134,7 +134,6 @@ if(CMAKE_CXX_SIMULATE_ID)
 message("----CMAKE_CXX_SIMULATE_ID: ${CMAKE_CXX_SIMULATE_ID}")
 endif()
 
-if ()
 # When present, use Intel IPP for performance on Windows
 if(!APPLE)
     find_package(IPP)
