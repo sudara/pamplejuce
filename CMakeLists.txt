@@ -22,7 +22,7 @@ set(CMAKE_XCODE_GENERATE_SCHEME OFF)
 
 # Building universal binaries on macOS increases build time
 # This is set on CI but not during local dev
-if ((DEFINED ENV{CI}) AND (CMAKE_BUILD_TYPE STREQUAL "Release"))
+if (APPLE AND (DEFINED ENV{CI}) AND (CMAKE_BUILD_TYPE STREQUAL "Release"))
   message("Building for Apple Silicon and x86_64")
   set(CMAKE_OSX_ARCHITECTURES arm64 x86_64)
 endif ()
@@ -126,7 +126,7 @@ target_link_libraries("${PROJECT_NAME}"
     juce::juce_recommended_warning_flags)
 
 # When present, use Intel IPP for performance on Windows
-if(MSVC)
+if(!APPLE)
     find_package(IPP)
     if(IPP_FOUND)
         target_link_libraries("${PROJECT_NAME}" PUBLIC IPP::ipps IPP::ippcore IPP::ippi IPP::ippcv)
