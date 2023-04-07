@@ -39,13 +39,11 @@ After you've created a new repo:
 
 2. Populate the latest JUCE by running `git submodule update --init` in your repository directory. By default, this will track JUCE's `develop` branch, which IMO is what you want until you are at the point of releasing a plugin.
 
-3. Replace `Pamplejuce` with the name of your project in CMakeLists.txt line 5, where the `PROJECT_NAME` variable is set. Make this all one word, no spaces. 
+3. Replace `Pamplejuce` with the name of your project in CMakeLists.txt line 7, where the `PROJECT_NAME` variable is set. Make this all one word, no spaces. 
 
-4. Pick which formats you want built on line 8.
+4. Pick which formats you want built on line 11.
 
 5. Set the correct flags for your plugin under `juce_add_plugin`. Check out the API https://github.com/juce-framework/JUCE/blob/master/docs/CMake%20API.md and be sure to change things like `PLUGIN_CODE` and `PLUGIN_MANUFACTURER_CODE`.  
-
-6. Rename `AudioPluginAudioProcessor` to your plugin name in the code.
 
 7. If you are packaging and code signing, you'll want to take a look at the packaging/ directory and add assets and config that match your product. Otherwise you can delete the steps which do this.
 
