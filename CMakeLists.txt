@@ -10,6 +10,8 @@ set(PROJECT_NAME "Pamplejuce")
 # Valid formats: AAX Unity VST AU AUv3 Standalone
 set(FORMATS AU VST3 AUv3)
 
+set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "Support macOS down to High Sierra")
+
 # Reads in VERSION file and sticks in it CURRENT_VERSION variable
 # Be sure the file has no newlines
 file(STRINGS VERSION CURRENT_VERSION)
@@ -26,8 +28,6 @@ if ((DEFINED ENV{CI}) AND (CMAKE_BUILD_TYPE STREQUAL "Release"))
   message("Building for Apple Silicon and x86_64")
   set(CMAKE_OSX_ARCHITECTURES arm64 x86_64)
 endif ()
-
-set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "Support macOS down to High Sierra")
 
 # Adds all the module sources so they appear correctly in the IDE
 # Must be set before JUCE is added as a sub-dir (or any targets are made)
