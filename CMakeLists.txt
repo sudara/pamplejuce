@@ -10,10 +10,12 @@ set(PROJECT_NAME "Pamplejuce")
 # Valid formats: AAX Unity VST AU AUv3 Standalone
 set(FORMATS AU VST3 AUv3)
 
+# This must be set before the project() call
+# see: https://cmake.org/cmake/help/latest/variable/CMAKE_OSX_DEPLOYMENT_TARGET.html
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "Support macOS down to High Sierra")
 
-# Reads in VERSION file and sticks in it CURRENT_VERSION variable
-# Be sure the file has no newlines
+# Reads in our VERSION file and sticks in it CURRENT_VERSION variable
+# Be sure the file has no newlines!
 file(STRINGS VERSION CURRENT_VERSION)
 
 # For simplicity, the name of the project is also the name of the target
