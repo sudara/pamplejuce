@@ -27,8 +27,8 @@ set(CMAKE_XCODE_GENERATE_SCHEME OFF)
 # Building universal binaries on macOS increases build time
 # This is set on CI but not during local dev
 if ((DEFINED ENV{CI}) AND (CMAKE_BUILD_TYPE STREQUAL "Release"))
-  message("Building for Apple Silicon and x86_64")
-  set(CMAKE_OSX_ARCHITECTURES arm64 x86_64)
+    message("Building for Apple Silicon and x86_64")
+    set(CMAKE_OSX_ARCHITECTURES arm64 x86_64)
 endif ()
 
 # Adds all the module sources so they appear correctly in the IDE
@@ -93,8 +93,8 @@ set_target_properties(Assets PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 # The non-hacky way of doing this is via the global PREDEFINED_TARGETS_FOLDER property
 # However that doesn't seem to be working in Xcode
 # Not all plugin types (au, vst) available on each build type (win, macos, linux)
-foreach(target ${FORMATS} "All")
-    if(TARGET ${PROJECT_NAME}_${target})
+foreach (target ${FORMATS} "All")
+    if (TARGET ${PROJECT_NAME}_${target})
         set_target_properties(${PROJECT_NAME}_${target} PROPERTIES
             # Tuck the actual plugin targets into a folder where they won't bother us
             FOLDER "Targets"
@@ -105,8 +105,8 @@ foreach(target ${FORMATS} "All")
 
             # Let us build the target in Xcode
             XCODE_GENERATE_SCHEME ON)
-    endif()
-endforeach()
+    endif ()
+endforeach ()
 set_target_properties(Assets PROPERTIES FOLDER "Targets")
 
 
@@ -118,26 +118,27 @@ target_compile_definitions("${PROJECT_NAME}"
     JUCE_VST3_CAN_REPLACE_VST2=0)
 
 target_link_libraries("${PROJECT_NAME}"
-    PRIVATE
+    PRIVATE # needed by the plugin targets only
     Assets
-    PUBLIC
+    INTERFACE # needed by both the plugin and test targets
     juce::juce_audio_utils
     juce::juce_audio_processors
+    PUBLIC
     juce::juce_recommended_config_flags
     juce::juce_recommended_lto_flags
     juce::juce_recommended_warning_flags)
 
 # When present, use Intel IPP for performance on Windows
-if(WIN32) # Can't use MSVC here, as it won't catch Clang on Windows
+if (WIN32) # Can't use MSVC here, as it won't catch Clang on Windows
     find_package(IPP)
-    if(IPP_FOUND)
+    if (IPP_FOUND)
         target_link_libraries("${PROJECT_NAME}" PUBLIC IPP::ipps IPP::ippcore IPP::ippi IPP::ippcv)
         message("IPP LIBRARIES FOUND")
         target_compile_definitions("${PROJECT_NAME}" PUBLIC PAMPLEJUCE_IPP=1)
-    else()
+    else ()
         message("IPP LIBRARIES *NOT* FOUND")
-    endif()
-endif()
+    endif ()
+endif ()
 
 # Required for ctest (which is just easier for cross-platform CI)
 # include(CTest) does this too, but adds tons of targets we don't want
@@ -170,8 +171,10 @@ target_link_libraries(Tests PRIVATE Catch2::Catch2WithMain "${PROJECT_NAME}")
 
 # We can't link again to the shared juce target without ODL violations
 # However, we can steal its include dirs and compile definitions to use in tests!
-target_compile_definitions(Tests INTERFACE $<TARGET_PROPERTY:${PROJECT_NAME},INTERFACE_COMPILE_DEFINITIONS>)
+# https://forum.juce.com/t/windows-linker-issue-on-develop/55524/2
+target_compile_definitions(Tests INTERFACE $<TARGET_PROPERTY:${PROJECT_NAME},COMPILE_DEFINITIONS>)
 target_include_directories(Tests INTERFACE $<TARGET_PROPERTY:${PROJECT_NAME},INCLUDE_DIRECTORIES>)
+
 
 # Make an Xcode Scheme for the test executable so we can run tests in the IDE
 set_target_properties(Tests PROPERTIES XCODE_GENERATE_SCHEME ON)
@@ -187,7 +190,7 @@ catch_discover_tests(Tests)
 
 # Color our warnings and errors
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-   add_compile_options (-fdiagnostics-color=always)
+    add_compile_options(-fdiagnostics-color=always)
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-   add_compile_options (-fcolor-diagnostics)
+    add_compile_options(-fcolor-diagnostics)
 endif ()
