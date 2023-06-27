@@ -30,7 +30,7 @@ TEST_CASE ("Boot performance")
         PluginProcessor plugin;
 
         // due to complex construction logic of the editor, let's measure open/close together
-        meter.measure ([&](/*int i*/) {
+        meter.measure ([&] (int /* i */) {
             auto editor = plugin.createEditorIfNeeded();
             plugin.editorBeingDeleted (editor);
             delete editor;
