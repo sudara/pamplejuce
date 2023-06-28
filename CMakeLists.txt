@@ -118,9 +118,8 @@ target_compile_definitions("${PROJECT_NAME}"
     JUCE_VST3_CAN_REPLACE_VST2=0)
 
 target_link_libraries("${PROJECT_NAME}"
-    PRIVATE # needed by the plugin targets only
+    PRIVATE
     Assets
-    INTERFACE # needed by both the plugin and test targets
     juce::juce_audio_utils
     juce::juce_audio_processors
     PUBLIC
@@ -172,8 +171,8 @@ target_link_libraries(Tests PRIVATE Catch2::Catch2WithMain "${PROJECT_NAME}")
 # We can't link again to the shared juce target without ODL violations
 # However, we can steal its include dirs and compile definitions to use in tests!
 # https://forum.juce.com/t/windows-linker-issue-on-develop/55524/2
-target_compile_definitions(Tests INTERFACE $<TARGET_PROPERTY:${PROJECT_NAME},COMPILE_DEFINITIONS>)
-target_include_directories(Tests INTERFACE $<TARGET_PROPERTY:${PROJECT_NAME},INCLUDE_DIRECTORIES>)
+target_compile_definitions(Tests PRIVATE $<TARGET_PROPERTY:${PROJECT_NAME},COMPILE_DEFINITIONS>)
+target_include_directories(Tests PRIVATE $<TARGET_PROPERTY:${PROJECT_NAME},INCLUDE_DIRECTORIES>)
 
 
 # Make an Xcode Scheme for the test executable so we can run tests in the IDE
