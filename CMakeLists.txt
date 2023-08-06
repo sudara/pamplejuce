@@ -75,7 +75,7 @@ set(SourceFiles
     Source/PluginProcessor.h
     Source/PluginEditor.cpp
     Source/PluginProcessor.cpp)
-target_sources(SharedCode PRIVATE ${SourceFiles})
+target_sources(SharedCode INTERFACE ${SourceFiles})
 
 # No, we don't want our source buried in extra nested folders
 set_target_properties(SharedCode PROPERTIES FOLDER "")
@@ -124,7 +124,6 @@ target_link_libraries(SharedCode
     INTERFACE
     Assets
     juce::juce_audio_utils
-    juce::juce_audio_processors
     juce::juce_recommended_config_flags
     juce::juce_recommended_lto_flags
     juce::juce_recommended_warning_flags)
