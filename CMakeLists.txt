@@ -63,8 +63,11 @@ juce_add_plugin("${PROJECT_NAME}"
     FORMATS "${FORMATS}"
     PRODUCT_NAME "${PROJECT_NAME}")        # The name of the final executable, which can differ from the target name
 
+# We'll stick all of our dependencies here
+add_library(SharedCode INTERFACE)
+
 # C++20, please
-target_compile_features("${PROJECT_NAME}" PRIVATE cxx_std_20)
+target_compile_features(SharedCode INTERFACE cxx_std_20)
 
 # Manually list all .h and .cpp files for the plugin
 set(SourceFiles
@@ -72,10 +75,10 @@ set(SourceFiles
     Source/PluginProcessor.h
     Source/PluginEditor.cpp
     Source/PluginProcessor.cpp)
-target_sources("${PROJECT_NAME}" PRIVATE ${SourceFiles})
+target_sources(SharedCode PRIVATE ${SourceFiles})
 
 # No, we don't want our source buried in extra nested folders
-set_target_properties("${PROJECT_NAME}" PROPERTIES FOLDER "")
+set_target_properties(SharedCode PROPERTIES FOLDER "")
 
 # The Xcode source tree should uhhh, still look like the source tree, yo
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Source PREFIX "" FILES ${SourceFiles})
@@ -110,19 +113,18 @@ endforeach ()
 set_target_properties(Assets PROPERTIES FOLDER "Targets")
 
 
-target_compile_definitions("${PROJECT_NAME}"
-    PUBLIC
+target_compile_definitions(SharedCode
+    INTERFACE
     # JUCE_WEB_BROWSER and JUCE_USE_CURL would be on by default, but you might not need them.
     JUCE_WEB_BROWSER=0  # If you remove this, add `NEEDS_WEB_BROWSER TRUE` to the `juce_add_plugin` call
     JUCE_USE_CURL=0     # If you remove this, add `NEEDS_CURL TRUE` to the `juce_add_plugin` call
     JUCE_VST3_CAN_REPLACE_VST2=0)
 
-target_link_libraries("${PROJECT_NAME}"
-    PRIVATE
+target_link_libraries(SharedCode
+    INTERFACE
     Assets
     juce::juce_audio_utils
     juce::juce_audio_processors
-    PUBLIC
     juce::juce_recommended_config_flags
     juce::juce_recommended_lto_flags
     juce::juce_recommended_warning_flags)
@@ -138,6 +140,8 @@ if (WIN32) # Can't use MSVC here, as it won't catch Clang on Windows
         message("IPP LIBRARIES *NOT* FOUND")
     endif ()
 endif ()
+
+target_link_libraries("${PROJECT_NAME}" PRIVATE SharedCode)
 
 # Required for ctest (which is just easier for cross-platform CI)
 # include(CTest) does this too, but adds tons of targets we don't want
@@ -166,17 +170,16 @@ target_compile_features(Tests PRIVATE cxx_std_20)
 
 # Our test executable also wants to know about our plugin code...
 target_include_directories(Tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Source)
-target_link_libraries(Tests PRIVATE Catch2::Catch2WithMain "${PROJECT_NAME}")
-
-# We can't link again to the shared juce target without ODL violations
-# However, we can steal its include dirs and compile definitions to use in tests!
-# https://forum.juce.com/t/windows-linker-issue-on-develop/55524/2
-target_compile_definitions(Tests PRIVATE $<TARGET_PROPERTY:${PROJECT_NAME},COMPILE_DEFINITIONS>)
-target_include_directories(Tests PRIVATE $<TARGET_PROPERTY:${PROJECT_NAME},INCLUDE_DIRECTORIES>)
-
+target_link_libraries(Tests PRIVATE "${PROJECT_NAME}" SharedCode Catch2::Catch2WithMain)
 
 # Make an Xcode Scheme for the test executable so we can run tests in the IDE
 set_target_properties(Tests PROPERTIES XCODE_GENERATE_SCHEME ON)
+
+# When running Tests we have specific needs
+target_compile_definitions(Tests PUBLIC
+    JUCE_MODAL_LOOPS_PERMITTED=1 # let us run Message Manager in tests
+    RUN_PAMPLEJUCE_TESTS=1 # lets us run tests in module .cpp files
+)
 
 # Organize the test source in the Tests/ folder in the IDE
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Tests PREFIX "" FILES ${TestFiles})
