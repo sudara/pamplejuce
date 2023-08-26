@@ -43,7 +43,8 @@ After you've created a new repo:
 
 4. Pick which formats you want built on line 11.
 
-5. Set the correct flags for your plugin under `juce_add_plugin`. Check out the API https://github.com/juce-framework/JUCE/blob/master/docs/CMake%20API.md and be sure to change things like `PLUGIN_CODE` and `PLUGIN_MANUFACTURER_CODE`.  
+5. Set the correct flags for your plugin under `juce_add_plugin`. Check out the API https://github.com/juce-framework/JUCE/blob/master/docs/CMake%20API.md and be sure to change things like `PLUGIN_CODE` and `PLUGIN_MANUFACTURER_CODE`.
+6. Build n' Run! If you want to generate an Xcode project, run `cmake -B Builds -G Xcode`. Or just open the project in CLion or VS2022.
 
 7. If you are packaging and code signing, you'll want to take a look at the packaging/ directory and add assets and config that match your product. Otherwise you can delete the steps which do this.
 
@@ -51,10 +52,11 @@ After you've created a new repo:
 
 1. Your tests will be in "Tests" and you can just add new .cpp files there.
 2. Your binary data target is called "Assets"
+3. GitHub Actions will run against Linux, Windows, and macOS.
 
 ## Releases
 
-You can cut a release with downloadable assets by creating a tag starting with `v` and pushing it to GitHub. Note that you currently *must push the tag along with an actual commit*.
+Cut a release with downloadable assets by creating a tag starting with `v` and pushing it to GitHub. Note that you currently *must push the tag along with an actual commit*.
 
 I recommend the workflow of bumping the VERSION file and then pushing that as a release, like so:
 
@@ -73,7 +75,7 @@ Releases are set to `prerelease`, which means that uploaded release assets are v
 
 This repo [codesigns Windows via Azure Key Vault, read more about how to do that on my blog](https://melatonin.dev/blog/how-to-code-sign-windows-installers-with-an-ev-cert-on-github-actions/).
 
-It also code signs and notarizes macOS, blog article coming soon, but there are many more examples of this in the wild.
+It also [code signs and notarizes on macOS, again, you can read my article for details](https://melatonin.dev/blog/how-to-code-sign-and-notarize-macos-audio-plugins-in-ci/).
 
 
 ## Tips n' Tricks
@@ -82,7 +84,7 @@ It also code signs and notarizes macOS, blog article coming soon, but there are 
 
 2. There's a `VERSION` file in the root that you can treat as the main place to bump the version.
 
-3. You might feel disincentivized to push to a private repo due to burning minutes. You can push a commit with `[ci skip]` in the message if you are doing things like updating the README. You have a few other big picture options, like doing testing/pluginval only on linux and moving everything else to release. The tradeoff is you won't be sure everything is happy on all platforms until the time you are releasing, which is the last place you really want friction. By default, multiple commits in quick succession will cancel the earlier builds.
+3. If you made the repo private, you might feel disincentivized to push as you would burn through minutes. Note you can push a commit with `[ci skip]` in the message if you are doing things like updating the README. You have a few other big picture options, like doing testing/pluginval only on linux and moving everything else to release only. The tradeoff is you won't be sure everything is happy on all platforms until the time you are releasing, which is the last place you really want friction. By default, multiple commits in quick succession will cancel the earlier builds.
 
 ## How do variables work in GitHub Actions?
 
