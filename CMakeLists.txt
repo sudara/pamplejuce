@@ -63,7 +63,7 @@ juce_add_plugin("${PROJECT_NAME}"
     FORMATS "${FORMATS}"
     PRODUCT_NAME "${PROJECT_NAME}")        # The name of the final executable, which can differ from the target name
 
-# We'll stick all of our dependencies here
+# Any dependency you want to add ll of our dependencies here
 add_library(SharedCode INTERFACE)
 
 # C++20, please
@@ -90,7 +90,7 @@ juce_add_binary_data(Assets SOURCES pamplejuce.png)
 # See https://forum.juce.com/t/loading-pytorch-model-using-binarydata/39997/2
 set_target_properties(Assets PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
-# Clean up folder organization on Xcode.
+# MacOS only: Clean up folder organization on Xcode.
 # It tucks the Plugin varieties into a "Targets" folder and generate an Xcode Scheme manually
 # Xcode scheme generation is turned off globally to limit noise from other targets
 # The non-hacky way of doing this is via the global PREDEFINED_TARGETS_FOLDER property
@@ -101,15 +101,18 @@ foreach (target ${FORMATS} "All")
         set_target_properties(${PROJECT_NAME}_${target} PROPERTIES
             # Tuck the actual plugin targets into a folder where they won't bother us
             FOLDER "Targets"
-
-            # MacOS only: Sets the default executable that Xcode will open on build
-            # For this exact path to to work, manually build the AudioPluginHost.xcodeproj in the JUCE subdir
-            XCODE_SCHEME_EXECUTABLE "${CMAKE_CURRENT_SOURCE_DIR}/JUCE/extras/AudioPluginHost/Builds/MacOSX/build/Debug/AudioPluginHost.app"
-
             # Let us build the target in Xcode
             XCODE_GENERATE_SCHEME ON)
+
+        # Set the default executable that Xcode will open on build
+        # Note: you must manually build the AudioPluginHost.xcodeproj in the JUCE subdir
+        if (NOT target STREQUAL "All")
+            set_target_properties(${PROJECT_NAME}_${target} PROPERTIES
+                XCODE_SCHEME_EXECUTABLE "${CMAKE_CURRENT_SOURCE_DIR}/JUCE/extras/AudioPluginHost/Builds/MacOSX/build/Debug/AudioPluginHost.app")
+        endif ()
     endif ()
 endforeach ()
+
 set_target_properties(Assets PROPERTIES FOLDER "Targets")
 
 
@@ -169,7 +172,12 @@ target_compile_features(Tests PRIVATE cxx_std_20)
 
 # Our test executable also wants to know about our plugin code...
 target_include_directories(Tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Source)
-target_link_libraries(Tests PRIVATE "${PROJECT_NAME}" SharedCode Catch2::Catch2WithMain)
+
+# We also want to copy over compile definitions from our plugin target
+target_compile_definitions(Tests PRIVATE $<TARGET_PROPERTY:${PROJECT_NAME},COMPILE_DEFINITIONS>)
+
+# And give tests access to our shared code
+target_link_libraries(Tests PRIVATE SharedCode Catch2::Catch2WithMain)
 
 # Make an Xcode Scheme for the test executable so we can run tests in the IDE
 set_target_properties(Tests PROPERTIES XCODE_GENERATE_SCHEME ON)
