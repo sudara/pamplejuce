@@ -9,7 +9,7 @@ Out of the box, it:
 2. Uses JUCE 7.x as a submodule tracking develop.
 3. Relies on CMake 3.24.1 and higher for cross-platform building.
 4. Has [Catch2](https://github.com/catchorg/Catch2) v3.4.0 setup the test framework and runner.
-5. Has [Melatonin Inspector](github.com/sudara/melatonin_inspector) installed as a JUCE module to help relieve headaches when building plugin UI.
+5. Has [Melatonin Inspector](https://github.com/sudara/melatonin_inspector) installed as a JUCE module to help relieve headaches when building plugin UI.
 
 It also has integration with GitHub Actions, specifically:
 
@@ -25,7 +25,6 @@ It also contains:
 2. A `.clang-format` file for keeping code tidy.
 3. A `VERSION` file that will propagate through JUCE and your app.
 
-![Pamplejuce v1 - 2023-08-28 41@2x](https://github.com/sudara/pamplejuce/assets/472/33a9c8d5-fc3f-42e7-bd06-21a1559c7128)
 
 ## How does this all work at a high level?
 
@@ -56,6 +55,10 @@ After you've created a new repo from the template, you have a checklist of thing
 * [ ] Build n' Run! If you want to generate an Xcode project, run `cmake -B Builds -G Xcode`. Or just open the project in CLion or VS2022. Running the standalone might be easiest, but you can also build the `AudioPluginHost` that comes with JUCE. Out of the box, Pamplejuce's VST3/AU targets should already be pointing to it's built location.
 
 * [ ] If you are already wanting to package and code signing, you'll want to take a look at the packaging/ directory add assets and config that match your product. Otherwise, you can delete the GitHub Action workflow steps that handle packaging (macOS will need code signing steps to work properly).
+
+This is what you should see when it's built, the plugin displaying its version number with a button that opens up the [Melatonin Inspector](https://github.com/sudara/melatonin_inspector). 
+
+![Pamplejuce v1 - 2023-08-28 41@2x](https://github.com/sudara/pamplejuce/assets/472/33a9c8d5-fc3f-42e7-bd06-21a1559c7128)
 
 ## Conventions
 
