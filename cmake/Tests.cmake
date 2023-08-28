@@ -1,11 +1,10 @@
-# Required for ctest (which is just easier for cross-platform CI)
-# include(CTest) does this too, but adds tons of targets we don't want
+# Required for ctest (which is just an easier way to run in cross-platform CI)
+# include(CTest) could be used too, but adds additional targets we don't care about
 # See: https://github.com/catchorg/Catch2/issues/2026
-# You also could forgo ctest and call ./Tests directly from the build dir
+# You can also forgo ctest entirely and call ./Tests directly from the build dir
 enable_testing()
 
 # "GLOBS ARE BAD" is brittle and silly dev UX, sorry CMake!
-# CONFIGURE_DEPENDS / Clion's CMake integration makes globbing absolutely fine
 file(GLOB_RECURSE TestFiles CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/Tests/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/Tests/*.h")
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Tests PREFIX "" FILES ${TestFiles})
 
@@ -16,17 +15,17 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/catchorg/Catch2.git
     GIT_PROGRESS TRUE
     GIT_SHALLOW TRUE
-    GIT_TAG v3.3.2)
+    GIT_TAG v3.4.0)
 FetchContent_MakeAvailable(Catch2) # find_package equivalent
 
-# Setup the test executable, again C++ 20 please
+# Setup the test executable, again C++20 please
 add_executable(Tests ${TestFiles})
 target_compile_features(Tests PRIVATE cxx_std_20)
 
 # Our test executable also wants to know about our plugin code...
 target_include_directories(Tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Source)
 
-# We also want to copy over compile definitions from our plugin target
+# Copy over compile definitions from our plugin target so it has all the JUCEy goodness
 target_compile_definitions(Tests PRIVATE $<TARGET_PROPERTY:${PROJECT_NAME},COMPILE_DEFINITIONS>)
 
 # And give tests access to our shared code
