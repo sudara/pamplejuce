@@ -5,17 +5,17 @@ Pamplejuce is a ~~template~~ lifestyle for creating and building JUCE plugins in
 
 Out of the box, it:
 
-1. Supports C++20
-2. Uses JUCE 7.x as a submodule tracking develop
-3. Relies on CMake 3.24.1 and higher for building cross-platform
-4. Has [Catch2](https://github.com/catchorg/Catch2) v3.4.0 setup the test framework and runner
-5. Has [Melatonin Inspector](github.com/sudara/melatonin_inspector) installed as a JUCE module
+1. Supports C++20.
+2. Uses JUCE 7.x as a submodule tracking develop.
+3. Relies on CMake 3.24.1 and higher for cross-platform building.
+4. Has [Catch2](https://github.com/catchorg/Catch2) v3.4.0 setup the test framework and runner.
+5. Has [Melatonin Inspector](github.com/sudara/melatonin_inspector) installed as a JUCE module to help relieve headaches when building plugin UI.
 
 It also has integration with GitHub Actions, specifically:
 
 1. Building and testing cross-platform (linux, macOS, Windows) binaries
 2. Running [pluginval](http://github.com/tracktion/pluginval) 1.x against the binaries for plugin validation
-3. Config for [installing Intel IPP](https://www.intel.com/content/www/us/en/developer/tools/oneapi/ipp.html), building binaries
+3. Config for [installing Intel IPP](https://www.intel.com/content/www/us/en/developer/tools/oneapi/ipp.html)
 4. [Code signing and notarization on macOS](https://melatonin.dev/blog/how-to-code-sign-and-notarize-macos-audio-plugins-in-ci/)
 5. [Windows EV/OV code signing via Azure Key Vault](https://melatonin.dev/blog/how-to-code-sign-windows-installers-with-an-ev-cert-on-github-actions/)
 
@@ -23,7 +23,7 @@ It also contains:
 
 1. A `.gitignore` for all platforms.
 2. A `.clang-format` file for keeping code tidy.
-3. A `VERSION` file that will propagate through to JUCE and your app.
+3. A `VERSION` file that will propagate through JUCE and your app.
 
 ![Pamplejuce v1 - 2023-08-28 41@2x](https://github.com/sudara/pamplejuce/assets/472/33a9c8d5-fc3f-42e7-bd06-21a1559c7128)
 
@@ -35,33 +35,34 @@ If you are new to CMake, I suggest you read up about [JUCE and CMmake on my blog
 
 This is a template repo! 
 
-That means the easiest thing to do is  click "[Use this template](https://github.com/sudara/pamplejuce/generate)" here or at the top of the page to get your own repo with all the code here.
+That means the easiest thing to do is click "[Use this template](https://github.com/sudara/pamplejuce/generate)" here or at the top of the page to get your own repo with all the code here.
 
 For an example of a plugin that uses this repo, check out [Load Monster!](https://github.com/sudara/load_monster_plugin).
 
-After you've created a new repo:
+After you've created a new repo from the template, you have a checklist of things to do to customize for your project:
 
-0. `git clone` your new repo (if you make it private, see the warning below about GitHub Actions minutes)
+* [ ] `git clone` your new repo (if you make it private, see the warning below about GitHub Actions minutes)
 
-1. [Download CMAKE](https://cmake.org/download/) if you aren't already using it (Clion and VS2022 both have it bundled, so you can skip this step in those cases).
+* [ ] [Download CMAKE](https://cmake.org/download/) if you aren't already using it (Clion and VS2022 both have it bundled, so you can skip this step in those cases).
 
-2. Populate the latest JUCE by running `git submodule update --init` in your repository directory. By default, this will track JUCE's `develop` branch, which IMO is what you want until you are at the point of releasing a plugin.
+* [ ] Populate the  JUCE by running `git submodule update --init` in your repository directory. By default, this will track JUCE's `develop` branch, which is a good default until you are at the point of releasing a plugin.
 
-3. Replace `Pamplejuce` with the name of your project in CMakeLists.txt line 7, where the `PROJECT_NAME` variable is set. Make this all one word, no spaces. 
+* [ ] Replace `Pamplejuce` with the name of your project in `CMakeLists.txt` where the `PROJECT_NAME` variable is first set. Make this all one word, no spaces. 
 
-4. Pick which formats you want built on line 11.
+* [ ] Pick which plugin formats you want built (VST3, AU, etc).
 
-5. Set the correct flags for your plugin under `juce_add_plugin`. Check out the API https://github.com/juce-framework/JUCE/blob/master/docs/CMake%20API.md and be sure to change things like `PLUGIN_CODE` and `PLUGIN_MANUFACTURER_CODE`.
-6. Build n' Run! If you want to generate an Xcode project, run `cmake -B Builds -G Xcode`. Or just open the project in CLion or VS2022.
+* [ ] Set the correct flags for your plugin `juce_add_plugin`. Check out the API https://github.com/juce-framework/JUCE/blob/master/docs/CMake%20API.md and be sure to change things like `PLUGIN_CODE` and `PLUGIN_MANUFACTURER_CODE` and everything that says `Change me!`.
+* 
+* [ ] Build n' Run! If you want to generate an Xcode project, run `cmake -B Builds -G Xcode`. Or just open the project in CLion or VS2022. Running the standalone might be easiest, but you can also build the `AudioPluginHost` that comes with JUCE. Out of the box, Pamplejuce's VST3/AU targets should already be pointing to it's built location.
 
-7. If you are packaging and code signing, you'll want to take a look at the packaging/ directory and add assets and config that match your product. Otherwise you can delete the steps which do this.
+* [ ] If you are already wanting to package and code signing, you'll want to take a look at the packaging/ directory add assets and config that match your product. Otherwise, you can delete the GitHub Action workflow steps that handle packaging (macOS will need code signing steps to work properly).
 
 ## Conventions
 
-1. Your tests will be in "Tests" and you can just add new .cpp files there.
-2. Your 3rd party JUCE modules go in "modules."
+1. Your tests go in "/tests", just add .cpp files there.
+2. Additional 3rd party JUCE modules go in "modules."
 3. Your binary data target in CMake is called "Assets" (but you need to include `BinaryData.h` to access it)
-4. GitHub Actions will run against Linux, Windows, and macOS.
+4. GitHub Actions will run against Linux, Windows, and macOS unless modified.
 
 ## Releases
 
