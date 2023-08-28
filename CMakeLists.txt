@@ -33,26 +33,32 @@ include(JUCEDefaults)
 # On Github Actions, this is done as a part of actions/checkout
 add_subdirectory(JUCE)
 
-# See `JUCE/docs/CMake API.md` in the JUCE repo for all config options
+# Add your modules here
+# juce_add_module(modules/my_module)
+
+# This adds the melatonin inspector module
+add_subdirectory (modules/melatonin_inspector)
+
+# See `docs/CMake API.md` in the JUCE repo for all config options
 juce_add_plugin("${PROJECT_NAME}"
-    # ICON_BIG ... # ICON_* arguments specify a path to an image file to use as an icon for the Standalone
-    # ICON_SMALL ...
+    # Icons for the standalone app
+    ICON_BIG "${CMAKE_CURRENT_SOURCE_DIR}/packaging/icon.png"
 
     # Change me!
     COMPANY_NAME Pamplejuce
     BUNDLE_ID com.pamplejuce.pamplejuce
 
-    # On MacOS, plugin will be copied to /Users/you/Library/Audio/Plug-Ins/
+    # On MacOS, plugin is copied to ~/Users/you/Library/Audio/Plug-Ins/
     COPY_PLUGIN_AFTER_BUILD TRUE
 
     # Change me!
     # A four-character plugin id
-    # First character MUST be uppercase  AU formats
+    # First character MUST be uppercase for AU formats
     PLUGIN_MANUFACTURER_CODE Pamp
 
     # Change me!
     # A unique four-character plugin id
-    # Note: this must have at least one upper-case character to please DAWs
+    # Note: this must have at least one upper-case character
     PLUGIN_CODE P001
     FORMATS "${FORMATS}"
 
@@ -86,10 +92,22 @@ include(Xcode)
 
 target_compile_definitions(SharedCode
     INTERFACE
-    # JUCE_WEB_BROWSER and JUCE_USE_CURL are default on, but you might not need them.
+
+    # JUCE_WEB_BROWSER and JUCE_USE_CURL off by default
     JUCE_WEB_BROWSER=0  # If you set this to 1, add `NEEDS_WEB_BROWSER TRUE` to the `juce_add_plugin` call
     JUCE_USE_CURL=0     # If you set this to 1, add `NEEDS_CURL TRUE` to the `juce_add_plugin` call
-    JUCE_VST3_CAN_REPLACE_VST2=0)
+    JUCE_VST3_CAN_REPLACE_VST2=0
+
+    # Uncomment if you are paying for a an Indie/Pro license or releasing under GPLv3
+    # JUCE_DISPLAY_SPLASH_SCREEN=0
+
+    # lets the app known if we're Debug or Release
+    CMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE}"
+    VERSION="${CURRENT_VERSION}"
+
+    # JucePlugin_Name is for some reason doesn't use the nicer PRODUCT_NAME
+    PRODUCT_NAME_WITHOUT_VERSION="Pamplejuce"
+)
 
 # Usually JUCE modules should have PRIVATE visibility
 # See https://github.com/juce-framework/JUCE/blob/master/docs/CMake%20API.md#juce_add_module
@@ -98,6 +116,7 @@ target_compile_definitions(SharedCode
 target_link_libraries(SharedCode
     INTERFACE
     Assets
+    melatonin_inspector
     juce::juce_audio_utils
     juce::juce_recommended_config_flags
     juce::juce_recommended_lto_flags

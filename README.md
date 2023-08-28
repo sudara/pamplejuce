@@ -8,8 +8,9 @@ Out of the box, it supports:
 1. C++20
 2. JUCE 7.x as a submodule tracking develop
 3. CMake 3.24.1 and higher for building cross-platform
-4. [Catch2](https://github.com/catchorg/Catch2) v3.3.2 as the test framework and runner
-5. [pluginval](http://github.com/tracktion/pluginval) 1.x for plugin validation
+4. [Catch2](https://github.com/catchorg/Catch2) v3.4.0 as the test framework and runner
+5. [Melatonin Inspector](github.com/sudara/melatonin_inspector) as a module to remove headache from building JUCE UI.
+5. [pluginval](http://github.com/tracktion/pluginval) 1.x running in CI for plugin validation
 6. GitHub Actions config for [installing Intel IPP](https://www.intel.com/content/www/us/en/developer/tools/oneapi/ipp.html), building binaries, running Catch2 tests and pluginval, artifact building on the Windows, Linux and macOS platforms, including [code signing and notarization on macOS](https://melatonin.dev/blog/how-to-code-sign-and-notarize-macos-audio-plugins-in-ci/) and [Windows EV/OV code signing via Azure Key Vault](https://melatonin.dev/blog/how-to-code-sign-windows-installers-with-an-ev-cert-on-github-actions/)
 
 It also contains:
@@ -51,8 +52,9 @@ After you've created a new repo:
 ## Conventions
 
 1. Your tests will be in "Tests" and you can just add new .cpp files there.
-2. Your binary data target is called "Assets"
-3. GitHub Actions will run against Linux, Windows, and macOS.
+2. Your 3rd party JUCE modules go in "modules."
+3. Your binary data target is called "Assets."
+4. GitHub Actions will run against Linux, Windows, and macOS.
 
 ## Releases
 
