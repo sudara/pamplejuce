@@ -3,26 +3,33 @@
 
 Pamplejuce is a ~~template~~ lifestyle for creating and building JUCE plugins in 2023.
 
-Out of the box, it supports:
+Out of the box, it:
 
-1. C++20
-2. JUCE 7.x as a submodule tracking develop
-3. CMake 3.24.1 and higher for building cross-platform
-4. [Catch2](https://github.com/catchorg/Catch2) v3.4.0 as the test framework and runner
-5. [Melatonin Inspector](github.com/sudara/melatonin_inspector) as a module to remove headache from building JUCE UI.
-5. [pluginval](http://github.com/tracktion/pluginval) 1.x running in CI for plugin validation
-6. GitHub Actions config for [installing Intel IPP](https://www.intel.com/content/www/us/en/developer/tools/oneapi/ipp.html), building binaries, running Catch2 tests and pluginval, artifact building on the Windows, Linux and macOS platforms, including [code signing and notarization on macOS](https://melatonin.dev/blog/how-to-code-sign-and-notarize-macos-audio-plugins-in-ci/) and [Windows EV/OV code signing via Azure Key Vault](https://melatonin.dev/blog/how-to-code-sign-windows-installers-with-an-ev-cert-on-github-actions/)
+1. Supports C++20
+2. Uses JUCE 7.x as a submodule tracking develop
+3. Relies on CMake 3.24.1 and higher for building cross-platform
+4. Has [Catch2](https://github.com/catchorg/Catch2) v3.4.0 setup the test framework and runner
+5. Has [Melatonin Inspector](github.com/sudara/melatonin_inspector) installed as a JUCE module
+
+It also has integration with GitHub Actions, specifically:
+
+1. Building and testing cross-platform (linux, macOS, Windows) binaries
+2. Running [pluginval](http://github.com/tracktion/pluginval) 1.x against the binaries for plugin validation
+3. Config for [installing Intel IPP](https://www.intel.com/content/www/us/en/developer/tools/oneapi/ipp.html), building binaries
+4. [Code signing and notarization on macOS](https://melatonin.dev/blog/how-to-code-sign-and-notarize-macos-audio-plugins-in-ci/)
+5. [Windows EV/OV code signing via Azure Key Vault](https://melatonin.dev/blog/how-to-code-sign-windows-installers-with-an-ev-cert-on-github-actions/)
 
 It also contains:
 
-1. Proper `.gitignore` for all platforms
-2. A `.clang-format` file 
+1. A `.gitignore` for all platforms.
+2. A `.clang-format` file for keeping code tidy.
 3. A `VERSION` file that will propagate through to JUCE and your app.
+
+![Pamplejuce v1 - 2023-08-28 41@2x](https://github.com/sudara/pamplejuce/assets/472/33a9c8d5-fc3f-42e7-bd06-21a1559c7128)
 
 ## How does this all work at a high level?
 
-Read up about [JUCE and CMmake on my blog!](https://melatonin.dev/blog/how-to-use-cmake-with-juce/).
-
+If you are new to CMake, I suggest you read up about [JUCE and CMmake on my blog!](https://melatonin.dev/blog/how-to-use-cmake-with-juce/).
 
 ## Setting up for YOUR project
 
@@ -53,7 +60,7 @@ After you've created a new repo:
 
 1. Your tests will be in "Tests" and you can just add new .cpp files there.
 2. Your 3rd party JUCE modules go in "modules."
-3. Your binary data target is called "Assets."
+3. Your binary data target in CMake is called "Assets" (but you need to include `BinaryData.h` to access it)
 4. GitHub Actions will run against Linux, Windows, and macOS.
 
 ## Releases
@@ -80,13 +87,11 @@ This repo [codesigns Windows via Azure Key Vault, read more about how to do that
 It also [code signs and notarizes on macOS, again, you can read my article for details](https://melatonin.dev/blog/how-to-code-sign-and-notarize-macos-audio-plugins-in-ci/).
 
 
-## Tips n' Tricks
+## A note on GitHub Actions and macOS
 
-1. :warning: GitHub gives you 2000 or 3000 free GitHub Actions "minutes" for private projects, but [they actually bill 2x the number of minutes you use on Windows and 10x on MacOS](https://docs.github.com/en/free-pro-team@latest/github/setting-up-and-managing-billing-and-payments-on-github/about-billing-for-github-actions#about-billing-for-github-actions).
+:warning: GitHub gives you 2000 or 3000 free GitHub Actions "minutes" for private projects, but [they actually bill 2x the number of minutes you use on Windows and 10x on MacOS](https://docs.github.com/en/free-pro-team@latest/github/setting-up-and-managing-billing-and-payments-on-github/about-billing-for-github-actions#about-billing-for-github-actions).
 
-2. There's a `VERSION` file in the root that you can treat as the main place to bump the version.
-
-3. If you made the repo private, you might feel disincentivized to push as you would burn through minutes. Note you can push a commit with `[ci skip]` in the message if you are doing things like updating the README. You have a few other big picture options, like doing testing/pluginval only on linux and moving everything else to release only. The tradeoff is you won't be sure everything is happy on all platforms until the time you are releasing, which is the last place you really want friction. By default, multiple commits in quick succession will cancel the earlier builds.
+If you made the repo private, you might feel disincentivized to push as you would burn through minutes. Note you can push a commit with `[ci skip]` in the message if you are doing things like updating the README. You have a few other big picture options, like doing testing/pluginval only on linux and moving everything else to release only. The tradeoff is you won't be sure everything is happy on all platforms until the time you are releasing, which is the last place you really want friction. By default, multiple commits in quick succession will cancel the earlier builds.
 
 ## How do variables work in GitHub Actions?
 
