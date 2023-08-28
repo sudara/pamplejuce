@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  PROJECT_NAME: Pamplejuce
+  PROJECT_NAME: Pamplejuce_v1
   BUILD_TYPE: Release
   BUILD_DIR: Builds
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
