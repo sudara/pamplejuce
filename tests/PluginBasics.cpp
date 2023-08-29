@@ -13,7 +13,7 @@ PluginProcessor testPlugin;
 TEST_CASE("Plugin instance name", "[name]")
 {
   CHECK_THAT(testPlugin.getName().toStdString(),
-             Catch::Matchers::Equals("Pamplejuce v1"));
+             Catch::Matchers::Equals("Pamplejuce"));
 }
 
 #ifdef PAMPLEJUCE_IPP

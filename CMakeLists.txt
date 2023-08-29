@@ -4,18 +4,15 @@ cmake_minimum_required(VERSION 3.24.1)
 
 # This tells cmake we have goodies in the /cmake folder
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-
-# This is the name of your plugin
-# Change me! Note: It cannot have spaces (but PRODUCT_NAME can)
-set(PROJECT_NAME "Pamplejuce")
-
 include (PamplejuceVersion)
 
-# By default, we add the major version on the end of the plugin name like  _v1
-# Different major versions then show up in DAWs as separate plugins
-# This lets you change parameters and behavior without breaking user projects
-# Comment the following line to disable this behavior
-set(PROJECT_NAME "Pamplejuce_v${MAJOR_VERSION}")
+# This is the name of your plugin
+# Change me! Note: It cannot have spaces (but JUCE's PRODUCT_NAME can)
+# You may want to append the major version on the end of this (and PRODUCT_NAME)
+# set(PROJECT_NAME "MyPlugin_v${MAJOR_VERSION}")
+# Doing so enables major versions to show up in IDEs and DAWs as separate plugins
+# allowing you to change parameters and behavior without breaking user projects
+set(PROJECT_NAME "Pamplejuce")
 
 # Set the plugin formats you'll be building here.
 # Valid choices here: AAX Unity VST VST3 AU AUv3 Standalone
@@ -62,11 +59,13 @@ juce_add_plugin("${PROJECT_NAME}"
     PLUGIN_CODE P001
     FORMATS "${FORMATS}"
 
-    # Change me!
     # The name of your final executable
     # This is how it's listed in the DAW
     # This can be different from PROJECT_NAME and can have spaces!
-    PRODUCT_NAME "Pamplejuce v1")
+    # You might want to use v${MAJOR_VERSION} here once you go to v2...
+    set(PRODUCT_NAME "${PROJECT_NAME}")
+
+    PRODUCT_NAME "${PRODUCT_NAME}")
 
 # This lets us use our code in both the JUCE targets and our Test target
 # Without running into ODR violations
@@ -81,7 +80,7 @@ target_compile_features(SharedCode INTERFACE cxx_std_20)
 # Just ensure you employ CONFIGURE_DEPENDS so the build system picks up changes
 # If you want to appease the CMake gods and avoid globs, manually add files like so:
 # set(SourceFiles Source/PluginEditor.h Source/PluginProcessor.h Source/PluginEditor.cpp Source/PluginProcessor.cpp)
-file(GLOB_RECURSE SourceFiles CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/Source/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/Source/*.h")
+file(GLOB_RECURSE SourceFiles CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/source/*.h")
 target_sources(SharedCode INTERFACE ${SourceFiles})
 
 # Adds a BinaryData target for embedding assets into the binary
@@ -117,7 +116,11 @@ target_link_libraries(SharedCode
     INTERFACE
     Assets
     melatonin_inspector
-    juce::juce_audio_utils
+    juce_audio_utils
+    juce_audio_processors
+    juce_dsp
+    juce_gui_basics
+    juce_gui_extra
     juce::juce_recommended_config_flags
     juce::juce_recommended_lto_flags
     juce::juce_recommended_warning_flags)
@@ -128,5 +131,8 @@ target_link_libraries("${PROJECT_NAME}" PRIVATE SharedCode)
 # IPP support, comment out to disable
 include(PamplejuceIPP)
 
-# Tests target, comment out to disable
+# Everything related to the tests target
 include(Tests)
+
+# A separate target keeps the Tests target fast!
+include(Benchmarks)

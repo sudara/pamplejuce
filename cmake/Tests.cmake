@@ -5,8 +5,10 @@
 enable_testing()
 
 # "GLOBS ARE BAD" is brittle and silly dev UX, sorry CMake!
-file(GLOB_RECURSE TestFiles CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/Tests/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/Tests/*.h")
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Tests PREFIX "" FILES ${TestFiles})
+file(GLOB_RECURSE TestFiles CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/tests/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/tests/*.h")
+
+# Organize the test source in the Tests/ folder in Xcode
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/tests PREFIX "" FILES ${TestFiles})
 
 # Use Catch2 v3 on the devel branch
 Include(FetchContent)
@@ -37,11 +39,8 @@ set_target_properties(Tests PROPERTIES XCODE_GENERATE_SCHEME ON)
 # When running Tests we have specific needs
 target_compile_definitions(Tests PUBLIC
     JUCE_MODAL_LOOPS_PERMITTED=1 # let us run Message Manager in tests
-    RUN_PAMPLEJUCE_TESTS=1 # lets us run tests in module .cpp files
+    RUN_PAMPLEJUCE_TESTS=1 # also run tests in other module .cpp files guarded by RUN_PAMPLEJUCE_TESTS
 )
-
-# Organize the test source in the Tests/ folder in the IDE
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Tests PREFIX "" FILES ${TestFiles})
 
 # Load and use the .cmake file provided by Catch2
 # https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md
