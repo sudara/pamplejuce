@@ -8,23 +8,25 @@ Out of the box, it:
 1. Supports C++20.
 2. Uses JUCE 7.x as a submodule tracking develop.
 3. Relies on CMake 3.24.1 and higher for cross-platform building.
-4. Has [Catch2](https://github.com/catchorg/Catch2) v3.4.0 setup the test framework and runner.
-5. Has [Melatonin Inspector](https://github.com/sudara/melatonin_inspector) installed as a JUCE module to help relieve headaches when building plugin UI.
+4. Has [Catch2](https://github.com/catchorg/Catch2) v3.4.0 for the test framework and runner.
+5. Includes a Tests target and a Benchmarks target with examples to get started quickly.
+6. Has [Melatonin Inspector](https://github.com/sudara/melatonin_inspector) installed as a JUCE module to help relieve headaches when building plugin UI.
 
 It also has integration with GitHub Actions, specifically:
 
 1. Building and testing cross-platform (linux, macOS, Windows) binaries
-2. Running [pluginval](http://github.com/tracktion/pluginval) 1.x against the binaries for plugin validation
-3. Config for [installing Intel IPP](https://www.intel.com/content/www/us/en/developer/tools/oneapi/ipp.html)
-4. [Code signing and notarization on macOS](https://melatonin.dev/blog/how-to-code-sign-and-notarize-macos-audio-plugins-in-ci/)
-5. [Windows EV/OV code signing via Azure Key Vault](https://melatonin.dev/blog/how-to-code-sign-windows-installers-with-an-ev-cert-on-github-actions/)
+2. Running tests and benchmarks in CI
+4Running [pluginval](http://github.com/tracktion/pluginval) 1.x against the binaries for plugin validation
+5. Config for [installing Intel IPP](https://www.intel.com/content/www/us/en/developer/tools/oneapi/ipp.html)
+6. [Code signing and notarization on macOS](https://melatonin.dev/blog/how-to-code-sign-and-notarize-macos-audio-plugins-in-ci/)
+7. [Windows EV/OV code signing via Azure Key Vault](https://melatonin.dev/blog/how-to-code-sign-windows-installers-with-an-ev-cert-on-github-actions/)
 
 It also contains:
 
 1. A `.gitignore` for all platforms.
 2. A `.clang-format` file for keeping code tidy.
 3. A `VERSION` file that will propagate through JUCE and your app.
-
+4. A ton of useful comments and options around the CMake config.
 
 ## How does this all work at a high level?
 
@@ -48,26 +50,26 @@ After you've created a new repo from the template, you have a checklist of thing
 
 * [ ] Replace `Pamplejuce` with the name of your project in `CMakeLists.txt` where the `PROJECT_NAME` variable is first set. Make this all one word, no spaces. 
 
-* [ ] Pick which plugin formats you want built (VST3, AU, etc).
+* [ ] Adjust which plugin formats you want built as needed (VST3, AU, etc).
 
 * [ ] Set the correct flags for your plugin `juce_add_plugin`. Check out the API https://github.com/juce-framework/JUCE/blob/master/docs/CMake%20API.md and be sure to change things like `PLUGIN_CODE` and `PLUGIN_MANUFACTURER_CODE` and everything that says `Change me!`.
 * 
 * [ ] Build n' Run! If you want to generate an Xcode project, run `cmake -B Builds -G Xcode`. Or just open the project in CLion or VS2022. Running the standalone might be easiest, but you can also build the `AudioPluginHost` that comes with JUCE. Out of the box, Pamplejuce's VST3/AU targets should already be pointing to it's built location.
 
-* [ ] If you are already wanting to package and code signing, you'll want to take a look at the packaging/ directory add assets and config that match your product. Otherwise, you can delete the GitHub Action workflow steps that handle packaging (macOS will need code signing steps to work properly).
+* [ ] If you want to package and code sign, you'll want to take a look at the packaging/ directory add assets and config that match your product. Otherwise, you can delete the GitHub Action workflow steps that handle packaging (macOS will need code signing steps to work properly).
 
-This is what you should see when it's built, the plugin displaying its version number with a button that opens up the [Melatonin Inspector](https://github.com/sudara/melatonin_inspector). 
+This is what you will see when it's built, the plugin displaying its version number with a button that opens up the [Melatonin Inspector](https://github.com/sudara/melatonin_inspector): 
 
 ![Pamplejuce v1 - 2023-08-28 41@2x](https://github.com/sudara/pamplejuce/assets/472/33a9c8d5-fc3f-42e7-bd06-21a1559c7128)
 
 ## Conventions
 
 1. Your tests go in "/tests", just add .cpp files there.
-2. Additional 3rd party JUCE modules go in "modules."
-3. Your binary data target in CMake is called "Assets" (but you need to include `BinaryData.h` to access it)
+2. Additional 3rd party JUCE modules go in "/modules."
+3. Your binary data target in CMake is called "Assets" (you need to include `BinaryData.h` to access it)
 4. GitHub Actions will run against Linux, Windows, and macOS unless modified.
 
-## Releases
+## Cutting GitHub Releases
 
 Cut a release with downloadable assets by creating a tag starting with `v` and pushing it to GitHub. Note that you currently *must push the tag along with an actual commit*.
 
@@ -110,7 +112,7 @@ It can be confusing, as the documentation is a big fragmented.
 ## How to update a repo based on Pamplejuce
 
 1. Update with the latest CMake version [listed here](https://github.com/lukka/get-cmake), or the latest version supported by your toolchain like VS or Clion.
-2. Update JUCE with `git submodule update --remote --merge`
+2. Update JUCE and the inspector with `git submodule update --remote --merge`
 3. Check for an [IPP update from Intel](https://github.com/oneapi-src/oneapi-ci/blob/master/.github/workflows/build_all.yml#L10).
 4. You'll have to manually compare CMakeLists.txt, as I assume you made a changes. In the future, I may move most of the cmake magic into helpers to keep the main CMakesList.txt cleaner. 
 
