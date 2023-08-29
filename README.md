@@ -3,58 +3,75 @@
 
 Pamplejuce is a ~~template~~ lifestyle for creating and building JUCE plugins in 2023.
 
-Out of the box, it supports:
+Out of the box, it:
 
-1. C++20
-2. JUCE 7.x as a submodule tracking develop
-3. CMake 3.24.1 and higher for building cross-platform
-4. [Catch2](https://github.com/catchorg/Catch2) v3.3.2 as the test framework and runner
-5. [pluginval](http://github.com/tracktion/pluginval) 1.x for plugin validation
-6. GitHub Actions config for [installing Intel IPP](https://www.intel.com/content/www/us/en/developer/tools/oneapi/ipp.html), building binaries, running Catch2 tests and pluginval, artifact building on the Windows, Linux and macOS platforms, including [code signing and notarization on macOS](https://melatonin.dev/blog/how-to-code-sign-and-notarize-macos-audio-plugins-in-ci/) and [Windows EV/OV code signing via Azure Key Vault](https://melatonin.dev/blog/how-to-code-sign-windows-installers-with-an-ev-cert-on-github-actions/)
+1. Supports C++20.
+2. Uses JUCE 7.x as a submodule tracking develop.
+3. Relies on CMake 3.24.1 and higher for cross-platform building.
+4. Has [Catch2](https://github.com/catchorg/Catch2) v3.4.0 for the test framework and runner.
+5. Includes a Tests target and a Benchmarks target with examples to get started quickly.
+6. Has [Melatonin Inspector](https://github.com/sudara/melatonin_inspector) installed as a JUCE module to help relieve headaches when building plugin UI.
+
+It also has integration with GitHub Actions, specifically:
+
+1. Building and testing cross-platform (linux, macOS, Windows) binaries
+2. Running tests and benchmarks in CI
+4Running [pluginval](http://github.com/tracktion/pluginval) 1.x against the binaries for plugin validation
+5. Config for [installing Intel IPP](https://www.intel.com/content/www/us/en/developer/tools/oneapi/ipp.html)
+6. [Code signing and notarization on macOS](https://melatonin.dev/blog/how-to-code-sign-and-notarize-macos-audio-plugins-in-ci/)
+7. [Windows EV/OV code signing via Azure Key Vault](https://melatonin.dev/blog/how-to-code-sign-windows-installers-with-an-ev-cert-on-github-actions/)
 
 It also contains:
 
-1. Proper `.gitignore` for all platforms
-2. A `.clang-format` file 
-3. A `VERSION` file that will propagate through to JUCE and your app.
+1. A `.gitignore` for all platforms.
+2. A `.clang-format` file for keeping code tidy.
+3. A `VERSION` file that will propagate through JUCE and your app.
+4. A ton of useful comments and options around the CMake config.
 
 ## How does this all work at a high level?
 
-Read up about [JUCE and CMmake on my blog!](https://melatonin.dev/blog/how-to-use-cmake-with-juce/).
-
+If you are new to CMake, I suggest you read up about [JUCE and CMmake on my blog!](https://melatonin.dev/blog/how-to-use-cmake-with-juce/).
 
 ## Setting up for YOUR project
 
 This is a template repo! 
 
-That means the easiest thing to do is  click "[Use this template](https://github.com/sudara/pamplejuce/generate)" here or at the top of the page to get your own repo with all the code here.
+That means the easiest thing to do is click "[Use this template](https://github.com/sudara/pamplejuce/generate)" here or at the top of the page to get your own repo with all the code here.
 
 For an example of a plugin that uses this repo, check out [Load Monster!](https://github.com/sudara/load_monster_plugin).
 
-After you've created a new repo:
+After you've created a new repo from the template, you have a checklist of things to do to customize for your project:
 
-0. `git clone` your new repo (if you make it private, see the warning below about GitHub Actions minutes)
+* [ ] `git clone` your new repo (if you make it private, see the warning below about GitHub Actions minutes)
 
-1. [Download CMAKE](https://cmake.org/download/) if you aren't already using it (Clion and VS2022 both have it bundled, so you can skip this step in those cases).
+* [ ] [Download CMAKE](https://cmake.org/download/) if you aren't already using it (Clion and VS2022 both have it bundled, so you can skip this step in those cases).
 
-2. Populate the latest JUCE by running `git submodule update --init` in your repository directory. By default, this will track JUCE's `develop` branch, which IMO is what you want until you are at the point of releasing a plugin.
+* [ ] Populate the  JUCE by running `git submodule update --init` in your repository directory. By default, this will track JUCE's `develop` branch, which is a good default until you are at the point of releasing a plugin.
 
-3. Replace `Pamplejuce` with the name of your project in CMakeLists.txt line 7, where the `PROJECT_NAME` variable is set. Make this all one word, no spaces. 
+* [ ] Replace `Pamplejuce` with the name of your project in `CMakeLists.txt` where the `PROJECT_NAME` variable is first set. Make this all one word, no spaces. 
 
-4. Pick which formats you want built on line 11.
+* [ ] Adjust which plugin formats you want built as needed (VST3, AU, etc).
 
-5. Set the correct flags for your plugin under `juce_add_plugin`. Check out the API https://github.com/juce-framework/JUCE/blob/master/docs/CMake%20API.md and be sure to change things like `PLUGIN_CODE` and `PLUGIN_MANUFACTURER_CODE`.  
+* [ ] Set the correct flags for your plugin `juce_add_plugin`. Check out the API https://github.com/juce-framework/JUCE/blob/master/docs/CMake%20API.md and be sure to change things like `PLUGIN_CODE` and `PLUGIN_MANUFACTURER_CODE` and everything that says `Change me!`.
+* 
+* [ ] Build n' Run! If you want to generate an Xcode project, run `cmake -B Builds -G Xcode`. Or just open the project in CLion or VS2022. Running the standalone might be easiest, but you can also build the `AudioPluginHost` that comes with JUCE. Out of the box, Pamplejuce's VST3/AU targets should already be pointing to it's built location.
 
-7. If you are packaging and code signing, you'll want to take a look at the packaging/ directory and add assets and config that match your product. Otherwise you can delete the steps which do this.
+* [ ] If you want to package and code sign, you'll want to take a look at the packaging/ directory add assets and config that match your product. Otherwise, you can delete the GitHub Action workflow steps that handle packaging (macOS will need code signing steps to work properly).
+
+This is what you will see when it's built, the plugin displaying its version number with a button that opens up the [Melatonin Inspector](https://github.com/sudara/melatonin_inspector): 
+
+![Pamplejuce v1 - 2023-08-28 41@2x](https://github.com/sudara/pamplejuce/assets/472/33a9c8d5-fc3f-42e7-bd06-21a1559c7128)
 
 ## Conventions
 
-1. Your tests will be in "Tests" and you can just add new .cpp files there.
-2. Your binary data target is called "Assets"
+1. Your tests go in "/tests", just add .cpp files there.
+2. Additional 3rd party JUCE modules go in "/modules."
+3. Your binary data target in CMake is called "Assets" (you need to include `BinaryData.h` to access it)
+4. GitHub Actions will run against Linux, Windows, and macOS unless modified.
 
-## Releases
+## Cutting GitHub Releases
 
-You can cut a release with downloadable assets by creating a tag starting with `v` and pushing it to GitHub. Note that you currently *must push the tag along with an actual commit*.
+Cut a release with downloadable assets by creating a tag starting with `v` and pushing it to GitHub. Note that you currently *must push the tag along with an actual commit*.
 
 I recommend the workflow of bumping the VERSION file and then pushing that as a release, like so:
 
@@ -73,16 +90,14 @@ Releases are set to `prerelease`, which means that uploaded release assets are v
 
 This repo [codesigns Windows via Azure Key Vault, read more about how to do that on my blog](https://melatonin.dev/blog/how-to-code-sign-windows-installers-with-an-ev-cert-on-github-actions/).
 
-It also code signs and notarizes macOS, blog article coming soon, but there are many more examples of this in the wild.
+It also [code signs and notarizes on macOS, again, you can read my article for details](https://melatonin.dev/blog/how-to-code-sign-and-notarize-macos-audio-plugins-in-ci/).
 
 
-## Tips n' Tricks
+## A note on GitHub Actions and macOS
 
-1. :warning: GitHub gives you 2000 or 3000 free GitHub Actions "minutes" for private projects, but [they actually bill 2x the number of minutes you use on Windows and 10x on MacOS](https://docs.github.com/en/free-pro-team@latest/github/setting-up-and-managing-billing-and-payments-on-github/about-billing-for-github-actions#about-billing-for-github-actions).
+:warning: GitHub gives you 2000 or 3000 free GitHub Actions "minutes" for private projects, but [they actually bill 2x the number of minutes you use on Windows and 10x on MacOS](https://docs.github.com/en/free-pro-team@latest/github/setting-up-and-managing-billing-and-payments-on-github/about-billing-for-github-actions#about-billing-for-github-actions).
 
-2. There's a `VERSION` file in the root that you can treat as the main place to bump the version.
-
-3. You might feel disincentivized to push to a private repo due to burning minutes. You can push a commit with `[ci skip]` in the message if you are doing things like updating the README. You have a few other big picture options, like doing testing/pluginval only on linux and moving everything else to release. The tradeoff is you won't be sure everything is happy on all platforms until the time you are releasing, which is the last place you really want friction. By default, multiple commits in quick succession will cancel the earlier builds.
+If you made the repo private, you might feel disincentivized to push as you would burn through minutes. Note you can push a commit with `[ci skip]` in the message if you are doing things like updating the README. You have a few other big picture options, like doing testing/pluginval only on linux and moving everything else to release only. The tradeoff is you won't be sure everything is happy on all platforms until the time you are releasing, which is the last place you really want friction. By default, multiple commits in quick succession will cancel the earlier builds.
 
 ## How do variables work in GitHub Actions?
 
@@ -97,7 +112,7 @@ It can be confusing, as the documentation is a big fragmented.
 ## How to update a repo based on Pamplejuce
 
 1. Update with the latest CMake version [listed here](https://github.com/lukka/get-cmake), or the latest version supported by your toolchain like VS or Clion.
-2. Update JUCE with `git submodule update --remote --merge`
+2. Update JUCE and the inspector with `git submodule update --remote --merge`
 3. Check for an [IPP update from Intel](https://github.com/oneapi-src/oneapi-ci/blob/master/.github/workflows/build_all.yml#L10).
 4. You'll have to manually compare CMakeLists.txt, as I assume you made a changes. In the future, I may move most of the cmake magic into helpers to keep the main CMakesList.txt cleaner. 
 

@@ -2,194 +2,135 @@
 # 3.24.1 is also bundled in CLion as of 2023
 cmake_minimum_required(VERSION 3.24.1)
 
+# This tells cmake we have goodies in the /cmake folder
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+include (PamplejuceVersion)
+
 # This is the name of your plugin
-# This cannot have spaces (but PRODUCT_NAME can)
+# Change me! Note: It cannot have spaces (but JUCE's PRODUCT_NAME can)
+# You may want to append the major version on the end of this (and PRODUCT_NAME)
+# set(PROJECT_NAME "MyPlugin_v${MAJOR_VERSION}")
+# Doing so enables major versions to show up in IDEs and DAWs as separate plugins
+# allowing you to change parameters and behavior without breaking user projects
 set(PROJECT_NAME "Pamplejuce")
 
 # Set the plugin formats you'll be building here.
-# Valid formats: AAX Unity VST AU AUv3 Standalone
-set(FORMATS AU VST3 AUv3)
+# Valid choices here: AAX Unity VST VST3 AU AUv3 Standalone
+set(FORMATS Standalone AU VST3 AUv3)
 
-# This must be set before the project() call
-# see: https://cmake.org/cmake/help/latest/variable/CMAKE_OSX_DEPLOYMENT_TARGET.html
-set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "Support macOS down to High Sierra")
-
-# Reads in our VERSION file and sticks in it CURRENT_VERSION variable
-# Be sure the file has no newlines!
-file(STRINGS VERSION CURRENT_VERSION)
-
-# For simplicity, the name of the project is also the name of the target
+# For simplicity, the name of the CMake project is also the name of the target
 project(${PROJECT_NAME} VERSION ${CURRENT_VERSION})
 
-# By default we don't want Xcode schemes to be made for modules, etc
-set(CMAKE_XCODE_GENERATE_SCHEME OFF)
-
-# Building universal binaries on macOS increases build time
-# This is set on CI but not during local dev
-if ((DEFINED ENV{CI}) AND (CMAKE_BUILD_TYPE STREQUAL "Release"))
-    message("Building for Apple Silicon and x86_64")
-    set(CMAKE_OSX_ARCHITECTURES arm64 x86_64)
-endif ()
-
-# Adds all the module sources so they appear correctly in the IDE
-# Must be set before JUCE is added as a sub-dir (or any targets are made)
-# https://github.com/juce-framework/JUCE/commit/6b1b4cf7f6b1008db44411f2c8887d71a3348889
-set_property(GLOBAL PROPERTY USE_FOLDERS YES)
-
-# Create a /Modules directory in the IDE with the JUCE Module code
-option(JUCE_ENABLE_MODULE_SOURCE_GROUPS "Show all module sources in IDE projects" ON)
+# Couple tweaks that IMO should be JUCE defaults
+include(JUCEDefaults)
 
 # JUCE is setup as a submodule in the /JUCE folder
-# Locally, you'll need to run `git submodule update --init --recursive` once
-# and `git submodule update --remote --merge` to keep it up to date
-# On Github Actions, it's managed by actions/checkout
+# Locally, you must run `git submodule update --init --recursive` once
+# and later `git submodule update --remote --merge` to keep it up to date
+# On Github Actions, this is done as a part of actions/checkout
 add_subdirectory(JUCE)
 
-# Check the readme at `docs/CMake API.md` in the JUCE repo for full config
+# Add your modules here
+# juce_add_module(modules/my_module)
+
+# This adds the melatonin inspector module
+add_subdirectory (modules/melatonin_inspector)
+
+# See `docs/CMake API.md` in the JUCE repo for all config options
 juce_add_plugin("${PROJECT_NAME}"
-    # VERSION ...                               # Set this if the plugin version is different to the project version
-    # ICON_BIG ...                              # ICON_* arguments specify a path to an image file to use as an icon for the Standalone
-    # ICON_SMALL ...
+    # Icons for the standalone app
+    ICON_BIG "${CMAKE_CURRENT_SOURCE_DIR}/packaging/icon.png"
+
+    # Change me!
     COMPANY_NAME Pamplejuce
     BUNDLE_ID com.pamplejuce.pamplejuce
-    # IS_SYNTH TRUE/FALSE                       # Is this a synth or an effect?
-    # NEEDS_MIDI_INPUT TRUE/FALSE               # Does the plugin need midi input?
-    # NEEDS_MIDI_OUTPUT TRUE/FALSE              # Does the plugin need midi output?
-    # IS_MIDI_EFFECT TRUE/FALSE                 # Is this plugin a MIDI effect?
-    # EDITOR_WANTS_KEYBOARD_FOCUS TRUE/FALSE    # Does the editor need keyboard focus?
-    COPY_PLUGIN_AFTER_BUILD TRUE                # On MacOS, plugin will be copied to /Users/you/Library/Audio/Plug-Ins/
-    PLUGIN_MANUFACTURER_CODE Pamp               # This has to be one uppercase, rest lower for AU formats
-    PLUGIN_CODE P001                            # A unique four-character plugin id with at least one upper-case character
+    
+    # On MacOS, plugin is copied to ~/Users/you/Library/Audio/Plug-Ins/
+    COPY_PLUGIN_AFTER_BUILD TRUE
+
+    # Change me!
+    # A four-character plugin id
+    # First character MUST be uppercase for AU formats
+    PLUGIN_MANUFACTURER_CODE Pamp
+
+    # Change me!
+    # A unique four-character plugin id
+    # Note: this must have at least one upper-case character
+    PLUGIN_CODE P001
     FORMATS "${FORMATS}"
-    PRODUCT_NAME "${PROJECT_NAME}")             # The name of the final executable, which can differ from the target name
+
+    # The name of your final executable
+    # This is how it's listed in the DAW
+    # This can be different from PROJECT_NAME and can have spaces!
+    # You might want to use v${MAJOR_VERSION} here once you go to v2...
+    PRODUCT_NAME "${PROJECT_NAME}")
+
+# This lets us use our code in both the JUCE targets and our Test target
+# Without running into ODR violations
+add_library(SharedCode INTERFACE)
 
 # C++20, please
-target_compile_features("${PROJECT_NAME}" PRIVATE cxx_std_20)
+# Use cxx_std_23 for C++23 (as of CMake v 3.20)
+target_compile_features(SharedCode INTERFACE cxx_std_20)
 
 # Manually list all .h and .cpp files for the plugin
-set(SourceFiles
-    Source/PluginEditor.h
-    Source/PluginProcessor.h
-    Source/PluginEditor.cpp
-    Source/PluginProcessor.cpp)
-target_sources("${PROJECT_NAME}" PRIVATE ${SourceFiles})
+# If you are like me, you'll use globs for your sanity.
+# Just ensure you employ CONFIGURE_DEPENDS so the build system picks up changes
+# If you want to appease the CMake gods and avoid globs, manually add files like so:
+# set(SourceFiles Source/PluginEditor.h Source/PluginProcessor.h Source/PluginEditor.cpp Source/PluginProcessor.cpp)
+file(GLOB_RECURSE SourceFiles CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/source/*.h")
+target_sources(SharedCode INTERFACE ${SourceFiles})
 
-# No, we don't want our source buried in extra nested folders
-set_target_properties("${PROJECT_NAME}" PROPERTIES FOLDER "")
+# Adds a BinaryData target for embedding assets into the binary
+include(Assets)
 
-# The Xcode source tree should uhhh, still look like the source tree, yo
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Source PREFIX "" FILES ${SourceFiles})
+# MacOS only: Clean up folder organization on Xcode.
+include(Xcode)
 
-# Setup our binary data as a target
-juce_add_binary_data(Assets SOURCES pamplejuce.png)
+target_compile_definitions(SharedCode
+    INTERFACE
 
-# Required for Linux happiness:
-# See https://forum.juce.com/t/loading-pytorch-model-using-binarydata/39997/2
-set_target_properties(Assets PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+    # JUCE_WEB_BROWSER and JUCE_USE_CURL off by default
+    JUCE_WEB_BROWSER=0  # If you set this to 1, add `NEEDS_WEB_BROWSER TRUE` to the `juce_add_plugin` call
+    JUCE_USE_CURL=0     # If you set this to 1, add `NEEDS_CURL TRUE` to the `juce_add_plugin` call
+    JUCE_VST3_CAN_REPLACE_VST2=0
 
-# Clean up folder organization on Xcode.
-# It tucks the Plugin varieties into a "Targets" folder and generate an Xcode Scheme manually
-# Xcode scheme generation is turned off globally to limit noise from other targets
-# The non-hacky way of doing this is via the global PREDEFINED_TARGETS_FOLDER property
-# However that doesn't seem to be working in Xcode
-# Not all plugin types (au, vst) available on each build type (win, macos, linux)
-foreach (target ${FORMATS} "All")
-    if (TARGET ${PROJECT_NAME}_${target})
-        set_target_properties(${PROJECT_NAME}_${target} PROPERTIES
-            # Tuck the actual plugin targets into a folder where they won't bother us
-            FOLDER "Targets"
+    # Uncomment if you are paying for a an Indie/Pro license or releasing under GPLv3
+    # JUCE_DISPLAY_SPLASH_SCREEN=0
 
-            # MacOS only: Sets the default executable that Xcode will open on build
-            # For this exact path to to work, manually build the AudioPluginHost.xcodeproj in the JUCE subdir
-            XCODE_SCHEME_EXECUTABLE "${CMAKE_CURRENT_SOURCE_DIR}/JUCE/extras/AudioPluginHost/Builds/MacOSX/build/Debug/AudioPluginHost.app"
+    # lets the app known if we're Debug or Release
+    CMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE}"
+    VERSION="${CURRENT_VERSION}"
 
-            # Let us build the target in Xcode
-            XCODE_GENERATE_SCHEME ON)
-    endif ()
-endforeach ()
-set_target_properties(Assets PROPERTIES FOLDER "Targets")
+    # JucePlugin_Name is for some reason doesn't use the nicer PRODUCT_NAME
+    PRODUCT_NAME_WITHOUT_VERSION="Pamplejuce"
+)
 
-
-target_compile_definitions("${PROJECT_NAME}"
-    PUBLIC
-    # JUCE_WEB_BROWSER and JUCE_USE_CURL would be on by default, but you might not need them.
-    JUCE_WEB_BROWSER=0  # If you remove this, add `NEEDS_WEB_BROWSER TRUE` to the `juce_add_plugin` call
-    JUCE_USE_CURL=0     # If you remove this, add `NEEDS_CURL TRUE` to the `juce_add_plugin` call
-    JUCE_VST3_CAN_REPLACE_VST2=0)
-
-target_link_libraries("${PROJECT_NAME}"
-    PRIVATE
+# Usually JUCE modules should have PRIVATE visibility
+# See https://github.com/juce-framework/JUCE/blob/master/docs/CMake%20API.md#juce_add_module
+# However, with Pamplejuce, you will link your modules to SharedCode with INTERFACE visibility
+# This allows JUCE targets and the Tests target to link against it
+target_link_libraries(SharedCode
+    INTERFACE
     Assets
-    juce::juce_audio_utils
-    juce::juce_audio_processors
-    PUBLIC
+    melatonin_inspector
+    juce_audio_utils
+    juce_audio_processors
+    juce_dsp
+    juce_gui_basics
+    juce_gui_extra
     juce::juce_recommended_config_flags
     juce::juce_recommended_lto_flags
     juce::juce_recommended_warning_flags)
 
-# When present, use Intel IPP for performance on Windows
-if (WIN32) # Can't use MSVC here, as it won't catch Clang on Windows
-    find_package(IPP)
-    if (IPP_FOUND)
-        target_link_libraries("${PROJECT_NAME}" PUBLIC IPP::ipps IPP::ippcore IPP::ippi IPP::ippcv)
-        message("IPP LIBRARIES FOUND")
-        target_compile_definitions("${PROJECT_NAME}" PUBLIC PAMPLEJUCE_IPP=1)
-    else ()
-        message("IPP LIBRARIES *NOT* FOUND")
-    endif ()
-endif ()
+# Link the JUCE plugin targets our SharedCode target
+target_link_libraries("${PROJECT_NAME}" PRIVATE SharedCode)
 
-# Required for ctest (which is just easier for cross-platform CI)
-# include(CTest) does this too, but adds tons of targets we don't want
-# See: https://github.com/catchorg/Catch2/issues/2026
-# You also could forgo ctest and call ./Tests directly from the build dir
-enable_testing()
+# IPP support, comment out to disable
+include(PamplejuceIPP)
 
-# "GLOBS ARE BAD" is brittle and silly dev UX, sorry CMake!
-# CONFIGURE_DEPENDS / Clion's CMake integration makes globbing absolutely fine
-file(GLOB_RECURSE TestFiles CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/Tests/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/Tests/*.h")
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Tests PREFIX "" FILES ${TestFiles})
+# Everything related to the tests target
+include(Tests)
 
-# Use Catch2 v3 on the devel branch
-Include(FetchContent)
-FetchContent_Declare(
-    Catch2
-    GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-    GIT_PROGRESS TRUE
-    GIT_SHALLOW TRUE
-    GIT_TAG v3.3.2)
-FetchContent_MakeAvailable(Catch2) # find_package equivalent
-
-# Setup the test executable, again C++ 20 please
-add_executable(Tests ${TestFiles})
-target_compile_features(Tests PRIVATE cxx_std_20)
-
-# Our test executable also wants to know about our plugin code...
-target_include_directories(Tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Source)
-target_link_libraries(Tests PRIVATE Catch2::Catch2WithMain "${PROJECT_NAME}")
-
-# We can't link again to the shared juce target without ODL violations
-# However, we can steal its include dirs and compile definitions to use in tests!
-# https://forum.juce.com/t/windows-linker-issue-on-develop/55524/2
-target_compile_definitions(Tests PRIVATE $<TARGET_PROPERTY:${PROJECT_NAME},COMPILE_DEFINITIONS>)
-target_include_directories(Tests PRIVATE $<TARGET_PROPERTY:${PROJECT_NAME},INCLUDE_DIRECTORIES>)
-
-
-# Make an Xcode Scheme for the test executable so we can run tests in the IDE
-set_target_properties(Tests PROPERTIES XCODE_GENERATE_SCHEME ON)
-
-# Organize the test source in the Tests/ folder in the IDE
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Tests PREFIX "" FILES ${TestFiles})
-
-# Load and use the .cmake file provided by Catch2
-# https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md
-# We have to manually provide the source directory here for now
-include(${Catch2_SOURCE_DIR}/extras/Catch.cmake)
-catch_discover_tests(Tests)
-
-# Color our warnings and errors
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    add_compile_options(-fdiagnostics-color=always)
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    add_compile_options(-fcolor-diagnostics)
-endif ()
+# A separate target keeps the Tests target fast!
+include(Benchmarks)
