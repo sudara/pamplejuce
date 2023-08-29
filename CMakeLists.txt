@@ -44,7 +44,7 @@ juce_add_plugin("${PROJECT_NAME}"
     # Change me!
     COMPANY_NAME Pamplejuce
     BUNDLE_ID com.pamplejuce.pamplejuce
-
+    
     # On MacOS, plugin is copied to ~/Users/you/Library/Audio/Plug-Ins/
     COPY_PLUGIN_AFTER_BUILD TRUE
 
