@@ -8,7 +8,7 @@ target_compile_features(Benchmarks PRIVATE cxx_std_20)
 catch_discover_tests(Benchmarks)
 
 # Our benchmark executable also wants to know about our plugin code...
-target_include_directories(Benchmarks PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Source)
+target_include_directories(Benchmarks PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/source)
 
 # Copy over compile definitions from our plugin target so it has all the JUCEy goodness
 target_compile_definitions(Benchmarks PRIVATE $<TARGET_PROPERTY:${PROJECT_NAME},COMPILE_DEFINITIONS>)
