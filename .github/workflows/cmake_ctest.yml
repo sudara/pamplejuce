@@ -127,12 +127,12 @@ jobs:
 
     - name: Set additional env vars for next steps
       shell: bash
-      run: |       
+      run: |
         VERSION=$(cat VERSION)
         echo "ARTIFACTS_PATH=${{ env.BUILD_DIR }}/${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}" >> $GITHUB_ENV
-        echo "VST3_PATH=${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3/${{ env.PROJECT_NAME }}.vst3" >> $GITHUB_ENV
-        echo "AU_PATH=${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/AU/${{ env.PROJECT_NAME }}.component" >> $GITHUB_ENV
-        echo "AUV3_PATH=${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/AUv3/${{ env.PROJECT_NAME }}.appex" >> $GITHUB_ENV
+        echo "VST3_PATH=${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3/${{ env.PRODUCT_NAME }}.vst3" >> $GITHUB_ENV
+        echo "AU_PATH=${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/AU/${{ env.PRODUCT_NAME }}.component" >> $GITHUB_ENV
+        echo "AUV3_PATH=${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/AUv3/${{ env.PRODUCT_NAME }}.appex" >> $GITHUB_ENV          
         echo "ARTIFACT_NAME=${{ env.PROJECT_NAME }}-$VERSION-${{ matrix.name }}" >> $GITHUB_ENV
 
     - name: Pluginval
@@ -157,14 +157,14 @@ jobs:
       run: |
         # add the icns as its own icon resource (meta!)
         sips -i ../packaging/pamplejuce.icns
-
+        
         # Grab the resource, put in tempfile
         DeRez -only icns ../packaging/pamplejuce.icns > /tmp/icons
-
+        
         # Stuff the resource into the strange Icon? file's resource fork
         Rez -a /tmp/icons -o ${{ env.VST3_PATH }}/Icon$'\r'
         Rez -a /tmp/icons -o ${{ env.AU_PATH }}/Icon$'\r'
-
+        
         # Set custom icon attribute
         SetFile -a C ${{ env.VST3_PATH }}
         SetFile -a C ${{ env.AU_PATH }}
@@ -222,7 +222,6 @@ jobs:
       with:
         name: ${{ env.ARTIFACT_NAME }}.dmg
         path: packaging/${{ env.ARTIFACT_NAME }}.dmg
-
 
   release:
     if: contains(github.ref, 'tags/v')
