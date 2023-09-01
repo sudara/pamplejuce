@@ -13,6 +13,7 @@ include (PamplejuceVersion)
 # Doing so enables major versions to show up in IDEs and DAWs as separate plugins
 # allowing you to change parameters and behavior without breaking user projects
 set(PROJECT_NAME "Pamplejuce")
+set(BUNDLE_ID "com.pamplejuce.pamplejuce")
 
 # Set the plugin formats you'll be building here.
 # Valid choices here: AAX Unity VST VST3 AU AUv3 Standalone
@@ -46,7 +47,7 @@ juce_add_plugin("${PROJECT_NAME}"
 
     # Change me!
     COMPANY_NAME Pamplejuce
-    BUNDLE_ID com.pamplejuce.pamplejuce
+    BUNDLE_ID "${BUNDLE_ID}"
 
     # On MacOS, plugin is copied to ~/Users/you/Library/Audio/Plug-Ins/
     COPY_PLUGIN_AFTER_BUILD TRUE
@@ -137,3 +138,6 @@ include(Tests)
 
 # A separate target keeps the Tests target fast!
 include(Benchmarks)
+
+# Pass a few tidbits to GA
+include(GitHubENV)
