@@ -16,10 +16,10 @@ It also has integration with GitHub Actions, specifically:
 
 1. Building and testing cross-platform (linux, macOS, Windows) binaries
 2. Running tests and benchmarks in CI
-4Running [pluginval](http://github.com/tracktion/pluginval) 1.x against the binaries for plugin validation
-5. Config for [installing Intel IPP](https://www.intel.com/content/www/us/en/developer/tools/oneapi/ipp.html)
-6. [Code signing and notarization on macOS](https://melatonin.dev/blog/how-to-code-sign-and-notarize-macos-audio-plugins-in-ci/)
-7. [Windows EV/OV code signing via Azure Key Vault](https://melatonin.dev/blog/how-to-code-sign-windows-installers-with-an-ev-cert-on-github-actions/)
+3. Running [pluginval](http://github.com/tracktion/pluginval) 1.x against the binaries for plugin validation
+4. Config for [installing Intel IPP](https://www.intel.com/content/www/us/en/developer/tools/oneapi/ipp.html)
+5. [Code signing and notarization on macOS](https://melatonin.dev/blog/how-to-code-sign-and-notarize-macos-audio-plugins-in-ci/)
+6. [Windows EV/OV code signing via Azure Key Vault](https://melatonin.dev/blog/how-to-code-sign-windows-installers-with-an-ev-cert-on-github-actions/)
 
 It also contains:
 
