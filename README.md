@@ -30,7 +30,8 @@ It also contains:
 
 ## How does this all work at a high level?
 
-If you are new to CMake, I suggest you read up about [JUCE and CMmake on my blog!](https://melatonin.dev/blog/how-to-use-cmake-with-juce/).
+If you are new to CMake, I suggest you read up about [JUCE and CMmake on my blog!](https://melatonin.dev/blog/how-to-use-cmake-with-juce/)
+
 
 ## Setting up for YOUR project
 
@@ -46,7 +47,7 @@ After you've created a new repo from the template, you have a checklist of thing
 
 * [ ] [Download CMAKE](https://cmake.org/download/) if you aren't already using it (Clion and VS2022 both have it bundled, so you can skip this step in those cases).
 
-* [ ] Populate the  JUCE by running `git submodule update --init` in your repository directory. By default, this will track JUCE's `develop` branch, which is a good default until you are at the point of releasing a plugin.
+* [ ] Populate the  JUCE by running `git submodule update --init` in your repository directory. By default, this will track JUCE's `develop` branch, which is a good default until you are at the point of releasing a plugin. It will also pull in the CMake needed and an example module, my component inspector.
 
 * [ ] Replace `Pamplejuce` with the name of your project in `CMakeLists.txt` where the `PROJECT_NAME` variable is first set. Make this all one word, no spaces. 
 
@@ -114,7 +115,7 @@ It can be confusing, as the documentation is a big fragmented.
 1. Update with the latest CMake version [listed here](https://github.com/lukka/get-cmake), or the latest version supported by your toolchain like VS or Clion.
 2. Update JUCE and the inspector with `git submodule update --remote --merge`
 3. Check for an [IPP update from Intel](https://github.com/oneapi-src/oneapi-ci/blob/master/.github/workflows/build_all.yml#L10).
-4. You'll have to manually compare CMakeLists.txt, as I assume you made a changes. In the future, I may move most of the cmake magic into helpers to keep the main CMakesList.txt cleaner. 
+4. If you want to update CMake, first check the  `git submodule update --init --remote cmake`. You'll have to manually compare `CMakeLists.txt` as I assume you made changes.
 
 ## References & Inspiration
 
