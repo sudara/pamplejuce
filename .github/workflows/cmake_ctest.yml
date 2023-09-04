@@ -122,6 +122,8 @@ jobs:
     - name: Setup ENV for next steps
       shell: bash
       run: |
+        ls -ahl
+        cat .env # show us the config!
         cat .env >> GITHUB_ENV # pull in our PRODUCT_NAME, etc
         VERSION=$(cat VERSION)
         echo "ARTIFACTS_PATH=${{ env.BUILD_DIR }}/${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}" >> $GITHUB_ENV
