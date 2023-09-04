@@ -119,7 +119,7 @@ jobs:
       working-directory: ${{ env.BUILD_DIR }}
       run: ctest --output-on-failure -j4 -VV
 
-    - name: Read in .env from CMake
+    - name: Read in .env from CMake # see GitHubENV.cmake
       shell: bash
       run: |
         cat .env # show us the config
@@ -182,8 +182,8 @@ jobs:
         mv "${{ env.ARTIFACTS_PATH }}/AU/${{ env.PRODUCT_NAME }}.component" packaging/dmg
         
         # Run appdmg to create the .dmg
-        cd packaging && appdmg dmg.json ${{ env.ARTIFACT_NAME}}.dmg
-        codesign -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" --timestamp -i ${{ env.BUNDLE_ID }} --force ${{ env.ARTIFACT_NAME }}.dmg
+        cd packaging && appdmg dmg.json "${{ env.ARTIFACT_NAME}}.dmg"
+        codesign -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" --timestamp -i ${{ env.BUNDLE_ID }} --force "${{ env.ARTIFACT_NAME }}.dmg"
         xcrun notarytool submit "${{ env.ARTIFACT_NAME }}.dmg" --apple-id ${{ secrets.NOTARIZATION_USERNAME }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --team-id ${{ secrets.TEAM_ID }} --wait
         xcrun stapler staple "${{ env.ARTIFACT_NAME }}.dmg"
 
