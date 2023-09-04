@@ -6,20 +6,35 @@ cmake_minimum_required(VERSION 3.24.1)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include (PamplejuceVersion)
 
-# This is the name of your plugin
-# Change me! Note: It cannot have spaces (but JUCE's PRODUCT_NAME can)
-# You may want to append the major version on the end of this (and PRODUCT_NAME)
-# set(PROJECT_NAME "MyPlugin_v${MAJOR_VERSION}")
-# Doing so enables major versions to show up in IDEs and DAWs as separate plugins
-# allowing you to change parameters and behavior without breaking user projects
+# Change me!
+# This is the internal name of the project and the name of JUCE's shared code "target"
+# Note: This cannot have spaces (it may be 2023, but you can't have it all!)
+# Worry not, JUCE's PRODUCT_NAME can have spaces (and is DAWs display)
 set(PROJECT_NAME "Pamplejuce")
 
-# Set the plugin formats you'll be building here.
-# Valid choices here: AAX Unity VST VST3 AU AUv3 Standalone
+# Worry not, JUCE's PRODUCT_NAME can have spaces (and is what DAWs will display)
+# You can also just have it be the same thing as PROJECT_NAME
+# You may want to append the major version on the end of this (and PROJECT_NAME) ala:
+#   set(PROJECT_NAME "MyPlugin_v${MAJOR_VERSION}")
+# Doing so enables major versions to show up in IDEs and DAWs as separate plugins
+# allowing you to change parameters and behavior without breaking existing user projects
+set(PRODUCT_NAME "Pamplejuce Demo")
+
+# Change me! Used for the MacOS bundle name and Installers
+set(COMPANY_NAME "Pamplejuce Company")
+
+# Change me! Used for the MacOS bundle identifier (and signing)
+set(BUNDLE_ID "com.pamplejuce.pamplejuce")
+
+# Change me! Set the plugin formats you want built
+# Valid choices: AAX Unity VST VST3 AU AUv3 Standalone
 set(FORMATS Standalone AU VST3 AUv3)
 
 # For simplicity, the name of the CMake project is also the name of the target
 project(${PROJECT_NAME} VERSION ${CURRENT_VERSION})
+
+# Configures universal binaries in CI
+include(PamplejuceMacOS)
 
 # Couple tweaks that IMO should be JUCE defaults
 include(JUCEDefaults)
@@ -30,7 +45,7 @@ include(JUCEDefaults)
 # On Github Actions, this is done as a part of actions/checkout
 add_subdirectory(JUCE)
 
-# Add your modules here
+# Add any other modules you want modules here, before the juce_add_plugin call
 # juce_add_module(modules/my_module)
 
 # This adds the melatonin inspector module
@@ -42,10 +57,10 @@ juce_add_plugin("${PROJECT_NAME}"
     ICON_BIG "${CMAKE_CURRENT_SOURCE_DIR}/packaging/icon.png"
 
     # Change me!
-    COMPANY_NAME Pamplejuce
-    BUNDLE_ID com.pamplejuce.pamplejuce
-    
-    # On MacOS, plugin is copied to ~/Users/you/Library/Audio/Plug-Ins/
+    COMPANY_NAME "${COMPANY_NAME}"
+    BUNDLE_ID "${BUNDLE_ID}"
+
+    # On MacOS, plugin is copied to ~/Users/yourname/Library/Audio/Plug-Ins/
     COPY_PLUGIN_AFTER_BUILD TRUE
 
     # Change me!
@@ -63,7 +78,7 @@ juce_add_plugin("${PROJECT_NAME}"
     # This is how it's listed in the DAW
     # This can be different from PROJECT_NAME and can have spaces!
     # You might want to use v${MAJOR_VERSION} here once you go to v2...
-    PRODUCT_NAME "${PROJECT_NAME}")
+    PRODUCT_NAME "${PRODUCT_NAME}")
 
 # This lets us use our code in both the JUCE targets and our Test target
 # Without running into ODR violations
@@ -84,9 +99,10 @@ target_sources(SharedCode INTERFACE ${SourceFiles})
 # Adds a BinaryData target for embedding assets into the binary
 include(Assets)
 
-# MacOS only: Clean up folder organization on Xcode.
-include(Xcode)
+# MacOS only: Cleans up folder and target organization on Xcode.
+include(XcodePrettify)
 
+# This is where you can set preprocessor definitions for JUCE and your plugin
 target_compile_definitions(SharedCode
     INTERFACE
 
@@ -106,10 +122,11 @@ target_compile_definitions(SharedCode
     PRODUCT_NAME_WITHOUT_VERSION="Pamplejuce"
 )
 
-# Usually JUCE modules should have PRIVATE visibility
+# Link to any other modules you added (with juce_add_module) here!
+# Usually JUCE modules must have PRIVATE visibility
 # See https://github.com/juce-framework/JUCE/blob/master/docs/CMake%20API.md#juce_add_module
-# However, with Pamplejuce, you will link your modules to SharedCode with INTERFACE visibility
-# This allows JUCE targets and the Tests target to link against it
+# However, with Pamplejuce, you'll link modules to SharedCode with INTERFACE visibility
+# This allows the JUCE plugin targets and the Tests target to link against it
 target_link_libraries(SharedCode
     INTERFACE
     Assets
@@ -134,3 +151,6 @@ include(Tests)
 
 # A separate target keeps the Tests target fast!
 include(Benchmarks)
+
+# Pass some config to GA (like our PRODUCT_NAME)
+include(GitHubENV)

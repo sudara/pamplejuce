@@ -1,4 +1,4 @@
-![PAMPLEJUCE](pamplejuce.png)
+![PAMPLEJUCE](assets/images/pamplejuce.png)
 [![](https://github.com/sudara/pamplejuce/workflows/Pamplejuce/badge.svg)](https://github.com/sudara/pamplejuce/actions)
 
 Pamplejuce is a ~~template~~ lifestyle for creating and building JUCE plugins in 2023.
