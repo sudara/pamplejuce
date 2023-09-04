@@ -1,7 +1,7 @@
 # Write some temp files to make GitHub Actions / packaging easy
 
 if ((DEFINED ENV{CI}))
-    set (env_file "${PROJECT_SOURCE_DIR}/.pamplejuce_env")
+    set (env_file "${PROJECT_SOURCE_DIR}/.env")
     message ("Writing ENV file for CI: ${env_file}")
     file(APPEND env_file "${PROJECT_NAME}\\n")
     file(APPEND env_file "${PRODUCT_NAME}\\n")
