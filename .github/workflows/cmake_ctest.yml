@@ -94,17 +94,6 @@ jobs:
       with:
         submodules: true # Get JUCE populated
 
-    - name: Setup Environment Variables
-      shell: bash
-      run: |
-        cat .pamplejuce_env >> ${GITHUB_ENV} # pull in our PRODUCT_NAME, etc
-        VERSION=$(cat VERSION)
-        echo "ARTIFACTS_PATH=${{ env.BUILD_DIR }}/${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}" >> $GITHUB_ENV
-        echo "VST3_PATH=${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3/${{ env.PROJECT_NAME }}.vst3" >> $GITHUB_ENV
-        echo "AU_PATH=${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/AU/${{ env.PROJECT_NAME }}.component" >> $GITHUB_ENV
-        echo "AUV3_PATH=${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/AUv3/${{ env.PROJECT_NAME }}.appex" >> $GITHUB_ENV
-        echo "ARTIFACT_NAME=${{ env.PROJECT_NAME }}-$VERSION-${{ matrix.name }}" >> $GITHUB_ENV
-
     - name: ccache
       uses: hendrikmuhs/ccache-action@main
       with:
@@ -129,6 +118,17 @@ jobs:
     - name: Test
       working-directory: ${{ env.BUILD_DIR }}
       run: ctest --output-on-failure -j4 -VV
+
+    - name: Setup ENV for next steps
+      shell: bash
+      run: |
+        cat .pamplejuce_env >> ${GITHUB_ENV} # pull in our PRODUCT_NAME, etc
+        VERSION=$(cat VERSION)
+        echo "ARTIFACTS_PATH=${{ env.BUILD_DIR }}/${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}" >> $GITHUB_ENV
+        echo "VST3_PATH=${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3/${{ env.PROJECT_NAME }}.vst3" >> $GITHUB_ENV
+        echo "AU_PATH=${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/AU/${{ env.PROJECT_NAME }}.component" >> $GITHUB_ENV
+        echo "AUV3_PATH=${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/AUv3/${{ env.PROJECT_NAME }}.appex" >> $GITHUB_ENV
+        echo "ARTIFACT_NAME=${{ env.PROJECT_NAME }}-$VERSION-${{ matrix.name }}" >> $GITHUB_ENV
 
     - name: Pluginval
       working-directory: ${{ env.BUILD_DIR }}
