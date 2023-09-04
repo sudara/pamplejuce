@@ -184,13 +184,13 @@ jobs:
         # Run appdmg to create the .dmg
         cd packaging && appdmg dmg.json ${{ env.ARTIFACT_NAME}}.dmg
         codesign -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" --timestamp -i ${{ env.BUNDLE_ID }} --force ${{ env.ARTIFACT_NAME }}.dmg
-        xcrun notarytool submit ${{ env.ARTIFACT_NAME }}.dmg --apple-id ${{ secrets.NOTARIZATION_USERNAME }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --team-id ${{ secrets.TEAM_ID }} --wait
-        xcrun stapler staple ${{ env.ARTIFACT_NAME }}.dmg
+        xcrun notarytool submit "${{ env.ARTIFACT_NAME }}.dmg" --apple-id ${{ secrets.NOTARIZATION_USERNAME }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --team-id ${{ secrets.TEAM_ID }} --wait
+        xcrun stapler staple "${{ env.ARTIFACT_NAME }}.dmg"
 
     - name: Zip
       if: ${{ matrix.name == 'Linux' }}
       working-directory: ${{ env.ARTIFACTS_PATH }}
-      run: 7z a -tzip ${{ env.ARTIFACT_NAME }}.zip .
+      run: 7z a -tzip "${{ env.ARTIFACT_NAME }}.zip" .
 
     - name: Generate Installer and Sign with EV cert on Azure (Windows)
       if: ${{ matrix.name == 'Windows' }}
