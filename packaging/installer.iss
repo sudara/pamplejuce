@@ -15,7 +15,7 @@ DefaultDirName="{commoncf64}\VST3\{#PluginName}.vst3"
 DisableDirPage=yes
 
 ; MAKE SURE YOU READ THE FOLLOWING!
-LicenseFile="LICENSE"
+LicenseFile="EULA"
 UninstallFilesDir="{commonappdata}\{#PluginName}\uninstall"
 
 [UninstallDelete]
