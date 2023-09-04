@@ -119,11 +119,15 @@ jobs:
       working-directory: ${{ env.BUILD_DIR }}
       run: ctest --output-on-failure -j4 -VV
 
-    - name: Setup ENV for next steps
+    - name: Read in .env from CMake
       shell: bash
       run: |
-        cat .env # show us the config (and let us use it)!
+        cat .env # show us the config
         cat .env >> $GITHUB_ENV # pull in our PRODUCT_NAME, etc
+
+    - name: Set additional env vars for next steps
+      shell: bash
+      run: |       
         VERSION=$(cat VERSION)
         echo "ARTIFACTS_PATH=${{ env.BUILD_DIR }}/${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}" >> $GITHUB_ENV
         echo "VST3_PATH=${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3/${{ env.PROJECT_NAME }}.vst3" >> $GITHUB_ENV
