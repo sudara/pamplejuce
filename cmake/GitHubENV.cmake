@@ -1,5 +1,10 @@
-# Set ENV variables to make our GA life easy
+# Write some temp files to make GitHub Actions / packaging easy
 
-set (ENV{PROJECT_NAME} ${PROJECT_NAME})
-set (ENV{PRODUCT_NAME} ${PRODUCT_NAME})
-set (ENV{BUNDLE_ID} ${BUNDLE_ID})
+if (ENV{CI} STREQUAL 1)
+    message ("Writing ENV file for CI")
+    set (env_file "${CMAKE_CURRENT_BINARY_DIR}/.pamplejuce_env")
+    file(APPEND env_file "${PROJECT_NAME}\\n")
+    file(APPEND env_file "${PRODUCT_NAME}\\n")
+    file(APPEND env_file "${BUNDLE_ID}\\n")
+    file(APPEND env_file "${COMPANY_NAME}\\n")
+endif ()
