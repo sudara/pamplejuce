@@ -121,7 +121,6 @@ jobs:
 
     - name: Setup ENV for next steps
       shell: bash
-      working-directory: ${{ env.BUILD_DIR }}
       run: |
         cat .pamplejuce.env >> ${GITHUB_ENV} # pull in our PRODUCT_NAME, etc
         VERSION=$(cat VERSION)

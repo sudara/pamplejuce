@@ -142,5 +142,5 @@ include(Tests)
 # A separate target keeps the Tests target fast!
 include(Benchmarks)
 
-# Pass a few tidbits to GA
+# Pass some config to GA (like our PRODUCT_NAME)
 include(GitHubENV)
