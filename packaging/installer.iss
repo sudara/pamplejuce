@@ -1,6 +1,6 @@
 #define Version Trim(FileRead(FileOpen("..\VERSION")))
-#define PluginName "Pamplejuce"
-#define Publisher "Melatonin"
+#define PluginName GetEnv('PRODUCT_NAME')
+#define Publisher GetEnv('COMPANY_NAME')
 #define Year GetDateTimeString("yyyy","","")
 
 [Setup]
@@ -13,7 +13,9 @@ AppPublisher={#Publisher}
 AppVersion={#Version}
 DefaultDirName="{commoncf64}\VST3\{#PluginName}.vst3"
 DisableDirPage=yes
-LicenseFile="..\LICENSE"
+
+; MAKE SURE YOU READ THE FOLLOWING!
+LicenseFile="LICENSE"
 UninstallFilesDir="{commonappdata}\{#PluginName}\uninstall"
 
 [UninstallDelete]
