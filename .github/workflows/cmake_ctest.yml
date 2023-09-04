@@ -97,6 +97,7 @@ jobs:
     - name: Setup Environment Variables
       shell: bash
       run: |
+        cat .pamplejuce_env >> ${GITHUB_ENV} # pull in our PRODUCT_NAME, etc
         VERSION=$(cat VERSION)
         echo "ARTIFACTS_PATH=${{ env.BUILD_DIR }}/${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}" >> $GITHUB_ENV
         echo "VST3_PATH=${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3/${{ env.PROJECT_NAME }}.vst3" >> $GITHUB_ENV
