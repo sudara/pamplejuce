@@ -113,9 +113,10 @@ It can be confusing, as the documentation is a big fragmented.
 ## How to update a repo based on Pamplejuce
 
 1. Update with the latest CMake version [listed here](https://github.com/lukka/get-cmake), or the latest version supported by your toolchain like VS or Clion.
-2. Update JUCE and the inspector with `git submodule update --remote --merge`
-3. Check for an [IPP update from Intel](https://github.com/oneapi-src/oneapi-ci/blob/master/.github/workflows/build_all.yml#L10).
-4. If you want to update CMake, first check the  `git submodule update --init --remote cmake`. You'll have to manually compare `CMakeLists.txt` as I assume you made changes.
+2. Update JUCE with `git submodule update --remote --merge JUCE`
+3. Update the inspector with `git submodule update --remote --merge modules/melatonin_inspector`
+4. Check for an [IPP update from Intel](https://github.com/oneapi-src/oneapi-ci/blob/master/.github/workflows/build_all.yml#L10).
+5. If you want to update to the latest CMake config Pamplejuce uses, first check the repository's [CHANGELOG](https://github.com/sudara/cmake-includes/blob/main/CHANGELOG.md) to make sure you are informed of any breaking changes. Then. `git submodule update --remote --merge cmake`. Unfortunately, you'll have to manually compare `CMakeLists.txt`, but it should be pretty easy to see what changed.
 
 ## References & Inspiration
 
