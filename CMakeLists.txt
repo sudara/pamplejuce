@@ -6,13 +6,16 @@ cmake_minimum_required(VERSION 3.24.1)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include (PamplejuceVersion)
 
-# This is the name of your plugin
-# Change me! Note: It cannot have spaces (but JUCE's PRODUCT_NAME can)
+# Change me!
+# This is the internal name of the project and the name of JUCE's shared code "target"
+# Note: This cannot have spaces. It may be 2023, but you can't have it all.
+# Worry not, JUCE's PRODUCT_NAME can have spaces (and is external facing).
 # You may want to append the major version on the end of this (and PRODUCT_NAME)
 # set(PROJECT_NAME "MyPlugin_v${MAJOR_VERSION}")
 # Doing so enables major versions to show up in IDEs and DAWs as separate plugins
 # allowing you to change parameters and behavior without breaking user projects
 set(PROJECT_NAME "Pamplejuce")
+
 set(BUNDLE_ID "com.pamplejuce.pamplejuce")
 
 # Set the plugin formats you'll be building here.
