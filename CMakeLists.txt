@@ -10,13 +10,20 @@ include (PamplejuceVersion)
 # This is the internal name of the project and the name of JUCE's shared code "target"
 # Note: This cannot have spaces (it may be 2023, but you can't have it all!)
 # Worry not, JUCE's PRODUCT_NAME can have spaces (and is DAWs display)
-# You may want to append the major version on the end of this (and PRODUCT_NAME)
-# set(PROJECT_NAME "MyPlugin_v${MAJOR_VERSION}")
-# Doing so enables major versions to show up in IDEs and DAWs as separate plugins
-# allowing you to change parameters and behavior without breaking existing user projects
 set(PROJECT_NAME "Pamplejuce")
 
-# Change me! Used for the MacOS bundle identifier
+# Worry not, JUCE's PRODUCT_NAME can have spaces (and is what DAWs will display)
+# You can also just have it be the same thing as PROJECT_NAME
+# You may want to append the major version on the end of this (and PROJECT_NAME) ala:
+#   set(PROJECT_NAME "MyPlugin_v${MAJOR_VERSION}")
+# Doing so enables major versions to show up in IDEs and DAWs as separate plugins
+# allowing you to change parameters and behavior without breaking existing user projects
+set(PRODUCT_NAME "Pamplejuce Demo")
+
+# Change me! Used for the MacOS bundle name and Installers
+set(COMPANY_NAME "Pamplejuce Company")
+
+# Change me! Used for the MacOS bundle identifier (and signing)
 set(BUNDLE_ID "com.pamplejuce.pamplejuce")
 
 # Change me! Set the plugin formats you want built
@@ -50,7 +57,7 @@ juce_add_plugin("${PROJECT_NAME}"
     ICON_BIG "${CMAKE_CURRENT_SOURCE_DIR}/packaging/icon.png"
 
     # Change me!
-    COMPANY_NAME Pamplejuce
+    COMPANY_NAME "${COMPANY_NAME}"
     BUNDLE_ID "${BUNDLE_ID}"
 
     # On MacOS, plugin is copied to ~/Users/yourname/Library/Audio/Plug-Ins/
@@ -71,7 +78,7 @@ juce_add_plugin("${PROJECT_NAME}"
     # This is how it's listed in the DAW
     # This can be different from PROJECT_NAME and can have spaces!
     # You might want to use v${MAJOR_VERSION} here once you go to v2...
-    PRODUCT_NAME "${PROJECT_NAME}")
+    PRODUCT_NAME "${PRODUCT_NAME}")
 
 # This lets us use our code in both the JUCE targets and our Test target
 # Without running into ODR violations
