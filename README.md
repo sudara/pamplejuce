@@ -96,7 +96,7 @@ It also [code signs and notarizes on macOS, again, you can read my article for d
 
 ## A note on GitHub Actions and macOS
 
-:warning: GitHub gives you 2000 or 3000 free GitHub Actions "minutes" for private projects, but [they actually bill 2x the number of minutes you use on Windows and 10x on MacOS](https://docs.github.com/en/free-pro-team@latest/github/setting-up-and-managing-billing-and-payments-on-github/about-billing-for-github-actions#about-billing-for-github-actions).
+:warning: GitHub gives you 2000 or 3000 free GitHub Actions "minutes" / month for private projects, but [they actually bill 2x the number of minutes you use on Windows and 10x on MacOS](https://docs.github.com/en/free-pro-team@latest/github/setting-up-and-managing-billing-and-payments-on-github/about-billing-for-github-actions#about-billing-for-github-actions).
 
 If you made the repo private, you might feel disincentivized to push as you would burn through minutes. Note you can push a commit with `[ci skip]` in the message if you are doing things like updating the README. You have a few other big picture options, like doing testing/pluginval only on linux and moving everything else to release only. The tradeoff is you won't be sure everything is happy on all platforms until the time you are releasing, which is the last place you really want friction. By default, multiple commits in quick succession will cancel the earlier builds.
 
