@@ -63,47 +63,64 @@ This is what you will see when it's built, the plugin displaying its version num
 
 ![Pamplejuce v1 - 2023-08-28 41@2x](https://github.com/sudara/pamplejuce/assets/472/33a9c8d5-fc3f-42e7-bd06-21a1559c7128)
 
-## Conventions 
 
-### Adding new .h / .cpp files to the project
+## FAQ
+
+Don't see your question here? [Open an issue](https://github.com/sudara/pamplejuce/issues/new)!
+
+### Where do I put new .h / .cpp files?
 
 New source files go in `/source`. All `.h` and `.cpp` files in that directory will be available to include in your plugin target and your tests. 
 
 Tests go in `/tests`. Just add .cpp files there and they will be available in the Tests target.
 
-Note that if you use an overeager, CMake-aware IDE, it might prompt you to manually add files to a CMake target. This is not needed.
+> [!NOTE]
+> If you use an overeager, CMake-aware IDE, it might prompt you to manually add files to a CMake target. This is not needed.
 
 I recommend not stuffing everything into the boilerplate PluginEditor/PluginProcessor files. Sure, go ahead make a mess at first. But then clean them up and just include your source from there.
 
-### Modules
+### What's the deal with BinaryData?
 
-Additional 3rd party JUCE modules go in `/modules`. You can add third party git submodules there (like the inspector is set up). 
+Your binary data CMake target is called `Assets`.
+
+You need to include `BinaryData.h` to access it. 
+
+> [!IMPORTANT]
+> You may have to configure the project (just hit build in your IDE) to build juceaide before the header will be available.
+
+### How do I add another module?
+
+Additional 3rd party JUCE modules go in `/modules`. You can add third party git submodules there (like the inspector is set up). Remember to not only call `juce_add_module` but add it to the `target_link_libraries` list!
 
 I (and others, including some of the JUCE team) recommend moving as much as your application code into modules as possible. For example, if you tend to roll your own widgets, pop those into a module, you'll thank yourself later.
 
 A few reasons to do so:
 
-* Reusability. You can use modules across projects.
-* Testability. You can test modules in isolation. 
-* Sanity. You can keep your project tidy and focused on the application logic.
+* Re-usability. You can use modules across projects.
+* Testability. You can test modules in isolation from each other. When sticking test in modules, it's common to guard `.cpp` files with something like `#ifdef RUN_MY_TESTS` and set via `target_compile_definitions` in `Tests` target.
+* Sanity. You can keep the root project tidy, focused on the application logic.
 * Compile-friendliness. Each JUCE module is its own compilation unit. If you change a file in a module, only that one module needs to rebuild. It also means you can work on *only* the module in a separate CMake project, which is a very nice/fast life.
 
 Don't worry about all of this if you are new to JUCE. Just keep it in mind as you grow.
 
+### What's the deal with code signing and notarization?
 
-### Binary Data
+This repo code signs Windows via Azure Key Vault. [Read more about how to set it up blog](https://melatonin.dev/blog/how-to-code-sign-windows-installers-with-an-ev-cert-on-github-actions/).
 
-Your binary data target in CMake is called "Assets".
+It also code signs and notarizes on macOS. Again, you can [read my article for details](https://melatonin.dev/blog/how-to-code-sign-and-notarize-macos-audio-plugins-in-ci/).
 
-You need to include `BinaryData.h` to access it. Sometimes you have to  configure the project (hit build in your IDE) to build juceaide first before it will be available.
+> [!IMPORTANT]
+> Sudara is not available for code signing consulting work, but is happy to clarify questions. Comment on those articles or on the JUCE forum.
 
-### GitHub Actions 
+### How do I update my Pamplejuce-based project?
 
-CI will run against Linux, Windows, and macOS unless modified. 
+1. Update with the latest CMake version [listed here](https://github.com/lukka/get-cmake), or the latest version supported by your toolchain like VS or Clion.
+2. Update JUCE with `git submodule update --remote --merge JUCE`
+3. Update the inspector with `git submodule update --remote --merge modules/melatonin_inspector`
+4. Check for an [IPP update from Intel](https://github.com/oneapi-src/oneapi-ci/blob/master/.github/workflows/build_all.yml#L10).
+5. If you want to update to the latest CMake config Pamplejuce uses, first check the repository's [CHANGELOG](https://github.com/sudara/cmake-includes/blob/main/CHANGELOG.md) to make sure you are informed of any breaking changes. Then. `git submodule update --remote --merge cmake`. Unfortunately, you'll have to manually compare `CMakeLists.txt`, but it should be pretty easy to see what changed.
 
-If you are making a private repo, be sure to do some calculations about free minutes vs. costs on running in CI. 
-
-## Cutting GitHub Releases
+## How to Cut A GitHub Release
 
 Cut a release with downloadable assets by creating a tag starting with `v` and pushing it to GitHub. Note that you currently *must push the tag along with an actual commit*.
 
@@ -116,42 +133,54 @@ git tag v0.0.2
 git push --tags
 ```
 
-I'll work on making this less awkward...
+> [!IMPORTANT]
+> Releases are set to `prerelease`! This means that uploaded release assets are visible to other users (on public repositories), but not explicitly listed as the latest release until you "publish" in the GitHub UI. 
 
-Releases are set to `prerelease`, which means that uploaded release assets are visible to other users, but it's not explicitly listed as the latest release until changed in the GitHub UI.
-
-## New to code signing and notarization?
-
-This repo codesigns Windows via Azure Key Vault, [read more about how to do that on my blog](https://melatonin.dev/blog/how-to-code-sign-windows-installers-with-an-ev-cert-on-github-actions/).
-
-It also code signs and notarizes on macOS, again, you can [read my article for details](https://melatonin.dev/blog/how-to-code-sign-and-notarize-macos-audio-plugins-in-ci/).
+> [!NOTE]
+> I would like the release process to be easier. I'm open to suggestions, [please read the options and provide feedback](https://github.com/sudara/pamplejuce/issues/44#issuecomment-1701910167).
 
 
-## A note on GitHub Actions and macOS
+### How do I add *private* github repos as JUCE modules?
 
-:warning: GitHub gives you 2000 or 3000 free GitHub Actions "minutes" / month for private projects, but [they actually bill 2x the number of minutes you use on Windows and 10x on MacOS](https://docs.github.com/en/free-pro-team@latest/github/setting-up-and-managing-billing-and-payments-on-github/about-billing-for-github-actions#about-billing-for-github-actions).
+Generate an ssh key (without a passphrase) for the repository and add it as a secret to your Pamplejuce-derived repository. 
 
-If you made the repo private, you might feel disincentivized to push as you would burn through minutes. Note you can push a commit with `[ci skip]` in the message if you are doing things like updating the README. You have a few other big picture options, like doing testing/pluginval only on linux and moving everything else to release only. The tradeoff is you won't be sure everything is happy on all platforms until the time you are releasing, which is the last place you really want friction. By default, multiple commits in quick succession will cancel the earlier builds.
+Then, use the `ssh_key` option in the checkout action, like so:
 
-## How do variables work in GitHub Actions?
+```yml
+- name: Checkout code
+  uses: actions/checkout@v3
+  with:
+    ssh_key: ${{ secrets.SSH_PRIVATE_KEY }}
+    submodules: true # Get JUCE populated
+```
 
-It can be confusing, as the documentation is a big fragmented.
+Also see @mikelange49's solution [here](https://github.com/sudara/pamplejuce/issues/58#issuecomment-1777440387).
+
+### I'm new to GitHub Actions, what do I need to know?
+
+CI will run against latest Linux, Windows, and macOS unless modified. You can do it all for free on public repos.
+
+For private repos, be sure to do some calculations about free minutes vs. costs on running in CI.
+
+> [!WARNING] 
+> GitHub gives you 2000 or 3000 free GitHub Actions "minutes" / month for private projects, but [they actually bill 2x the number of minutes you use on Windows and 10x on MacOS](https://docs.github.com/en/free-pro-team@latest/github/setting-up-and-managing-billing-and-payments-on-github/about-billing-for-github-actions#about-billing-for-github-actions).
+
+You might feel disincentivized to push to private repos (as you would burn through minutes). By default, multiple commits in quick succession will cancel any earlier running builds. There are also timeouts set so you can't accidentally stall a build and burn through time.
+
+> [!NOTE]
+> You can push a commit with `[ci skip]` in the message if you are just doing things like updating the README or checking in a WIP that you know will fail CI.
+
+You have a few other big picture options, like doing testing/pluginval only on linux and moving everything else to `Release` only.  The tradeoff is you won't be sure everything is happy on all platforms until the time you are releasing, which is the last place you really want friction.
+
+### How do variables work in GitHub Actions?
+
+It can be confusing. The documentation is a big fragmented. Here are some tips.
 
 1. Things in double curly braces like `${{ matrix.name }}` are called ["contexts or expressions"](https://docs.github.com/en/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions) and can be used to get, set, or perform simple operations.
 2. In "if" conditions you can omit the double curly braces, as the whole condition is evaluated as an expression: `if: contains(github.ref, 'tags/v')`
 3. You can set variables for the whole workflow to use in ["env"](https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-syntax-for-github-actions#env)
 4. Reading those variables is done with the [env context](https://docs.github.com/en/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#env-context) when you are inside a `with`, `name`, or `if`: `${{ env.SOME_VARIABLE }}`
 5. Inside of `run`, you have access to bash ENV variables *in addition* to contexts/expressions. That means `$SOME_VARIABLE` or `${SOME_VARIABLE}` will work but *only when using bash* and [not while using powershell on windows](https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-syntax-for-github-actions#using-a-specific-shell). The version with curly braces (variable expansion) is often used [when the variable is forming part of a larger string to avoid ambiguity](https://stackoverflow.com/questions/8748831/when-do-we-need-curly-braces-around-shell-variables). Be sure that the ENV variable was set properly in the workflow/job/step before you use it. And if you need the variable to be os-agnostic, use the env context.
-
-## How to update a repo based on Pamplejuce
-
-1. Update with the latest CMake version [listed here](https://github.com/lukka/get-cmake), or the latest version supported by your toolchain like VS or Clion.
-2. Update JUCE with `git submodule update --remote --merge JUCE`
-3. Update the inspector with `git submodule update --remote --merge modules/melatonin_inspector`
-4. Check for an [IPP update from Intel](https://github.com/oneapi-src/oneapi-ci/blob/master/.github/workflows/build_all.yml#L10).
-5. If you want to update to the latest CMake config Pamplejuce uses, first check the repository's [CHANGELOG](https://github.com/sudara/cmake-includes/blob/main/CHANGELOG.md) to make sure you are informed of any breaking changes. Then. `git submodule update --remote --merge cmake`. Unfortunately, you'll have to manually compare `CMakeLists.txt`, but it should be pretty easy to see what changed.
-
-## Other questions
 
 ### What's up with the `SharedCode` interface target, is it needed?
 
@@ -162,6 +191,15 @@ The summary: JUCE modules build separately for each target. You need to link aga
 This becomes a problem when you link `Tests` to `YourPlugin` target, as it causes ODL issues and confuses your IDE. Additionally, it is hard/impossible to set different compile definitions for the `Tests` target vs. plugin targets (for example, you'll probably need to enable the deprecated modal loops, guard macros for running tests, etc).
 
 I spoke with [Reuben at JUCE a bit about this here](https://forum.juce.com/t/windows-linker-issue-on-develop/55524/2) and there's a Pamplejuce [issue with background here](https://github.com/sudara/pamplejuce/issues/31). 
+
+
+### How do I build JuceHeader.h
+
+Using JuceHeader.h has been deprecated for some time, so if it's a new project, I would definitely avoid it! 
+
+Instead, just include the `.h` files you need from the juce modules you are using, like `#include "juce_gui_basics/juce_gui_basics.h"`
+
+If you are converting an older project, it's still worth the conversion away from `JuceHeader.h` to using the actual juce modules you need. You'll get faster compilation, autocomplete, etc. You can [see an example of the conversion I did for the pluginval project](https://github.com/Tracktion/pluginval/pull/90/files). It's less scary than you are imagining: just make sure the `juce::` prefix is added everywhere, try to compile and your IDE will yell at you when you need to include one of the modules :)
 
 
 ## Contributing
