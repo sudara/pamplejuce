@@ -1,26 +1,35 @@
+#include "helpers/test_helpers.h"
 #include <PluginProcessor.h>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_string.hpp>
 
-TEST_CASE("one is equal to one", "[dummy]")
+TEST_CASE ("one is equal to one", "[dummy]")
 {
-  REQUIRE(1 == 1);
+    REQUIRE (1 == 1);
 }
 
-// https://github.com/McMartin/FRUT/issues/490#issuecomment-663544272
-PluginProcessor testPlugin;
-
-TEST_CASE("Plugin instance name", "[name]")
+TEST_CASE ("Plugin instance", "[instance]")
 {
-  CHECK_THAT(testPlugin.getName().toStdString(),
-             Catch::Matchers::Equals("Pamplejuce Demo"));
+    PluginProcessor testPlugin;
+
+    // This lets us use JUCE's MessageManager without leaking.
+    // PluginProcessor might need this if you use the APVTS for example.
+    // You'll also need it for tests that rely on juce::Graphics, juce::Timer, etc.
+    auto gui = juce::ScopedJuceInitialiser_GUI {};
+
+    SECTION ("name")
+    {
+        CHECK_THAT (testPlugin.getName().toStdString(),
+            Catch::Matchers::Equals ("Pamplejuce Demo"));
+    }
 }
+
 
 #ifdef PAMPLEJUCE_IPP
-#include <ipps.h>
+    #include <ipps.h>
 
-TEST_CASE("IPP version", "[ipp]")
+TEST_CASE ("IPP version", "[ipp]")
 {
-  CHECK_THAT(ippsGetLibVersion()->Version, Catch::Matchers::Equals("2021.7 (r0xa954907f)"));
+    CHECK_THAT (ippsGetLibVersion()->Version, Catch::Matchers::Equals ("2021.7 (r0xa954907f)"));
 }
 #endif
