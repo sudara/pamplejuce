@@ -76,7 +76,9 @@ New source files go in `/source`. All `.h` and `.cpp` files in that directory wi
 Tests go in `/tests`. Just add .cpp files there and they will be available in the Tests target.
 
 > [!NOTE]
-> If you use an overeager, CMake-aware IDE, it might prompt you to manually add files to a CMake target. This is not needed.
+> If you use an overeager, CMake-aware IDE (like CLion) it might prompt you to manually add files to a CMake target. This is not needed.
+
+![Preview - 2023-11-25 34@2x](https://github.com/sudara/pamplejuce/assets/472/cb9e22b5-3352-435a-ac3f-7631eb6ad007)
 
 I recommend not stuffing everything into the boilerplate PluginEditor/PluginProcessor files. Sure, go ahead make a mess at first. But then clean them up and just include your source from there.
 
