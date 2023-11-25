@@ -69,7 +69,7 @@ This is what you will see when it's built, the plugin displaying its version num
 > [!TIP]
 > Don't see your question here? [Open an issue](https://github.com/sudara/pamplejuce/issues/new)!
 
-### Where do I put new .h / .cpp files?
+## Where do I put new .h / .cpp files?
 
 New source files go in `/source`. All `.h` and `.cpp` files in that directory will be available to include in your plugin target and your tests. 
 
@@ -80,7 +80,7 @@ Tests go in `/tests`. Just add .cpp files there and they will be available in th
 
 I recommend not stuffing everything into the boilerplate PluginEditor/PluginProcessor files. Sure, go ahead make a mess at first. But then clean them up and just include your source from there.
 
-### How do I add another module?
+## How do I add another module?
 
 Additional 3rd party JUCE modules go in `/modules`. You can add third party git submodules there (like the inspector is set up). Remember to not only call `juce_add_module` but add it to the `target_link_libraries` list!
 
@@ -95,13 +95,13 @@ A few reasons to do so:
 
 Don't worry about all of this if you are new to JUCE. Just keep it in mind as you grow.
 
-### What if I need to include files not in modules and not in `/source`?
+## What if I need to include files not in modules and not in `/source`?
 
 If you have control over the files, I highly recommend taking 3 minutes to make a JUCE module — if nothing else than to wrap the code you need and make the build system nice and easy. See the [module API](https://github.com/juce-framework/JUCE/blob/master/docs/JUCE%20Module%20Format.md), or other JUCE modules for an example on how to do it. 
 
 If that's not an option, you could add more directories in the `file(GLOB_RECURSE SourceFiles` line in the `CMakeLists.txt` and maybe fiddle with `source_group` to have things show up in your IDE. But again, I recommend sticking with JUCE modules and keeping the IDE source tree reflective of your filesystem.
 
-### What's the deal with BinaryData?
+## What's the deal with BinaryData?
 
 Your binary data CMake target is called `Assets`.
 
@@ -110,7 +110,7 @@ You need to include `BinaryData.h` to access it.
 > [!IMPORTANT]
 > You may have to configure the project (just hit build in your IDE) to build juceaide before the header will be available.
 
-### What's the deal with code signing and notarization?
+## What's the deal with code signing and notarization?
 
 This repo code signs Windows via Azure Key Vault. [Read more about how to set it up blog](https://melatonin.dev/blog/how-to-code-sign-windows-installers-with-an-ev-cert-on-github-actions/).
 
@@ -119,7 +119,7 @@ It also code signs and notarizes on macOS. Again, you can [read my article for d
 > [!IMPORTANT]
 > Sudara is not available for code signing consulting work, but is happy to clarify questions. Comment on those articles or on the JUCE forum.
 
-### How do I update my Pamplejuce-based project?
+## How do I update my Pamplejuce-based project?
 
 1. Update with the latest CMake version [listed here](https://github.com/lukka/get-cmake), or the latest version supported by your toolchain like VS or Clion.
 2. Update JUCE with `git submodule update --remote --merge JUCE`
@@ -147,7 +147,7 @@ git push --tags
 > I would like the release process to be easier. I'm open to suggestions, [please read the options and provide feedback](https://github.com/sudara/pamplejuce/issues/44#issuecomment-1701910167).
 
 
-### How do I add *private* github repos as JUCE modules?
+## How do I add *private* github repos as JUCE modules?
 
 Generate an ssh key (without a passphrase) for the repository and add it as a secret to your Pamplejuce-derived repository. 
 
@@ -163,7 +163,7 @@ Then, use the `ssh_key` option in the checkout action, like so:
 
 Also see @mikelange49's solution [here](https://github.com/sudara/pamplejuce/issues/58#issuecomment-1777440387).
 
-### I'm new to GitHub Actions, what do I need to know?
+## I'm new to GitHub Actions, what do I need to know?
 
 CI will run against latest Linux, Windows, and macOS unless modified. You can do it all for free on public repos.
 
@@ -179,7 +179,7 @@ You might feel disincentivized to push to private repos (as you would burn throu
 
 You have a few other big picture options, like doing testing/pluginval only on linux and moving everything else to `Release` only.  The tradeoff is you won't be sure everything is happy on all platforms until the time you are releasing, which is the last place you really want friction.
 
-### How do variables work in GitHub Actions?
+## How do variables work in GitHub Actions?
 
 It can be confusing. The documentation is a big fragmented. Here are some tips.
 
@@ -189,7 +189,7 @@ It can be confusing. The documentation is a big fragmented. Here are some tips.
 4. Reading those variables is done with the [env context](https://docs.github.com/en/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#env-context) when you are inside a `with`, `name`, or `if`: `${{ env.SOME_VARIABLE }}`
 5. Inside of `run`, you have access to bash ENV variables *in addition* to contexts/expressions. That means `$SOME_VARIABLE` or `${SOME_VARIABLE}` will work but *only when using bash* and [not while using powershell on windows](https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-syntax-for-github-actions#using-a-specific-shell). The version with curly braces (variable expansion) is often used [when the variable is forming part of a larger string to avoid ambiguity](https://stackoverflow.com/questions/8748831/when-do-we-need-curly-braces-around-shell-variables). Be sure that the ENV variable was set properly in the workflow/job/step before you use it. And if you need the variable to be os-agnostic, use the env context.
 
-### What's up with the `SharedCode` interface target, is it needed?
+## What's up with the `SharedCode` interface target, is it needed?
 
 If you want to build both plugin targets and a test target, unfortunately the additional abstraction of the INTERFACE `SharedCode` target is needed  (as of Nov 2023). If you aren't running tests, shame on you, but hey, you can simply edit the CMake and get rid of it :)
 
@@ -200,7 +200,7 @@ This becomes a problem when you link `Tests` to `YourPlugin` target, as it cause
 I spoke with [Reuben at JUCE a bit about this here](https://forum.juce.com/t/windows-linker-issue-on-develop/55524/2) and there's a Pamplejuce [issue with background here](https://github.com/sudara/pamplejuce/issues/31). 
 
 
-### How do I build JuceHeader.h
+## How do I build JuceHeader.h
 
 Using JuceHeader.h has been deprecated for some time, so if it's a new project, I would definitely avoid it! 
 
