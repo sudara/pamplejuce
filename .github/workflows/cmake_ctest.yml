@@ -53,6 +53,9 @@ jobs:
       # Thanks to McMartin & co https://forum.juce.com/t/list-of-juce-dependencies-under-linux/15121/44
       run: |
         sudo apt-get update && sudo apt install libasound2-dev libx11-dev libxinerama-dev libxext-dev libfreetype6-dev libwebkit2gtk-4.0-dev libglu1-mesa-dev xvfb ninja-build
+        # downgrade gcc to workaround 22.04 and C++20 issue 
+        # see: https://github.com/actions/runner-images/issues/8659
+        sudo apt-get install -y --allow-downgrades libc6=2.35-0ubuntu3.4 libc6-dev=2.35-0ubuntu3.4 libstdc++6=12.3.0-1ubuntu1~22.04 libgcc-s1=12.3.0-1ubuntu1~22.04
         sudo /usr/bin/Xvfb $DISPLAY &
 
     - name: Cache IPP (Windows)
@@ -171,6 +174,8 @@ jobs:
     - name: Create DMG, Notarize and Staple (macOS)
       if: ${{ matrix.name == 'macOS' }}
       run: |
+        # workaround for https://github.com/LinusU/node-appdmg/issues/234
+        python3 -m pip install setuptools
         npm install -g appdmg
         mkdir -p packaging/dmg
         
