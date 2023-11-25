@@ -63,12 +63,45 @@ This is what you will see when it's built, the plugin displaying its version num
 
 ![Pamplejuce v1 - 2023-08-28 41@2x](https://github.com/sudara/pamplejuce/assets/472/33a9c8d5-fc3f-42e7-bd06-21a1559c7128)
 
-## Conventions
+## Conventions 
 
-1. Your tests go in "/tests", just add .cpp files there.
-2. Additional 3rd party JUCE modules go in "/modules."
-3. Your binary data target in CMake is called "Assets" (you need to include `BinaryData.h` to access it)
-4. GitHub Actions will run against Linux, Windows, and macOS unless modified.
+### Adding new .h / .cpp files to the project
+
+New source files go in `/source`. All `.h` and `.cpp` files in that directory will be available to include in your plugin target and your tests. 
+
+Tests go in `/tests`. Just add .cpp files there and they will be available in the Tests target.
+
+Note that if you use an overeager, CMake-aware IDE, it might prompt you to manually add files to a CMake target. This is not needed.
+
+I recommend not stuffing everything into the boilerplate PluginEditor/PluginProcessor files. Sure, go ahead make a mess at first. But then clean them up and just include your source from there.
+
+### Modules
+
+Additional 3rd party JUCE modules go in `/modules`. You can add third party git submodules there (like the inspector is set up). 
+
+I (and others, including some of the JUCE team) recommend moving as much as your application code into modules as possible. For example, if you tend to roll your own widgets, pop those into a module, you'll thank yourself later.
+
+A few reasons to do so:
+
+* Reusability. You can use modules across projects.
+* Testability. You can test modules in isolation. 
+* Sanity. You can keep your project tidy and focused on the application logic.
+* Compile-friendliness. Each JUCE module is its own compilation unit. If you change a file in a module, only that one module needs to rebuild. It also means you can work on *only* the module in a separate CMake project, which is a very nice/fast life.
+
+Don't worry about all of this if you are new to JUCE. Just keep it in mind as you grow.
+
+
+### Binary Data
+
+Your binary data target in CMake is called "Assets".
+
+You need to include `BinaryData.h` to access it. Sometimes you have to  configure the project (hit build in your IDE) to build juceaide first before it will be available.
+
+### GitHub Actions 
+
+CI will run against Linux, Windows, and macOS unless modified. 
+
+If you are making a private repo, be sure to do some calculations about free minutes vs. costs on running in CI. 
 
 ## Cutting GitHub Releases
 
@@ -87,11 +120,11 @@ I'll work on making this less awkward...
 
 Releases are set to `prerelease`, which means that uploaded release assets are visible to other users, but it's not explicitly listed as the latest release until changed in the GitHub UI.
 
-## Code signing and Notarization
+## New to code signing and notarization?
 
-This repo [codesigns Windows via Azure Key Vault, read more about how to do that on my blog](https://melatonin.dev/blog/how-to-code-sign-windows-installers-with-an-ev-cert-on-github-actions/).
+This repo codesigns Windows via Azure Key Vault, [read more about how to do that on my blog](https://melatonin.dev/blog/how-to-code-sign-windows-installers-with-an-ev-cert-on-github-actions/).
 
-It also [code signs and notarizes on macOS, again, you can read my article for details](https://melatonin.dev/blog/how-to-code-sign-and-notarize-macos-audio-plugins-in-ci/).
+It also code signs and notarizes on macOS, again, you can [read my article for details](https://melatonin.dev/blog/how-to-code-sign-and-notarize-macos-audio-plugins-in-ci/).
 
 
 ## A note on GitHub Actions and macOS
@@ -118,7 +151,29 @@ It can be confusing, as the documentation is a big fragmented.
 4. Check for an [IPP update from Intel](https://github.com/oneapi-src/oneapi-ci/blob/master/.github/workflows/build_all.yml#L10).
 5. If you want to update to the latest CMake config Pamplejuce uses, first check the repository's [CHANGELOG](https://github.com/sudara/cmake-includes/blob/main/CHANGELOG.md) to make sure you are informed of any breaking changes. Then. `git submodule update --remote --merge cmake`. Unfortunately, you'll have to manually compare `CMakeLists.txt`, but it should be pretty easy to see what changed.
 
-## References & Inspiration
+## Other questions
+
+### What's up with the `SharedCode` interface target, is it needed?
+
+If you want to build both plugin targets and a test target, unfortunately the additional abstraction of the INTERFACE `SharedCode` target is needed  (as of Nov 2023). If you aren't running tests, shame on you, but hey, you can simply edit the CMake and get rid of it :)
+
+The summary: JUCE modules build separately for each target. You need to link against them with PRIVATE visibility.  But both JUCE's internal plugin shared code target (which powers the formats like AU, VST, etc) and Pamplejuce's `Tests` target need to link against the same JUCE modules. 
+
+This becomes a problem when you link `Tests` to `YourPlugin` target, as it causes ODL issues and confuses your IDE. Additionally, it is hard/impossible to set different compile definitions for the `Tests` target vs. plugin targets (for example, you'll probably need to enable the deprecated modal loops, guard macros for running tests, etc).
+
+I spoke with [Reuben at JUCE a bit about this here](https://forum.juce.com/t/windows-linker-issue-on-develop/55524/2) and there's a Pamplejuce [issue with background here](https://github.com/sudara/pamplejuce/issues/31). 
+
+
+## Contributing
+
+Thanks to everyone who has contacted me over discord DM and/or contributed
+to the repository.
+
+This repository covers a _lot_ of ground. JUCE itself has a lot of surface area. It's a group effort to maintain the garden and keep things nice! 
+
+If something isn't just working out of the box — *it's not just you* — others are running into the problem, too, I promise. Please submit a PR or issue.
+
+## Original References & Inspiration
 
 ### CMake
 
