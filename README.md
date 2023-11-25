@@ -66,7 +66,8 @@ This is what you will see when it's built, the plugin displaying its version num
 
 ## FAQ
 
-Don't see your question here? [Open an issue](https://github.com/sudara/pamplejuce/issues/new)!
+> [!TIP]
+> Don't see your question here? [Open an issue](https://github.com/sudara/pamplejuce/issues/new)!
 
 ### Where do I put new .h / .cpp files?
 
@@ -78,15 +79,6 @@ Tests go in `/tests`. Just add .cpp files there and they will be available in th
 > If you use an overeager, CMake-aware IDE, it might prompt you to manually add files to a CMake target. This is not needed.
 
 I recommend not stuffing everything into the boilerplate PluginEditor/PluginProcessor files. Sure, go ahead make a mess at first. But then clean them up and just include your source from there.
-
-### What's the deal with BinaryData?
-
-Your binary data CMake target is called `Assets`.
-
-You need to include `BinaryData.h` to access it. 
-
-> [!IMPORTANT]
-> You may have to configure the project (just hit build in your IDE) to build juceaide before the header will be available.
 
 ### How do I add another module?
 
@@ -102,6 +94,21 @@ A few reasons to do so:
 * Compile-friendliness. Each JUCE module is its own compilation unit. If you change a file in a module, only that one module needs to rebuild. It also means you can work on *only* the module in a separate CMake project, which is a very nice/fast life.
 
 Don't worry about all of this if you are new to JUCE. Just keep it in mind as you grow.
+
+### What if I need to include files not in modules and not in `/source`?
+
+If you have control over the files, I highly recommend taking 3 minutes to make a JUCE module — if nothing else than to wrap the code you need and make the build system nice and easy. See the [module API](https://github.com/juce-framework/JUCE/blob/master/docs/JUCE%20Module%20Format.md), or other JUCE modules for an example on how to do it. 
+
+If that's not an option, you could add more directories in the `file(GLOB_RECURSE SourceFiles` line in the `CMakeLists.txt` and maybe fiddle with `source_group` to have things show up in your IDE. But again, I recommend sticking with JUCE modules and keeping the IDE source tree reflective of your filesystem.
+
+### What's the deal with BinaryData?
+
+Your binary data CMake target is called `Assets`.
+
+You need to include `BinaryData.h` to access it. 
+
+> [!IMPORTANT]
+> You may have to configure the project (just hit build in your IDE) to build juceaide before the header will be available.
 
 ### What's the deal with code signing and notarization?
 
