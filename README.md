@@ -97,12 +97,6 @@ A few reasons to do so:
 
 Don't worry about all of this if you are new to JUCE. Just keep it in mind as you grow.
 
-## What if I need to include files not in modules and not in `/source`?
-
-If you have control over the files, I highly recommend taking 3 minutes to make a JUCE module — if nothing else than to wrap the code you need and make the build system nice and easy. See the [module API](https://github.com/juce-framework/JUCE/blob/master/docs/JUCE%20Module%20Format.md), or other JUCE modules for an example on how to do it. 
-
-If that's not an option, you could add more directories in the `file(GLOB_RECURSE SourceFiles` line in the `CMakeLists.txt` and maybe fiddle with `source_group` to have things show up in your IDE. But again, I recommend sticking with JUCE modules and keeping the IDE source tree reflective of your filesystem.
-
 ## What's the deal with BinaryData?
 
 Your binary data CMake target is called `Assets`.
@@ -111,6 +105,22 @@ You need to include `BinaryData.h` to access it.
 
 > [!IMPORTANT]
 > You may have to configure the project (just hit build in your IDE) to build juceaide before the header will be available.
+
+## How I get clang-format working 
+
+There are a huge number of benefits to automatic formatting of code, including the very obvious one of guaranteed consistency and therefore readability. But it also saves brain cycles and can prevent team [bike-shedding](https://thedecisionlab.com/biases/bikeshedding).
+
+@CrushedPixel, who prompted me to write this FAQ entry says 
+
+> Formatting is a really key component and you’re providing it out of the box. I have learned to swallow my pride when it comes to my own preferences, so I’m okay as long as I can just hit save and the IDE does the deed for me
+
+The included `.clang-format` file will get you very close to the [JUCE style guide](https://juce.com/coding-standards/).
+
+On CLion, see [this guide](https://www.jetbrains.com/help/clion/clangformat-as-alternative-formatter.html) on how to clang format on save or on key command (my preference).
+
+On VS 2022, [it's enabled by default](https://learn.microsoft.com/en-us/visualstudio/ide/reference/options-text-editor-c-cpp-formatting?view=vs-2022#configuring-clangformat-options).
+
+On Xcode, see this [plugin](https://github.com/travisjeffery/ClangFormat-Xcode) (disclaimer, when I was still using Xcode I couldn't find a great solution, which is part of why I switched to CLion).
 
 ## What's the deal with code signing and notarization?
 
@@ -198,6 +208,11 @@ This becomes a problem when you link `Tests` to `YourPlugin` target, as it cause
 
 I spoke with [Reuben at JUCE a bit about this here](https://forum.juce.com/t/windows-linker-issue-on-develop/55524/2) and there's a Pamplejuce [issue with background here](https://github.com/sudara/pamplejuce/issues/31). 
 
+## What if I need to include files not in modules and not in `/source`?
+
+If you have control over the files, I highly recommend taking 3 minutes to make a JUCE module — if nothing else than to wrap the code you need and make the build system nice and easy. See the [module API](https://github.com/juce-framework/JUCE/blob/master/docs/JUCE%20Module%20Format.md), or other JUCE modules for an example on how to do it. 
+
+If that's not an option, you could add more directories in the `file(GLOB_RECURSE SourceFiles` line in the `CMakeLists.txt` and maybe fiddle with `source_group` to have things show up in your IDE. But again, I recommend sticking with JUCE modules and keeping the IDE source tree reflective of your filesystem.
 
 ## How do I build JuceHeader.h
 
