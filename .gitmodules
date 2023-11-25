@@ -8,5 +8,5 @@
 	branch = main
 [submodule "cmake"]
 	path = cmake
-	url = git@github.com:sudara/cmake-includes.git
+	url = https://github.com/sudara/cmake-includes.git
 	branch = main
