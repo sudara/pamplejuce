@@ -118,9 +118,6 @@ This repo code signs Windows via Azure Key Vault. [Read more about how to set it
 
 It also code signs and notarizes on macOS. Again, you can [read my article for details](https://melatonin.dev/blog/how-to-code-sign-and-notarize-macos-audio-plugins-in-ci/).
 
-> [!IMPORTANT]
-> Sudara is not available for code signing consulting work, but is happy to clarify questions. Comment on those articles or on the JUCE forum.
-
 ## How do I update my Pamplejuce-based project?
 
 1. Update with the latest CMake version [listed here](https://github.com/lukka/get-cmake), or the latest version supported by your toolchain like VS or Clion.
