@@ -14,9 +14,11 @@
   },
   "format": "UDZO",
   "contents": [
-    { "x": 250, "y": 245, "type": "file", "path": "dmg/Pamplejuce Demo.component" },
-    { "x": 480, "y": 245, "type": "file", "path": "dmg/Your Mac's Component Folder" },
-    { "x": 250, "y": 405, "type": "file", "path": "dmg/Pamplejuce Demo.vst3" },
-    { "x": 480, "y": 405, "type": "file", "path": "dmg/Your Mac's VST3 Folder" }
+    { "x": 250, "y": 200, "type": "file", "path": "dmg/Pamplejuce Demo.app" },
+    { "x": 480, "y": 200, "type": "link", "path": "/Applications" },
+    { "x": 250, "y": 300, "type": "file", "path": "dmg/Pamplejuce Demo.component" },
+    { "x": 480, "y": 300, "type": "file", "path": "dmg/Your Mac's Component Folder" },
+    { "x": 250, "y": 400, "type": "file", "path": "dmg/Pamplejuce Demo.vst3" },
+    { "x": 480, "y": 400, "type": "file", "path": "dmg/Your Mac's VST3 Folder" }
   ]
 }
