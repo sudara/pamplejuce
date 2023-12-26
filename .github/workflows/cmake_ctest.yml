@@ -30,15 +30,12 @@ jobs:
           - name: Linux
             os: ubuntu-22.04
             pluginval-binary: ./pluginval
-            ccache: ccache
           - name: macOS
             os: macos-12
             pluginval-binary: pluginval.app/Contents/MacOS/pluginval
-            ccache: ccache
           - name: Windows
             os: windows-latest
             pluginval-binary: ./pluginval.exe
-            ccache: sccache
 
     steps:
 
@@ -63,30 +60,28 @@ jobs:
       id: cache-ipp
       uses: actions/cache@v3
       with:
-        key: ipp-v1
+        key: ipp-v2
         path: C:\Program Files (x86)\Intel\oneAPI\ipp
 
     - name: Install IPP (Windows)
       if: (runner.os == 'Windows') && (steps.cache-ipp.outputs.cache-hit != 'true')
       shell: bash
       run: |
-        curl --output oneapi.exe https://registrationcenter-download.intel.com/akdlm/irc_nas/19078/w_BaseKit_p_2023.0.0.25940_offline.exe
+        curl --output oneapi.exe https://registrationcenter-download.intel.com/akdlm/IRC_NAS/8d158661-ca8f-4e66-b5ea-3e0b3d00836a/w_ipp_oneapi_p_2021.10.1.15_offline.exe
         ./oneapi.exe -s -x -f oneapi
         ./oneapi/bootstrapper.exe -s -c --action install --components=intel.oneapi.win.ipp.devel --eula=accept -p=NEED_VS2022_INTEGRATION=1 --log-dir=.
 
-    - name: Save IPP cache even on job fail
+    - name: Save IPP cache (even on CI fail)
       if: runner.os == 'Windows' && (steps.cache-ipp.outputs.cache-hit != 'true')
       uses: actions/cache/save@v3
       with:
         path: C:\Program Files (x86)\Intel\oneAPI\ipp
-        key: ipp-v1
+        key: ipp-v2
 
-    # This lets us use sscache on Windows
-    # We need to install ccache here for Windows to grab the right version
     - name: Install Ninja (Windows)
       if: runner.os == 'Windows'
       shell: bash
-      run: choco install ninja ccache
+      run: choco install ninja
 
     - name: Install macOS Deps
       if: ${{ matrix.name == 'macOS' }}
@@ -97,11 +92,8 @@ jobs:
       with:
         submodules: true # Get JUCE populated
 
-    - name: ccache
-      uses: hendrikmuhs/ccache-action@main
-      with:
-        key: v3-${{ matrix.os }}-${{ matrix.type }}
-        variant: ${{ matrix.ccache }}
+    - name: Cache the build
+      uses: mozilla-actions/sccache-action@v0.0.3
 
     - name: Import Certificates (macOS)
       uses: apple-actions/import-codesign-certs@v2 # only exists as a tag right now
@@ -131,15 +123,15 @@ jobs:
     - name: Set additional env vars for next steps
       shell: bash
       run: |
-        echo "ARTIFACTS_PATH=${{ env.BUILD_DIR }}/${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}" >> $GITHUB_ENV
-        echo "VST3_PATH=${{ env.ARTIFACTS_PATH }}/VST3/${{ env.PRODUCT_NAME }}.vst3" >> $GITHUB_ENV
-        echo "AU_PATH=${{ env.ARTIFACTS_PATH }}/AU/${{ env.PRODUCT_NAME }}.component" >> $GITHUB_ENV
-        echo "AUV3_PATH=${{ env.ARTIFACTS_PATH }}/AUv3/${{ env.PRODUCT_NAME }}.appex" >> $GITHUB_ENV          
-        echo "STANDALONE_PATH=${{ env.ARTIFACTS_PATH }}/Standalone/${{ env.PRODUCT_NAME }}.app" >> $GITHUB_ENV
+        ARTIFACTS_PATH=${{ env.BUILD_DIR }}/${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}
+        echo "ARTIFACTS_PATH=$ARTIFACTS_PATH" >> $GITHUB_ENV
+        echo "VST3_PATH=$ARTIFACTS_PATH/VST3/${{ env.PRODUCT_NAME }}.vst3" >> $GITHUB_ENV
+        echo "AU_PATH=$ARTIFACTS_PATH/AU/${{ env.PRODUCT_NAME }}.component" >> $GITHUB_ENV
+        echo "AUV3_PATH=$ARTIFACTS_PATH/AUv3/${{ env.PRODUCT_NAME }}.appex" >> $GITHUB_ENV          
+        echo "STANDALONE_PATH=$ARTIFACTS_PATH/Standalone/${{ env.PRODUCT_NAME }}.app" >> $GITHUB_ENV
         echo "ARTIFACT_NAME=${{ env.PRODUCT_NAME }}-${{ env.VERSION }}-${{ matrix.name }}" >> $GITHUB_ENV
 
     - name: Pluginval
-      working-directory: ${{ env.BUILD_DIR }}
       shell: bash
       run: |
         curl -LO "https://github.com/Tracktion/pluginval/releases/download/v1.0.3/pluginval_${{ matrix.name }}.zip"
@@ -147,7 +139,6 @@ jobs:
         ${{ matrix.pluginval-binary }} --strictness-level 10 --verbose --validate "${{ env.VST3_PATH }}"
 
     - name: Codesign (macOS)
-      working-directory: ${{ env.BUILD_DIR }}
       if: ${{ matrix.name == 'macOS' }}
       run: |
         # Each plugin must be code signed
@@ -157,13 +148,12 @@ jobs:
 
     - name: Add Custom Icons (macOS)
       if: ${{ matrix.name == 'macOS' }}
-      working-directory: ${{ env.BUILD_DIR }}
       run: |
         # add the icns as its own icon resource (meta!)
-        sips -i ../packaging/pamplejuce.icns
+        sips -i packaging/pamplejuce.icns
         
         # Grab the resource, put in tempfile
-        DeRez -only icns ../packaging/pamplejuce.icns > /tmp/icons
+        DeRez -only icns packaging/pamplejuce.icns > /tmp/icons
         
         # Stuff the resource into the strange Icon? file's resource fork
         Rez -a /tmp/icons -o "${{ env.VST3_PATH }}/Icon"$'\r'
