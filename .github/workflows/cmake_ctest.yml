@@ -30,15 +30,12 @@ jobs:
           - name: Linux
             os: ubuntu-22.04
             pluginval-binary: ./pluginval
-            ccache: ccache
           - name: macOS
             os: macos-12
             pluginval-binary: pluginval.app/Contents/MacOS/pluginval
-            ccache: ccache
           - name: Windows
             os: windows-latest
             pluginval-binary: ./pluginval.exe
-            ccache: sccache
 
     steps:
 
@@ -81,12 +78,10 @@ jobs:
         path: C:\Program Files (x86)\Intel\oneAPI\ipp
         key: ipp-v1
 
-    # This lets us use sscache on Windows
-    # We need to install ccache here for Windows to grab the right version
     - name: Install Ninja (Windows)
       if: runner.os == 'Windows'
       shell: bash
-      run: choco install ninja ccache
+      run: choco install ninja
 
     - name: Install macOS Deps
       if: ${{ matrix.name == 'macOS' }}
@@ -97,11 +92,8 @@ jobs:
       with:
         submodules: true # Get JUCE populated
 
-    - name: ccache
-      uses: hendrikmuhs/ccache-action@main
-      with:
-        key: v3-${{ matrix.os }}-${{ matrix.type }}
-        variant: ${{ matrix.ccache }}
+    - name: Cache the build
+      uses: mozilla-actions/sccache-action@v0.0.3
 
     - name: Import Certificates (macOS)
       uses: apple-actions/import-codesign-certs@v2 # only exists as a tag right now
