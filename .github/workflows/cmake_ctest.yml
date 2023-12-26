@@ -132,9 +132,10 @@ jobs:
       shell: bash
       run: |
         echo "ARTIFACTS_PATH=${{ env.BUILD_DIR }}/${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}" >> $GITHUB_ENV
-        echo "VST3_PATH=${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/VST3/${{ env.PRODUCT_NAME }}.vst3" >> $GITHUB_ENV
-        echo "AU_PATH=${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/AU/${{ env.PRODUCT_NAME }}.component" >> $GITHUB_ENV
-        echo "AUV3_PATH=${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}/AUv3/${{ env.PRODUCT_NAME }}.appex" >> $GITHUB_ENV          
+        echo "VST3_PATH=${{ env.ARTIFACTS_PATH }}/VST3/${{ env.PRODUCT_NAME }}.vst3" >> $GITHUB_ENV
+        echo "AU_PATH=${{ env.ARTIFACTS_PATH }}/AU/${{ env.PRODUCT_NAME }}.component" >> $GITHUB_ENV
+        echo "AUV3_PATH=${{ env.ARTIFACTS_PATH }}/AUv3/${{ env.PRODUCT_NAME }}.appex" >> $GITHUB_ENV          
+        echo "STANDALONE_PATH=${{ env.ARTIFACTS_PATH }}/Standalone/${{ env.PRODUCT_NAME }}.app" >> $GITHUB_ENV
         echo "ARTIFACT_NAME=${{ env.PRODUCT_NAME }}-${{ env.VERSION }}-${{ matrix.name }}" >> $GITHUB_ENV
 
     - name: Pluginval
@@ -152,6 +153,7 @@ jobs:
         # Each plugin must be code signed
         codesign --force -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" -v "${{ env.VST3_PATH }}" --deep --strict --options=runtime --timestamp
         codesign --force -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" -v "${{ env.AU_PATH }}" --deep --strict --options=runtime --timestamp
+        codesign --force -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" -v "${{ env.STANDALONE_PATH }}" --deep --strict --options=runtime --timestamp
 
     - name: Add Custom Icons (macOS)
       if: ${{ matrix.name == 'macOS' }}
@@ -183,8 +185,9 @@ jobs:
         sudo mkdir -m 755 -p /Library/Audio/Plug-Ins/Components && sudo mkdir -m 755 -p /Library/Audio/Plug-Ins/VST3
         ln -s /Library/Audio/Plug-Ins/Components "packaging/dmg/Your Mac's Component folder"
         ln -s /Library/Audio/Plug-Ins/VST3 "packaging/dmg/Your Mac's VST3 folder"
-        mv "${{ env.ARTIFACTS_PATH }}/VST3/${{ env.PRODUCT_NAME }}.vst3" packaging/dmg
-        mv "${{ env.ARTIFACTS_PATH }}/AU/${{ env.PRODUCT_NAME }}.component" packaging/dmg
+        mv "${{ env.VST3_PATH }}" packaging/dmg
+        mv "${{ env.AU_PATH }}" packaging/dmg
+        mv "${{ env.STANDALONE_PATH }}" packaging/dmg
         
         # Run appdmg to create the .dmg
         cd packaging && appdmg dmg.json "${{ env.ARTIFACT_NAME}}.dmg"
