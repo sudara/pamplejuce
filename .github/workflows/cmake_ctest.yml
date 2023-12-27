@@ -60,7 +60,7 @@ jobs:
       id: cache-ipp
       uses: actions/cache@v3
       with:
-        key: ipp-v2
+        key: ipp-v3
         path: C:\Program Files (x86)\Intel\oneAPI\ipp
 
     - name: Install IPP (Windows)
@@ -76,7 +76,7 @@ jobs:
       uses: actions/cache/save@v3
       with:
         path: C:\Program Files (x86)\Intel\oneAPI\ipp
-        key: ipp-v2
+        key: ipp-v3
 
     - name: Install Ninja (Windows)
       if: runner.os == 'Windows'
