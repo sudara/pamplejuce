@@ -9,7 +9,7 @@ Out of the box, it:
 2. Uses JUCE 7.x as a submodule tracking develop.
 3. Relies on CMake 3.24.1 and higher for cross-platform building.
 4. Has [Catch2](https://github.com/catchorg/Catch2) v3.4.0 for the test framework and runner.
-5. Includes a Tests target and a Benchmarks target with examples to get started quickly.
+5. Includes a `Tests` target and a `Benchmarks` target some examples to get started quickly.
 6. Has [Melatonin Inspector](https://github.com/sudara/melatonin_inspector) installed as a JUCE module to help relieve headaches when building plugin UI.
 
 It also has integration with GitHub Actions, specifically:
@@ -30,8 +30,16 @@ It also contains:
 
 ## How does this all work at a high level?
 
-If you are new to CMake, I suggest you read up about [JUCE and CMmake on my blog!](https://melatonin.dev/blog/how-to-use-cmake-with-juce/)
+If you are new to CMake, I suggest you read up about [JUCE and CMmake on my blog!](https://melatonin.dev/blog/how-to-use-cmake-with-juce/).
 
+## Can I see some examples?
+
+Lots of people have used Pamplejuce as their starting place for their private plugin projects. 
+
+Two amazing public examples (complete with signed binaries) are:
+
+* [Valentine](https://github.com/tote-bag-labs/valentine), a compressor plugin by Jose Diaz Rohena
+* [Maim](https://github.com/ArdenButterfield/Maim), an mp3 distortion plugin by Arden Butterfield
 
 ## Setting up for YOUR project
 
@@ -39,9 +47,7 @@ This is a template repo!
 
 That means the easiest thing to do is click "[Use this template](https://github.com/sudara/pamplejuce/generate)" here or at the top of the page to get your own repo with all the code here.
 
-For an example of a plugin that uses this repo, check out [Load Monster!](https://github.com/sudara/load_monster_plugin).
-
-After you've created a new repo from the template, you have a checklist of things to do to customize for your project:
+After you've created a new repo from the template, you have a checklist of things to do to customize for your project.
 
 * [ ] `git clone` your new repo (if you make it private, see the warning below about GitHub Actions minutes)
 
@@ -216,17 +222,15 @@ If that's not an option, you could add more directories in the `file(GLOB_RECURS
 
 ## How do I build JuceHeader.h
 
-Using JuceHeader.h has been deprecated for some time, so if it's a new project, I would definitely avoid it! 
+Using `JuceHeader.h` has been deprecated for some time — if it's a new project, definitely avoid it! 
 
-Instead, just include the `.h` files you need from the juce modules you are using, like `#include "juce_gui_basics/juce_gui_basics.h"`
+Instead, directly include the `.h` files you need from the juce modules you are using, like `#include "juce_gui_basics/juce_gui_basics.h"`
 
-If you are converting an older project, it's still worth the conversion away from `JuceHeader.h` to using the actual juce modules you need. You'll get faster compilation, autocomplete, etc. You can [see an example of the conversion I did for the pluginval project](https://github.com/Tracktion/pluginval/pull/90/files). It's less scary than you are imagining: just make sure the `juce::` prefix is added everywhere, try to compile and your IDE will yell at you when you need to include one of the modules :)
-
+If you are converting an older project, it's still worth the conversion away from `JuceHeader.h` to using the actual juce modules you need. You'll get faster compilation, autocomplete, etc. You can [see an example of the conversion I did for the pluginval project](https://github.com/Tracktion/pluginval/pull/90/files). It's less scary than you think: just make sure the `juce::` prefix is added everywhere, try to compile and your IDE will yell at you when you need to include one of the modules :)
 
 ## Contributing
 
-Thanks to everyone who has contacted me over discord DM and/or contributed
-to the repository.
+Thanks to everyone who has contacted me over discord DM and/or contributed to the repository.
 
 This repository covers a _lot_ of ground. JUCE itself has a lot of surface area. It's a group effort to maintain the garden and keep things nice! 
 
