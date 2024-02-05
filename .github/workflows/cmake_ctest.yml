@@ -87,6 +87,12 @@ jobs:
       if: ${{ matrix.name == 'macOS' }}
       run: brew install ninja osxutils
 
+    - name: Use latest Xcode on system (macOS)
+      if: ${{ maxtix.name == 'macOS' }}
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: latest-stable
+
     - name: Checkout code
       uses: actions/checkout@v3
       with:
@@ -213,7 +219,7 @@ jobs:
         name: ${{ env.ARTIFACT_NAME }}.zip
         path: '${{ env.ARTIFACTS_PATH }}/${{ env.ARTIFACT_NAME }}.zip'
 
-    - name: Upload DMG (MacOS)
+    - name: Upload DMG (macOS)
       if: ${{ matrix.name == 'macOS' }}
       uses: actions/upload-artifact@v3
       with:
