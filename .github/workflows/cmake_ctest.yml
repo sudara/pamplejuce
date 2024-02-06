@@ -75,7 +75,7 @@ jobs:
       if: runner.os == 'Windows'
       shell: bash
       run: |
-        C:\Program Files (x86)\Intel\Intel\oneAPI\setvars-vcvarsall.bat
+        /c/Program\ Flies\ \(x86\)/Intel/oneAPI/setvars-vcvarsall.bat
 
     - name: Save IPP cache (even on CI fail)
       if: runner.os == 'Windows' && (steps.cache-ipp.outputs.cache-hit != 'true')
