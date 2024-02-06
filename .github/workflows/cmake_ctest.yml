@@ -63,11 +63,6 @@ jobs:
         key: ipp-v4
         path: C:\Program Files (x86)\Intel
 
-    - name: Set IPP_ROOT for CMake
-      if: runner.os == 'Windows'
-      shell: bash
-      run: echo "IPP_ROOT=${{ env.ProgramFiles(x86) }}/Intel/oneAPI/ipp/latest/lib/cmake/ipp/" >> $GITHUB_ENV
-
     - name: Install IPP (Windows)
       if: (runner.os == 'Windows') && (steps.cache-ipp.outputs.cache-hit != 'true')
       shell: bash
@@ -75,6 +70,13 @@ jobs:
         curl --output oneapi.exe https://registrationcenter-download.intel.com/akdlm/IRC_NAS/8d158661-ca8f-4e66-b5ea-3e0b3d00836a/w_ipp_oneapi_p_2021.10.1.15_offline.exe
         ./oneapi.exe -s -x -f oneapi
         ./oneapi/bootstrapper.exe -s -c --action install --components=intel.oneapi.win.ipp.devel --eula=accept -p=NEED_VS2022_INTEGRATION=1 --log-dir=.
+
+    - name: Set IPP_ROOT and setvars for CMake
+      if: runner.os == 'Windows'
+      shell: bash
+      run: |
+        echo "IPP_ROOT=${{ env.ProgramFiles(x86) }}/Intel/oneAPI/ipp/latest/lib/cmake/ipp/" >> $GITHUB_ENV
+        C:\Program Files (x86)\Intel\Intel\oneAPI\setvars-vcvarsall.bat
 
     - name: Save IPP cache (even on CI fail)
       if: runner.os == 'Windows' && (steps.cache-ipp.outputs.cache-hit != 'true')
