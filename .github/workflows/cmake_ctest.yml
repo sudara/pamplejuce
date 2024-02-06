@@ -71,11 +71,10 @@ jobs:
         ./oneapi.exe -s -x -f oneapi
         ./oneapi/bootstrapper.exe -s -c --action install --components=intel.oneapi.win.ipp.devel --eula=accept -p=NEED_VS2022_INTEGRATION=1 --log-dir=.
 
-    - name: Set IPP_ROOT and setvars for CMake
+    - name: setvars for CMake
       if: runner.os == 'Windows'
       shell: bash
       run: |
-        echo "IPP_ROOT=${{ env.ProgramFiles(x86) }}/Intel/oneAPI/ipp/latest/lib/cmake/ipp/" >> $GITHUB_ENV
         C:\Program Files (x86)\Intel\Intel\oneAPI\setvars-vcvarsall.bat
 
     - name: Save IPP cache (even on CI fail)
