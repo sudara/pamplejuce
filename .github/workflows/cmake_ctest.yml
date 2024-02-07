@@ -79,13 +79,6 @@ jobs:
         path: C:\Program Files (x86)\Intel
         key: ipp-v4
 
-    - name: setvars for CMake
-      if: runner.os == 'Windows'
-      shell: bash
-      run: |
-        /c/Program\ Files\ \(x86\)/Intel/oneAPI/setvars-vcvarsall.bat
-        ls -ahl /c/Program\ Files\ \(x86\)/Intel/oneAPI/ipp
-
     - name: Install Ninja (Windows)
       if: runner.os == 'Windows'
       shell: bash
