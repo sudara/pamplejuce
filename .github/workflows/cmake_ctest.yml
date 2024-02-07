@@ -71,18 +71,18 @@ jobs:
         ./oneapi.exe -s -x -f oneapi
         ./oneapi/bootstrapper.exe -s -c --action install --components=intel.oneapi.win.ipp.devel --eula=accept -p=NEED_VS2022_INTEGRATION=1 --log-dir=.
 
-    - name: setvars for CMake
-      if: runner.os == 'Windows'
-      shell: bash
-      run: |
-        /c/Program\ Flies\ \(x86\)/Intel/oneAPI/setvars-vcvarsall.bat
-
     - name: Save IPP cache (even on CI fail)
       if: runner.os == 'Windows' && (steps.cache-ipp.outputs.cache-hit != 'true')
       uses: actions/cache/save@v3
       with:
         path: C:\Program Files (x86)\Intel
         key: ipp-v4
+
+    - name: setvars for CMake
+      if: runner.os == 'Windows'
+      shell: bash
+      run: |
+        /c/Program\ Files\ \(x86\)/Intel/oneAPI/setvars-vcvarsall.bat
 
     - name: Install Ninja (Windows)
       if: runner.os == 'Windows'
