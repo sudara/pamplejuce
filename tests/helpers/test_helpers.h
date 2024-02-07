@@ -5,7 +5,7 @@
  *
  * Read more here: https://github.com/sudara/pamplejuce/issues/18#issuecomment-1425836807
  *
- * Example usage:
+ * Example usage (screenshots the plugin)
  *
   runWithinPluginEditor ([&] (PluginProcessor& plugin) {
     auto snapshot = plugin.getActiveEditor()->createComponentSnapshot (plugin.getActiveEditor()->getLocalBounds(), true, 2.0f);
@@ -19,7 +19,7 @@
    });
 
  */
-static void runWithinPluginEditor (const std::function<void (PluginProcessor& plugin)>& testCode)
+[[maybe_unused]] void runWithinPluginEditor (const std::function<void (PluginProcessor& plugin)>& testCode)
 {
     PluginProcessor plugin;
     auto gui = juce::ScopedJuceInitialiser_GUI {};

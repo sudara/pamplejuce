@@ -16,6 +16,7 @@ env:
   DISPLAY: :0 # linux pluginval needs this
   CMAKE_BUILD_PARALLEL_LEVEL: 3 # Use up to 3 cpus to build juceaide, etc
   HOMEBREW_NO_INSTALL_CLEANUP: 1
+  IPP_DIR: C:\Program Files (x86)\Intel\oneAPI\ipp\latest\lib\cmake\ipp
 
 # jobs are run in paralell on different machines
 # all steps run in series
@@ -60,8 +61,8 @@ jobs:
       id: cache-ipp
       uses: actions/cache@v3
       with:
-        key: ipp-v2
-        path: C:\Program Files (x86)\Intel\oneAPI\ipp
+        key: ipp-v4
+        path: C:\Program Files (x86)\Intel
 
     - name: Install IPP (Windows)
       if: (runner.os == 'Windows') && (steps.cache-ipp.outputs.cache-hit != 'true')
@@ -75,8 +76,8 @@ jobs:
       if: runner.os == 'Windows' && (steps.cache-ipp.outputs.cache-hit != 'true')
       uses: actions/cache/save@v3
       with:
-        path: C:\Program Files (x86)\Intel\oneAPI\ipp
-        key: ipp-v2
+        path: C:\Program Files (x86)\Intel
+        key: ipp-v4
 
     - name: Install Ninja (Windows)
       if: runner.os == 'Windows'
