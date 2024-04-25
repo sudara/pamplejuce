@@ -205,6 +205,16 @@ jobs:
         iscc "packaging\installer.iss"
         mv "packaging/Output/${{ env.ARTIFACT_NAME }}.exe" "${{ env.ARTIFACTS_PATH }}/"
 
+    - name: Setup .NET Core SDK
+      if: ${{ matrix.name == 'Windows' }}
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 6.0.x
+
+    - name: Install dependencies
+      if: ${{ matrix.name == 'Windows' }}
+      run: dotnet restore App
+
     - name: Codesign with Azure Trusted Signing
       if: ${{ matrix.name == 'Windows' }}
       uses: azure/trusted-signing-action@v0.3.16
