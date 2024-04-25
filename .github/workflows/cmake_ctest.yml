@@ -229,6 +229,7 @@ jobs:
 
         # Just signing one file, the installer
         files-catalog: "${{ env.ARTIFACTS_PATH }}/${{ env.ARTIFACT_NAME }}.exe"
+        file-digest: SHA256
 
     - name: Upload Exe (Windows)
       if: ${{ matrix.name == 'Windows' }}
