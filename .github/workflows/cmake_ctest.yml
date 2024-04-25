@@ -227,8 +227,9 @@ jobs:
         # The Certificate Profile name.
         certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
 
-        # Just signing one file, the installer
-        files-catalog: "${{ env.ARTIFACTS_PATH }}/${{ env.ARTIFACT_NAME }}.exe"
+        # This signs all exes inside the folder
+        files-folder: ${{ env.ARTIFACTS_PATH }}
+        files-folder-filter: exe
         file-digest: SHA256
 
     - name: Upload Exe (Windows)
