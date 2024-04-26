@@ -3,6 +3,7 @@ name: Pamplejuce
 on:
   workflow_dispatch: # lets you run a build from the UI
   push:
+  pull_request:
 
 # When pushing new commits, cancel any running builds on that branch
 concurrency:
