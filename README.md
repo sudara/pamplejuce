@@ -1,12 +1,12 @@
 ![PAMPLEJUCE](assets/images/pamplejuce.png)
-[![](https://github.com/sudara/pamplejuce/workflows/Pamplejuce/badge.svg)](https://github.com/sudara/pamplejuce/actions)
+[![](https://github.com/sudara/pamplejuce/actions/workflows/build_and_test.yml/badge.svg)](https://github.com/sudara/pamplejuce/actions)
 
 Pamplejuce is a ~~template~~ lifestyle for creating and building JUCE plugins in 2024.
 
 Out of the box, it:
 
 1. Supports C++20.
-2. Uses JUCE 7.x as a submodule tracking develop.
+2. Uses JUCE 7.x as a git submodule (tracking develop).
 3. Relies on CMake 3.24.1 and higher for cross-platform building.
 4. Has [Catch2](https://github.com/catchorg/Catch2) v3.4.0 for the test framework and runner.
 5. Includes a `Tests` target and a `Benchmarks` target some examples to get started quickly.
@@ -34,7 +34,7 @@ If you are new to CMake, I suggest you read up about [JUCE and CMmake on my blog
 
 ## Can I see some examples?
 
-Lots of people have used Pamplejuce as their starting place for their private plugin projects. 
+Lots of people have used Pamplejuce as their starting place for their private plugin projects.
 
 Two amazing public examples (complete with signed binaries) are:
 
@@ -43,7 +43,7 @@ Two amazing public examples (complete with signed binaries) are:
 
 ## Setting up for YOUR project
 
-This is a template repo! 
+This is a template repo!
 
 That means the easiest thing to do is click "[Use this template](https://github.com/sudara/pamplejuce/generate)" here or at the top of the page to get your own repo with all the code here.
 
@@ -55,17 +55,17 @@ After you've created a new repo from the template, you have a checklist of thing
 
 * [ ] Populate the  JUCE by running `git submodule update --init` in your repository directory. By default, this will track JUCE's `develop` branch, which is a good default until you are at the point of releasing a plugin. It will also pull in the CMake needed and an example module, my component inspector.
 
-* [ ] Replace `Pamplejuce` with the name of your project in `CMakeLists.txt` where the `PROJECT_NAME` variable is first set. Make this all one word, no spaces. 
+* [ ] Replace `Pamplejuce` with the name of your project in `CMakeLists.txt` where the `PROJECT_NAME` variable is first set. Make this all one word, no spaces.
 
 * [ ] Adjust which plugin formats you want built as needed (VST3, AU, etc).
 
 * [ ] Set the correct flags for your plugin `juce_add_plugin`. Check out the API https://github.com/juce-framework/JUCE/blob/master/docs/CMake%20API.md and be sure to change things like `PLUGIN_CODE` and `PLUGIN_MANUFACTURER_CODE` and everything that says `Change me!`.
-  
+
 * [ ] Build n' Run! If you want to generate an Xcode project, run `cmake -B Builds -G Xcode`. Or just open the project in CLion or VS2022. Running the standalone might be easiest, but you can also build the `AudioPluginHost` that comes with JUCE. Out of the box, Pamplejuce's VST3/AU targets should already be pointing to it's built location.
 
 * [ ] If you want to package and code sign, you'll want to take a look at the packaging/ directory add assets and config that match your product. Otherwise, you can delete the GitHub Action workflow steps that handle packaging (macOS will need code signing steps to work properly).
 
-This is what you will see when it's built, the plugin displaying its version number with a button that opens up the [Melatonin Inspector](https://github.com/sudara/melatonin_inspector): 
+This is what you will see when it's built, the plugin displaying its version number with a button that opens up the [Melatonin Inspector](https://github.com/sudara/melatonin_inspector):
 
 ![Pamplejuce v1 - 2023-08-28 41@2x](https://github.com/sudara/pamplejuce/assets/472/33a9c8d5-fc3f-42e7-bd06-21a1559c7128)
 
@@ -77,7 +77,7 @@ This is what you will see when it's built, the plugin displaying its version num
 
 ## Where do I put new .h / .cpp files?
 
-New source files go in `/source`. All `.h` and `.cpp` files in that directory will be available to include in your plugin target and your tests. 
+New source files go in `/source`. All `.h` and `.cpp` files in that directory will be available to include in your plugin target and your tests.
 
 Tests go in `/tests`. Just add .cpp files there and they will be available in the Tests target.
 
@@ -107,16 +107,16 @@ Don't worry about all of this if you are new to JUCE. Just keep it in mind as yo
 
 Your binary data CMake target is called `Assets`.
 
-You need to include `BinaryData.h` to access it. 
+You need to include `BinaryData.h` to access it.
 
 > [!IMPORTANT]
 > You may have to configure the project (just hit build in your IDE) to build juceaide before the header will be available.
 
-## How I get clang-format working 
+## How I get clang-format working
 
 There are a huge number of benefits to automatic formatting of code, including the very obvious one of guaranteed consistency and therefore readability. But it also saves brain cycles and can prevent team [bike-shedding](https://thedecisionlab.com/biases/bikeshedding).
 
-@CrushedPixel, who prompted me to write this FAQ entry says 
+@CrushedPixel, who prompted me to write this FAQ entry says
 
 > Formatting is a really key component and you’re providing it out of the box. I have learned to swallow my pride when it comes to my own preferences, so I’m okay as long as I can just hit save and the IDE does the deed for me
 
@@ -156,7 +156,7 @@ git push --tags
 ```
 
 > [!IMPORTANT]
-> Releases are set to `prerelease`! This means that uploaded release assets are visible to other users (on public repositories), but not explicitly listed as the latest release until you "publish" in the GitHub UI. 
+> Releases are set to `prerelease`! This means that uploaded release assets are visible to other users (on public repositories), but not explicitly listed as the latest release until you "publish" in the GitHub UI.
 
 > [!NOTE]
 > I would like the release process to be easier. I'm open to suggestions, [please read the options and provide feedback](https://github.com/sudara/pamplejuce/issues/44#issuecomment-1701910167).
@@ -164,7 +164,7 @@ git push --tags
 
 ## How do I add *private* github repos as JUCE modules?
 
-Generate an ssh key (without a passphrase) for the repository and add it as a secret to your Pamplejuce-derived repository. 
+Generate an ssh key (without a passphrase) for the repository and add it as a secret to your Pamplejuce-derived repository.
 
 Then, use the `ssh_key` option in the checkout action, like so:
 
@@ -184,7 +184,7 @@ CI will run against latest Linux, Windows, and macOS unless modified. You can do
 
 For private repos, be sure to do some calculations about free minutes vs. costs on running in CI.
 
-> [!WARNING] 
+> [!WARNING]
 > GitHub gives you 2000 or 3000 free GitHub Actions "minutes" / month for private projects, but [they actually bill 2x the number of minutes you use on Windows and 10x on MacOS](https://docs.github.com/en/free-pro-team@latest/github/setting-up-and-managing-billing-and-payments-on-github/about-billing-for-github-actions#about-billing-for-github-actions).
 
 You might feel disincentivized to push to private repos (as you would burn through minutes). By default, multiple commits in quick succession will cancel any earlier running builds. There are also timeouts set so you can't accidentally stall a build and burn through time.
@@ -208,21 +208,21 @@ It can be confusing. The documentation is a big fragmented. Here are some tips.
 
 If you want to build both plugin targets and a test target, unfortunately the additional abstraction of the INTERFACE `SharedCode` target is needed  (as of Nov 2023). If you aren't running tests, shame on you, but hey, you can simply edit the CMake and get rid of it :)
 
-The summary: JUCE modules build separately for each target. You need to link against them with PRIVATE visibility.  But both JUCE's internal plugin shared code target (which powers the formats like AU, VST, etc) and Pamplejuce's `Tests` target need to link against the same JUCE modules. 
+The summary: JUCE modules build separately for each target. You need to link against them with PRIVATE visibility.  But both JUCE's internal plugin shared code target (which powers the formats like AU, VST, etc) and Pamplejuce's `Tests` target need to link against the same JUCE modules.
 
 This becomes a problem when you link `Tests` to `YourPlugin` target, as it causes ODL issues and confuses your IDE. Additionally, it is hard/impossible to set different compile definitions for the `Tests` target vs. plugin targets (for example, you'll probably need to enable the deprecated modal loops, guard macros for running tests, etc).
 
-I spoke with [Reuben at JUCE a bit about this here](https://forum.juce.com/t/windows-linker-issue-on-develop/55524/2) and there's a Pamplejuce [issue with background here](https://github.com/sudara/pamplejuce/issues/31). 
+I spoke with [Reuben at JUCE a bit about this here](https://forum.juce.com/t/windows-linker-issue-on-develop/55524/2) and there's a Pamplejuce [issue with background here](https://github.com/sudara/pamplejuce/issues/31).
 
 ## What if I need to include files not in modules and not in `/source`?
 
-If you have control over the files, I highly recommend taking 3 minutes to make a JUCE module — if nothing else than to wrap the code you need and make the build system nice and easy. See the [module API](https://github.com/juce-framework/JUCE/blob/master/docs/JUCE%20Module%20Format.md), or other JUCE modules for an example on how to do it. 
+If you have control over the files, I highly recommend taking 3 minutes to make a JUCE module — if nothing else than to wrap the code you need and make the build system nice and easy. See the [module API](https://github.com/juce-framework/JUCE/blob/master/docs/JUCE%20Module%20Format.md), or other JUCE modules for an example on how to do it.
 
 If that's not an option, you could add more directories in the `file(GLOB_RECURSE SourceFiles` line in the `CMakeLists.txt` and maybe fiddle with `source_group` to have things show up in your IDE. But again, I recommend sticking with JUCE modules and keeping the IDE source tree reflective of your filesystem.
 
 ## How do I build JuceHeader.h
 
-Using `JuceHeader.h` has been deprecated for some time — if it's a new project, definitely avoid it! 
+Using `JuceHeader.h` has been deprecated for some time — if it's a new project, definitely avoid it!
 
 Instead, directly include the `.h` files you need from the juce modules you are using, like `#include "juce_gui_basics/juce_gui_basics.h"`
 
@@ -232,7 +232,7 @@ If you are converting an older project, it's still worth the conversion away fro
 
 Thanks to everyone who has contacted me over discord DM and/or contributed to the repository.
 
-This repository covers a _lot_ of ground. JUCE itself has a lot of surface area. It's a group effort to maintain the garden and keep things nice! 
+This repository covers a _lot_ of ground. JUCE itself has a lot of surface area. It's a group effort to maintain the garden and keep things nice!
 
 If something isn't just working out of the box — *it's not just you* — others are running into the problem, too, I promise. Please submit a PR or issue.
 
@@ -261,7 +261,7 @@ If something isn't just working out of the box — *it's not just you* — other
 * [Unit Testing With CTest](https://bertvandenbroucke.netlify.app/2019/12/12/unit-testing-with-ctest/)
 * [Mark's Catch2 examples from his 2020 ADC talk](https://github.com/Sinecure-Audio/TestsTalk)
 
-### Packaging, Code Signing and Notarization 
+### Packaging, Code Signing and Notarization
 
 * [iPlug Packages and Inno Setup scripts](https://github.com/olilarkin/wdl-ol/tree/master/IPlugExamples/IPlugEffect/installer)
 * [Surge's pkgbuild installer script](https://github.com/kurasu/surge/blob/master/installer_mac/make_installer.sh)
