@@ -175,7 +175,7 @@ jobs:
       if: ${{ matrix.name == 'macOS' }}
       run: |
         # workaround for https://github.com/LinusU/node-appdmg/issues/234
-        python3 -m pip install setuptools
+        python3 -m pip install setuptools --break-system-packages
         npm install -g appdmg
         mkdir -p packaging/dmg
         
