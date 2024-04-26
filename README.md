@@ -19,7 +19,7 @@ It also has integration with GitHub Actions, specifically:
 3. Running [pluginval](http://github.com/tracktion/pluginval) 1.x against the binaries for plugin validation
 4. Config for [installing Intel IPP](https://www.intel.com/content/www/us/en/developer/tools/oneapi/ipp.html)
 5. [Code signing and notarization on macOS](https://melatonin.dev/blog/how-to-code-sign-and-notarize-macos-audio-plugins-in-ci/)
-6. [Windows EV/OV code signing via Azure Key Vault](https://melatonin.dev/blog/how-to-code-sign-windows-installers-with-an-ev-cert-on-github-actions/)
+6. [Windows code signing via Azure Trusted Signing](https://melatonin.dev/blog/code-signing-on-windows-with-azure-trusted-signing/)
 
 It also contains:
 
@@ -130,7 +130,7 @@ On Xcode, see this [plugin](https://github.com/travisjeffery/ClangFormat-Xcode) 
 
 ## What's the deal with code signing and notarization?
 
-This repo code signs Windows via Azure Key Vault. [Read more about how to set it up blog](https://melatonin.dev/blog/how-to-code-sign-windows-installers-with-an-ev-cert-on-github-actions/).
+This repo code signs Windows via Azure Trusted Signing. [Read more about how to set it up on my blog](https://melatonin.dev/blog/code-signing-on-windows-with-azure-trusted-signing/).
 
 It also code signs and notarizes on macOS. Again, you can [read my article for details](https://melatonin.dev/blog/how-to-code-sign-and-notarize-macos-audio-plugins-in-ci/).
 

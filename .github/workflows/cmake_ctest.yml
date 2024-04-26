@@ -198,14 +198,39 @@ jobs:
       working-directory: ${{ env.ARTIFACTS_PATH }}
       run: 7z a -tzip "${{ env.ARTIFACT_NAME }}.zip" .
 
-    - name: Generate Installer and Sign with EV cert on Azure (Windows)
+    - name: Generate Installer
       if: ${{ matrix.name == 'Windows' }}
       shell: bash
       run: |
         iscc "packaging\installer.iss"
         mv "packaging/Output/${{ env.ARTIFACT_NAME }}.exe" "${{ env.ARTIFACTS_PATH }}/"
-        dotnet tool install --global AzureSignTool 
-        AzureSignTool sign -kvu "${{ secrets.AZURE_KEY_VAULT_URI }}" -kvi "${{ secrets.AZURE_CLIENT_ID }}" -kvt "${{ secrets.AZURE_TENANT_ID }}" -kvs "${{ secrets.AZURE_CLIENT_SECRET }}" -kvc ${{ secrets.AZURE_CERT_NAME }} -tr http://timestamp.digicert.com -v "${{ env.ARTIFACTS_PATH }}/${{ env.ARTIFACT_NAME }}.exe"
+
+    - name: Codesign with Azure Trusted Signing
+      if: ${{ matrix.name == 'Windows' }}
+      uses: azure/trusted-signing-action@v0.3.16
+      with:
+        # The Azure Active Directory tenant (directory) ID.
+        azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+    
+        # The client (application) ID of an App Registration in the tenant.
+        azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        
+        # A client secret that was generated for the App Registration.
+        azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+
+        # The Code Signing Account endpoint. The URI value must have a URI that aligns to the region your Code Signing Account and Certificate Profile you are specifying were created in during the setup of these resources.
+        endpoint: ${{ secrets.AZURE_ENDPOINT }}
+        
+        # The Code Signing Account name.
+        code-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
+        
+        # The Certificate Profile name.
+        certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
+
+        # This signs all exes inside the folder
+        files-folder: ${{ env.ARTIFACTS_PATH }}
+        files-folder-filter: exe
+        file-digest: SHA256
 
     - name: Upload Exe (Windows)
       if: ${{ matrix.name == 'Windows' }}
