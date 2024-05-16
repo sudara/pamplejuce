@@ -156,6 +156,9 @@ git push --tags
 ```
 
 > [!IMPORTANT]
+> If you see a 403 error, [you'll need to adjust the repository permissions](https://github.com/softprops/action-gh-release/issues/400#issuecomment-1870332450). Go to `Settings > Acitions > General > Workflow Permissions` and choose `Read and Write`.
+
+> [!IMPORTANT]
 > Releases are set to `prerelease`! This means that uploaded release assets are visible to other users (on public repositories), but not explicitly listed as the latest release until you "publish" in the GitHub UI.
 
 > [!NOTE]
