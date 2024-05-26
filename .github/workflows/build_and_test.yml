@@ -105,7 +105,7 @@ jobs:
         uses: mozilla-actions/sccache-action@v0.0.4
 
       - name: Import Certificates (macOS)
-        uses: apple-actions/import-codesign-certs@v2 # only exists as a tag right now
+        uses: apple-actions/import-codesign-certs@v3
         if: ${{ matrix.name == 'macOS' }}
         with:
           p12-file-base64: ${{ secrets.DEV_ID_APP_CERT }}
@@ -208,7 +208,7 @@ jobs:
 
       - name: Codesign with Azure Trusted Signing
         if: ${{ matrix.name == 'Windows' }}
-        uses: azure/trusted-signing-action@v0.3.16
+        uses: azure/trusted-signing-action@v0.3.18
         with:
           # The Azure Active Directory tenant (directory) ID.
           azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
@@ -223,7 +223,7 @@ jobs:
           endpoint: ${{ secrets.AZURE_ENDPOINT }}
 
           # The Code Signing Account name.
-          code-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
+          trusted-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
 
           # The Certificate Profile name.
           certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
@@ -231,7 +231,6 @@ jobs:
           # This signs all exes inside the folder
           files-folder: ${{ env.ARTIFACTS_PATH }}
           files-folder-filter: exe
-          file-digest: SHA256
 
       - name: Upload Exe (Windows)
         if: ${{ matrix.name == 'Windows' }}
@@ -264,7 +263,7 @@ jobs:
         uses: actions/download-artifact@v4
 
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           prerelease: true
           # download-artifact puts these files in their own dirs...
