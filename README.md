@@ -30,7 +30,7 @@ It also contains:
 
 ## How does this all work at a high level?
 
-If you are new to CMake, I suggest you read up about [JUCE and CMmake on my blog!](https://melatonin.dev/blog/how-to-use-cmake-with-juce/).
+If you are new to CMake, I suggest you read up about [JUCE and CMake on my blog!](https://melatonin.dev/blog/how-to-use-cmake-with-juce/).
 
 ## Can I see some examples?
 
