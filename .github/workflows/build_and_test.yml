@@ -13,10 +13,14 @@ concurrency:
 env:
   BUILD_TYPE: Release
   BUILD_DIR: Builds
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   DISPLAY: :0 # linux pluginval needs this
   HOMEBREW_NO_INSTALL_CLEANUP: 1
+  SCCACHE_GHA_ENABLED: true
   IPP_DIR: C:\Program Files (x86)\Intel\oneAPI\ipp\latest\lib\cmake\ipp
+
+defaults:
+  run:
+    shell: bash
 
 # jobs are run in paralell on different machines
 # all steps run in series
@@ -31,17 +35,25 @@ jobs:
           - name: Linux
             os: ubuntu-22.04
             pluginval-binary: ./pluginval
+            extra-flags: ""
           - name: macOS
             os: macos-14
             pluginval-binary: pluginval.app/Contents/MacOS/pluginval
+            extra-flags: -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
           - name: Windows
             os: windows-latest
             pluginval-binary: ./pluginval.exe
+            # D_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR is a temporary workaround for a Visual Studio+GA snafu
+            # check if resolved here: https://github.com/sudara/pamplejuce/issues/103
+            extra-flags: -DCMAKE_CXX_FLAGS=" /D_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR"
 
     steps:
-      # This is just easier than debugging different compilers on different platforms
+      # Setup MSVC toolchain and developer command prompt (Windows)
+      - uses: ilammy/msvc-dev-cmd@v1
+
+      # This is just easier than debugging different compilers
       - name: Set up Clang
-        if: ${{ matrix.name != 'macOS' }}
+        if: runner.os == 'Linux'
         uses: egor-tensin/setup-clang@v1
 
       # This also starts up our "fake" display Xvfb, needed for pluginval
@@ -50,11 +62,6 @@ jobs:
         # Thanks to McMartin & co https://forum.juce.com/t/list-of-juce-dependencies-under-linux/15121/44
         run: |
           sudo apt-get update && sudo apt install libasound2-dev libx11-dev libxinerama-dev libxext-dev libfreetype6-dev libwebkit2gtk-4.0-dev libglu1-mesa-dev xvfb ninja-build
-          # downgrade gcc to workaround 22.04 and C++20 issue
-          # see: https://github.com/actions/runner-images/issues/8659
-          sudo rm -f /etc/apt/sources.list.d/ubuntu-toolchain-r-ubuntu-test-jammy.list
-          sudo apt-get update
-          sudo apt-get install -y --allow-downgrades libc6=2.35-0ubuntu3.7 libc6-dev=2.35-0ubuntu3.7 libstdc++6=12.3.0-1ubuntu1~22.04 libgcc-s1=12.3.0-1ubuntu1~22.04
           sudo /usr/bin/Xvfb $DISPLAY &
 
       - name: Cache IPP (Windows)
@@ -67,7 +74,6 @@ jobs:
 
       - name: Install IPP (Windows)
         if: (runner.os == 'Windows') && (steps.cache-ipp.outputs.cache-hit != 'true')
-        shell: bash
         run: |
           curl --output oneapi.exe https://registrationcenter-download.intel.com/akdlm/IRC_NAS/8d158661-ca8f-4e66-b5ea-3e0b3d00836a/w_ipp_oneapi_p_2021.10.1.15_offline.exe
           ./oneapi.exe -s -x -f oneapi
@@ -82,7 +88,6 @@ jobs:
 
       - name: Install Ninja (Windows)
         if: runner.os == 'Windows'
-        shell: bash
         run: choco install ninja
 
       - name: Install macOS Deps
@@ -112,25 +117,25 @@ jobs:
           p12-password: ${{ secrets.DEV_ID_APP_PASSWORD }}
 
       - name: Configure
-        shell: bash
-        run: cmake -B ${{ env.BUILD_DIR }} -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -DCMAKE_C_COMPILER_LAUNCHER=${{ matrix.ccache }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ matrix.ccache }} -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" .
+        run: cmake -B ${{ env.BUILD_DIR }} -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache ${{ matrix.extra-flags }} .
 
       - name: Build
-        shell: bash
         run: cmake --build ${{ env.BUILD_DIR }} --config ${{ env.BUILD_TYPE }} --parallel 4
 
       - name: Test
         working-directory: ${{ env.BUILD_DIR }}
-        run: ctest --output-on-failure -j4 -VV
+        run: ./Tests
+
+      - name: Run Benchmarks
+        working-directory: ${{ env.BUILD_DIR }}
+        run: ./Benchmarks
 
       - name: Read in .env from CMake # see GitHubENV.cmake
-        shell: bash
         run: |
           cat .env # show us the config
           cat .env >> $GITHUB_ENV # pull in our PRODUCT_NAME, etc
 
       - name: Set additional env vars for next steps
-        shell: bash
         run: |
           ARTIFACTS_PATH=${{ env.BUILD_DIR }}/${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}
           echo "ARTIFACTS_PATH=$ARTIFACTS_PATH" >> $GITHUB_ENV
@@ -141,7 +146,6 @@ jobs:
           echo "ARTIFACT_NAME=${{ env.PRODUCT_NAME }}-${{ env.VERSION }}-${{ matrix.name }}" >> $GITHUB_ENV
 
       - name: Pluginval
-        shell: bash
         run: |
           curl -LO "https://github.com/Tracktion/pluginval/releases/download/v1.0.3/pluginval_${{ matrix.name }}.zip"
           7z x pluginval_${{ matrix.name }}.zip
@@ -201,7 +205,6 @@ jobs:
 
       - name: Generate Installer
         if: ${{ matrix.name == 'Windows' }}
-        shell: bash
         run: |
           iscc "packaging\installer.iss"
           mv "packaging/Output/${{ env.ARTIFACT_NAME }}.exe" "${{ env.ARTIFACTS_PATH }}/"
