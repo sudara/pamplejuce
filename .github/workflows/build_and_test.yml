@@ -40,6 +40,9 @@ jobs:
             pluginval-binary: ./pluginval.exe
 
     steps:
+      # Setup MSVC toolchain and developer command prompt (Windows)
+      - uses: ilammy/msvc-dev-cmd@v1
+
       # This is just easier than debugging different compilers
       - name: Set up Clang
         if: runner.os == 'Linux'
