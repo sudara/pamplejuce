@@ -13,10 +13,9 @@ concurrency:
 env:
   BUILD_TYPE: Release
   BUILD_DIR: Builds
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   DISPLAY: :0 # linux pluginval needs this
   HOMEBREW_NO_INSTALL_CLEANUP: 1
-  SCCACHE_GHA_ENABLED: "true"
+  SCCACHE_GHA_ENABLED: true
   IPP_DIR: C:\Program Files (x86)\Intel\oneAPI\ipp\latest\lib\cmake\ipp
 
 defaults:
