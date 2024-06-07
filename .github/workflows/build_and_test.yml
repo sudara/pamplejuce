@@ -40,9 +40,9 @@ jobs:
             pluginval-binary: ./pluginval.exe
 
     steps:
-      # This is just easier than debugging different compilers on different platforms
+      # This is just easier than debugging different compilers
       - name: Set up Clang
-        if: ${{ matrix.name != 'macOS' }}
+        if: runner.os == 'Linux'
         uses: egor-tensin/setup-clang@v1
 
       # This also starts up our "fake" display Xvfb, needed for pluginval
