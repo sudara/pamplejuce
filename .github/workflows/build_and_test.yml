@@ -35,12 +35,18 @@ jobs:
           - name: Linux
             os: ubuntu-22.04
             pluginval-binary: ./pluginval
+            tests-binary: ./Tests
+            benchmarks-binary: ./Benchmarks
           - name: macOS
             os: macos-14
             pluginval-binary: pluginval.app/Contents/MacOS/pluginval
+            tests-binary: ./Tests
+            benchmarks-binary: ./Benchmarks
           - name: Windows
             os: windows-latest
             pluginval-binary: ./pluginval.exe
+            tests-binary: ./Tests.exe
+            benchmarks-binary: ./Benchmarks.exe
 
     steps:
       # Setup MSVC toolchain and developer command prompt (Windows)
@@ -119,8 +125,12 @@ jobs:
 
       - name: Test
         working-directory: ${{ env.BUILD_DIR }}
-        run: ctest --version && ctest -j1 --output-on-failure -VV
+        run: ${{ matrix.tests-binary }}
 
+      - name: Run Benchmarks
+        working-directory: ${{ env.BUILD_DIR }}
+        run: ${{ matrix.benchmarks-binary }}
+        
       - name: Read in .env from CMake # see GitHubENV.cmake
         run: |
           cat .env # show us the config
