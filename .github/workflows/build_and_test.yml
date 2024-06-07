@@ -120,7 +120,7 @@ jobs:
 
       - name: Test
         working-directory: ${{ env.BUILD_DIR }}
-        run: ctest --version && ctest --output-on-failure -VV
+        run: ctest --version && ctest -j1 --output-on-failure -VV
 
       - name: Read in .env from CMake # see GitHubENV.cmake
         shell: bash
