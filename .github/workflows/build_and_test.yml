@@ -19,6 +19,10 @@ env:
   SCCACHE_GHA_ENABLED: "true"
   IPP_DIR: C:\Program Files (x86)\Intel\oneAPI\ipp\latest\lib\cmake\ipp
 
+defaults:
+  run:
+    shell: bash
+
 # jobs are run in paralell on different machines
 # all steps run in series
 jobs:
@@ -66,7 +70,6 @@ jobs:
 
       - name: Install IPP (Windows)
         if: (runner.os == 'Windows') && (steps.cache-ipp.outputs.cache-hit != 'true')
-        shell: bash
         run: |
           curl --output oneapi.exe https://registrationcenter-download.intel.com/akdlm/IRC_NAS/8d158661-ca8f-4e66-b5ea-3e0b3d00836a/w_ipp_oneapi_p_2021.10.1.15_offline.exe
           ./oneapi.exe -s -x -f oneapi
@@ -81,7 +84,6 @@ jobs:
 
       - name: Install Ninja (Windows)
         if: runner.os == 'Windows'
-        shell: bash
         run: choco install ninja
 
       - name: Install macOS Deps
@@ -111,11 +113,9 @@ jobs:
           p12-password: ${{ secrets.DEV_ID_APP_PASSWORD }}
 
       - name: Configure
-        shell: bash
         run: cmake -B ${{ env.BUILD_DIR }} -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" .
 
       - name: Build
-        shell: bash
         run: cmake --build ${{ env.BUILD_DIR }} --config ${{ env.BUILD_TYPE }} --parallel 4
 
       - name: Test
@@ -123,13 +123,11 @@ jobs:
         run: ctest --version && ctest -j1 --output-on-failure -VV
 
       - name: Read in .env from CMake # see GitHubENV.cmake
-        shell: bash
         run: |
           cat .env # show us the config
           cat .env >> $GITHUB_ENV # pull in our PRODUCT_NAME, etc
 
       - name: Set additional env vars for next steps
-        shell: bash
         run: |
           ARTIFACTS_PATH=${{ env.BUILD_DIR }}/${{ env.PROJECT_NAME }}_artefacts/${{ env.BUILD_TYPE }}
           echo "ARTIFACTS_PATH=$ARTIFACTS_PATH" >> $GITHUB_ENV
@@ -140,7 +138,6 @@ jobs:
           echo "ARTIFACT_NAME=${{ env.PRODUCT_NAME }}-${{ env.VERSION }}-${{ matrix.name }}" >> $GITHUB_ENV
 
       - name: Pluginval
-        shell: bash
         run: |
           curl -LO "https://github.com/Tracktion/pluginval/releases/download/v1.0.3/pluginval_${{ matrix.name }}.zip"
           7z x pluginval_${{ matrix.name }}.zip
@@ -200,7 +197,6 @@ jobs:
 
       - name: Generate Installer
         if: ${{ matrix.name == 'Windows' }}
-        shell: bash
         run: |
           iscc "packaging\installer.iss"
           mv "packaging/Output/${{ env.ARTIFACT_NAME }}.exe" "${{ env.ARTIFACTS_PATH }}/"
