@@ -35,18 +35,17 @@ jobs:
           - name: Linux
             os: ubuntu-22.04
             pluginval-binary: ./pluginval
-            tests-binary: ./Tests
-            benchmarks-binary: ./Benchmarks
+            extra-flags: ""
           - name: macOS
             os: macos-14
             pluginval-binary: pluginval.app/Contents/MacOS/pluginval
-            tests-binary: ./Tests
-            benchmarks-binary: ./Benchmarks
+            extra-flags: -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
           - name: Windows
             os: windows-latest
             pluginval-binary: ./pluginval.exe
-            tests-binary: ./Tests.exe
-            benchmarks-binary: ./Benchmarks.exe
+            # D_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR is a temporary workaround for a Visual Studio+GA snafu
+            # check if resolved here: https://github.com/sudara/pamplejuce/issues/103
+            extra-flags: -DCMAKE_CXX_FLAGS=" /D_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR"
 
     steps:
       # Setup MSVC toolchain and developer command prompt (Windows)
@@ -118,19 +117,19 @@ jobs:
           p12-password: ${{ secrets.DEV_ID_APP_PASSWORD }}
 
       - name: Configure
-        run: cmake -B ${{ env.BUILD_DIR }} -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" .
+        run: cmake -B ${{ env.BUILD_DIR }} -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache ${{ matrix.extra-flags }} .
 
       - name: Build
         run: cmake --build ${{ env.BUILD_DIR }} --config ${{ env.BUILD_TYPE }} --parallel 4
 
       - name: Test
         working-directory: ${{ env.BUILD_DIR }}
-        run: ${{ matrix.tests-binary }}
+        run: ./Tests
 
       - name: Run Benchmarks
         working-directory: ${{ env.BUILD_DIR }}
-        run: ${{ matrix.benchmarks-binary }}
-        
+        run: ./Benchmarks
+
       - name: Read in .env from CMake # see GitHubENV.cmake
         run: |
           cat .env # show us the config
