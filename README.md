@@ -8,7 +8,7 @@ Out of the box, it:
 1. Supports C++20.
 2. Uses JUCE 7.x as a git submodule (tracking develop).
 3. Relies on CMake 3.24.1 and higher for cross-platform building.
-4. Has [Catch2](https://github.com/catchorg/Catch2) v3.4.0 for the test framework and runner.
+4. Has [Catch2](https://github.com/catchorg/Catch2) v3.6.0 for the test framework and runner.
 5. Includes a `Tests` target and a `Benchmarks` target some examples to get started quickly.
 6. Has [Melatonin Inspector](https://github.com/sudara/melatonin_inspector) installed as a JUCE module to help relieve headaches when building plugin UI.
 
