@@ -30,6 +30,6 @@ TEST_CASE ("Plugin instance", "[instance]")
 
 TEST_CASE ("IPP version", "[ipp]")
 {
-    CHECK_THAT (ippsGetLibVersion()->Version, Catch::Matchers::Equals ("2021.10.1 (r0x8e799c51)"));
+    CHECK_THAT (ippsGetLibVersion()->Version, Catch::Matchers::Equals ("2021.11.0 (r0xcd107b02)"));
 }
 #endif
