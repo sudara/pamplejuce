@@ -37,7 +37,6 @@ jobs:
           - name: Linux
             os: ubuntu-22.04
             pluginval-binary: ./pluginval
-            extra-flags: ""
           - name: macOS
             os: macos-14
             pluginval-binary: pluginval.app/Contents/MacOS/pluginval
@@ -45,20 +44,17 @@ jobs:
           - name: Windows
             os: windows-latest
             pluginval-binary: ./pluginval.exe
-            # D_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR is a temporary workaround for a Visual Studio+GA snafu
-            # check if resolved here: https://github.com/sudara/pamplejuce/issues/103
-            extra-flags: -DCMAKE_CXX_FLAGS=" /D_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR"
 
     steps:
       # Setup MSVC toolchain and developer command prompt (Windows)
       - uses: ilammy/msvc-dev-cmd@v1
 
-      # This is just easier than debugging different compilers
+      # Use clang on Linux so we don't introduce a 3rd compiler (Windows and macOS use MSVC and Clang)
       - name: Set up Clang
         if: runner.os == 'Linux'
         uses: egor-tensin/setup-clang@v1
 
-      # This also starts up our "fake" display Xvfb, needed for pluginval
+      # This also starts up our "fake" display (Xvfb), needed for pluginval
       - name: Install JUCE's Linux Deps
         if: runner.os == 'Linux'
         # Thanks to McMartin & co https://forum.juce.com/t/list-of-juce-dependencies-under-linux/15121/44
