@@ -84,9 +84,8 @@ juce_add_plugin("${PROJECT_NAME}"
 # Without running into ODR violations
 add_library(SharedCode INTERFACE)
 
-# C++20, please
-# Use cxx_std_23 for C++23 (as of CMake v 3.20)
-target_compile_features(SharedCode INTERFACE cxx_std_20)
+# Enable fast math, C++20 and a few other defaults
+include(SharedCodeDefaults)
 
 # Manually list all .h and .cpp files for the plugin
 # If you are like me, you'll use globs for your sanity.
