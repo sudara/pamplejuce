@@ -2,6 +2,8 @@
 # 3.24.1 is also bundled in CLion as of 2023
 cmake_minimum_required(VERSION 3.24.1)
 
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>" CACHE INTERNAL "")
+
 # This tells cmake we have goodies in the /cmake folder
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include (PamplejuceVersion)
@@ -85,7 +87,7 @@ juce_add_plugin("${PROJECT_NAME}"
 add_library(SharedCode INTERFACE)
 
 # Enable fast math, C++20 and a few other defaults
-include(SharedCodeDefaults)
+# include(SharedCodeDefaults)
 
 # Manually list all .h and .cpp files for the plugin
 # If you are like me, you'll use globs for your sanity.
