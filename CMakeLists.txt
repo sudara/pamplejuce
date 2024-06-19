@@ -2,7 +2,6 @@
 # 3.24.1 is also bundled in CLion as of 2023
 cmake_minimum_required(VERSION 3.24.1)
 
-set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>" CACHE INTERNAL "")
 
 # This tells cmake we have goodies in the /cmake folder
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -10,6 +9,9 @@ include (PamplejuceVersion)
 
 # Configures universal binaries and decides which version of macOS to support
 include(PamplejuceMacOS)
+
+# Couple tweaks that IMO should be JUCE defaults
+include(JUCEDefaults)
 
 # Change me!
 # This is the internal name of the project and the name of JUCE's shared code target
@@ -37,9 +39,6 @@ set(FORMATS Standalone AU VST3 AUv3)
 
 # For simplicity, the name of the CMake project is also the name of the target
 project(${PROJECT_NAME} VERSION ${CURRENT_VERSION})
-
-# Couple tweaks that IMO should be JUCE defaults
-include(JUCEDefaults)
 
 # JUCE is setup as a submodule in the /JUCE folder
 # Locally, you must run `git submodule update --init --recursive` once
@@ -86,8 +85,8 @@ juce_add_plugin("${PROJECT_NAME}"
 # Without running into ODR violations
 add_library(SharedCode INTERFACE)
 
-# Enable fast math, C++20 and a few other defaults
-# include(SharedCodeDefaults)
+# Enable fast math, C++20 and a few other target defaults
+include(SharedCodeDefaults)
 
 # Manually list all .h and .cpp files for the plugin
 # If you are like me, you'll use globs for your sanity.
@@ -150,8 +149,8 @@ include(PamplejuceIPP)
 # Everything related to the tests target
 include(Tests)
 
-# A separate target keeps the Tests target fast!
+# A separate target for Benchmarks (keeps the Tests target fast)
 include(Benchmarks)
 
-# Pass some config to GA (like our PRODUCT_NAME)
+# Output some config for CI (like our PRODUCT_NAME)
 include(GitHubENV)
