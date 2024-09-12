@@ -105,7 +105,7 @@ jobs:
           submodules: true # Get JUCE populated
 
       - name: Cache the build
-        uses: mozilla-actions/sccache-action@v0.0.4
+        uses: mozilla-actions/sccache-action@v0.0.5
 
       - name: Import Certificates (macOS)
         uses: apple-actions/import-codesign-certs@v3
@@ -209,7 +209,7 @@ jobs:
 
       - name: Codesign with Azure Trusted Signing
         if: ${{ matrix.name == 'Windows' }}
-        uses: azure/trusted-signing-action@v0.3.18
+        uses: azure/trusted-signing-action@v0.4.0
         with:
           # The Azure Active Directory tenant (directory) ID.
           azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
