@@ -30,7 +30,10 @@ It also contains:
 
 ## How does this all work at a high level?
 
-Go check out the [new shiny Pamplejuce documentation](https://melatonin.dev/manuals/pamplejuce/how-does-this-all-work/).
+Check out the [official Pamplejuce documentation](https://melatonin.dev/manuals/pamplejuce/how-does-this-all-work/).
+
+[![Arc - 2024-09-26 14@2x](https://github.com/user-attachments/assets/1d4bd5fb-2594-4422-9328-3e15aba88f1d)](https://melatonin.dev/manuals/pamplejuce/how-does-this-all-work/)
+
 
 ## Setting up for YOUR project
 
@@ -40,16 +43,10 @@ That means the easiest thing to do is click "[Use this template](https://github.
 
 Then check out the [documentation](https://melatonin.dev/manuals/pamplejuce/setting-your-project-up/) so you know what to tweak.
 
-
 ## Having Issues?
-
-> [!TIP]
-> Don't see your question here? [Open an issue](https://github.com/sudara/pamplejuce/issues/new)!
-
-## Contributing
 
 Thanks to everyone who has contributed to the repository. 
 
 This repository covers a _lot_ of ground. JUCE itself has a lot of surface area. It's a group effort to maintain the garden and keep things nice!
 
-If something isn't just working out of the box — *it's not just you* — others are running into the problem, too, I promise. Please submit a PR or issue.
+If something isn't just working out of the box — *it's probably not just you* — others are running into the problem, too, I promise. Check out [the official docs](https://melatonin.dev/manuals/pamplejuce), then please do [open an issue](https://github.com/sudara/pamplejuce/issues/new)!
