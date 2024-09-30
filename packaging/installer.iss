@@ -15,8 +15,8 @@ Name: "standalone"; Description: "Standalone application"; Types: full custom
 Name: "vst3"; Description: "VST3 plugin"; Types: full custom
 
 [Setup]
-ArchitecturesInstallIn64BitMode=x64
-ArchitecturesAllowed=x64
+ArchitecturesInstallIn64BitMode=x64compatible
+ArchitecturesAllowed=x64compatible
 AppName={#ProductName}
 OutputBaseFilename={#ProductName}-{#Version}-Windows
 AppCopyright=Copyright (C) {#Year} {#Publisher}
