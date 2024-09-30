@@ -32,8 +32,7 @@ It also contains:
 
 Check out the [official Pamplejuce documentation](https://melatonin.dev/manuals/pamplejuce/how-does-this-all-work/).
 
-[![Arc - 2024-09-26 14@2x](https://github.com/user-attachments/assets/1d4bd5fb-2594-4422-9328-3e15aba88f1d)](https://melatonin.dev/manuals/pamplejuce/how-does-this-all-work/)
-
+[![Arc - 2024-10-01 51@2x](https://github.com/user-attachments/assets/01d19d2d-fbac-481f-8cec-e9325b2abe57)](https://melatonin.dev/manuals/pamplejuce/how-does-this-all-work/)
 
 ## Setting up for YOUR project
 
