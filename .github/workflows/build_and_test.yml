@@ -47,6 +47,23 @@ jobs:
             pluginval-binary: ./pluginval.exe
 
     steps:
+      # Figure out how many cores we have to work with
+      - name: Set number of cores
+        run: |
+          echo "Determining number of cores..."
+          if [[ "$RUNNER_OS" == "Linux" ]]; then
+            CORES=$(nproc)
+          elif [[ "$RUNNER_OS" == "macOS" ]]; then
+            CORES=$(sysctl -n hw.ncpu)
+          elif [[ "$RUNNER_OS" == "Windows" ]]; then
+            CORES=$NUMBER_OF_PROCESSORS
+          else
+            echo "Unknown OS. Defaulting to 2 cores."
+            CORES=2
+          fi
+          echo "NUMBER_OF_CORES=$CORES" >> $GITHUB_ENV
+          echo "Detected $CORES cores"
+
       # Setup MSVC toolchain and developer command prompt (Windows)
       - uses: ilammy/msvc-dev-cmd@v1
 
@@ -119,7 +136,7 @@ jobs:
         run: cmake -B ${{ env.BUILD_DIR }} -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache ${{ matrix.extra-flags }} .
 
       - name: Build
-        run: cmake --build ${{ env.BUILD_DIR }} --config ${{ env.BUILD_TYPE }} --parallel 4
+        run: cmake --build ${{ env.BUILD_DIR }} --config ${{ env.BUILD_TYPE }} --parallel ${{ env.NUMBER_OF_CORES }}
 
       - name: Test
         working-directory: ${{ env.BUILD_DIR }}
