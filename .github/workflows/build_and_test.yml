@@ -18,6 +18,8 @@ env:
   SCCACHE_GHA_ENABLED: true
   SCCACHE_CACHE_MULTIARCH: 1
   IPP_DIR: C:\Program Files (x86)\Intel\oneAPI\ipp\latest\lib\cmake\ipp
+  SHOULD_STRIP_SYMBOLS: true
+  TEST_SYMBOL: processBlock
 
 defaults:
   run:
@@ -142,13 +144,267 @@ jobs:
           echo "AU_PATH=$ARTIFACTS_PATH/AU/${{ env.PRODUCT_NAME }}.component" >> $GITHUB_ENV
           echo "AUV3_PATH=$ARTIFACTS_PATH/AUv3/${{ env.PRODUCT_NAME }}.appex" >> $GITHUB_ENV
           echo "STANDALONE_PATH=$ARTIFACTS_PATH/Standalone/${{ env.PRODUCT_NAME }}.app" >> $GITHUB_ENV
+          echo "STANDALONE_PATH_LINUX=$ARTIFACTS_PATH/Standalone/${{ env.PRODUCT_NAME }}" >> $GITHUB_ENV
           echo "ARTIFACT_NAME=${{ env.PRODUCT_NAME }}-${{ env.VERSION }}-${{ matrix.name }}" >> $GITHUB_ENV
+
+      - name: Set Linux-specific env vars
+        if: ${{ matrix.name == 'Linux' }}
+        run: |
+          VST3_SO_PATH="${{ env.VST3_PATH }}/Contents/x86_64-linux/${{ env.PRODUCT_NAME }}.so"
+          echo "VST3_SO_PATH=$VST3_SO_PATH" >> $GITHUB_ENV
+
+      - name: Set macOS-specific env vars
+        if: ${{ matrix.name == 'macOS' }}
+        run: |
+          STANDALONE_BIN="${{ env.STANDALONE_PATH }}/Contents/MacOS/${{ env.PRODUCT_NAME }}"
+          VST3_BIN="${{ env.VST3_PATH }}/Contents/MacOS/${{ env.PRODUCT_NAME }}"
+          AU_BIN="${{ env.AU_PATH }}/Contents/MacOS/${{ env.PRODUCT_NAME }}"
+          echo "STANDALONE_BIN=$STANDALONE_BIN" >> $GITHUB_ENV
+          echo "VST3_BIN=$VST3_BIN" >> $GITHUB_ENV
+          echo "AU_BIN=$AU_BIN" >> $GITHUB_ENV
 
       - name: Pluginval
         run: |
           curl -LO "https://github.com/Tracktion/pluginval/releases/download/v1.0.3/pluginval_${{ matrix.name }}.zip"
           7z x pluginval_${{ matrix.name }}.zip
           ${{ matrix.pluginval-binary }} --strictness-level 10 --verbose --validate "${{ env.VST3_PATH }}"
+
+      - name: Test if symbol exists (Linux)
+        if: ${{ matrix.name == 'Linux' && env.SHOULD_STRIP_SYMBOLS == 'true' }}
+        run: |
+          # Standalone
+          if nm "${{ env.STANDALONE_PATH_LINUX }}" | c++filt | grep -F "${{ env.TEST_SYMBOL }}" > /dev/null; then
+            echo "Symbol ${{ env.TEST_SYMBOL }} found in Standalone!"
+          else
+            echo "Symbol we were expecting to exist in Standalone was not found!"
+            exit 1
+          fi
+
+          # VST3
+          if nm "$VST3_SO_PATH" | c++filt | grep -F "${{ env.TEST_SYMBOL }}" > /dev/null; then
+            echo "Symbol ${{ env.TEST_SYMBOL }} found in VST3!"
+          else
+            echo "Symbol we were expecting to exist in VST3 was not found!"
+            exit 1
+          fi
+
+      - name: Generate symbol files, strip binaries (Linux)
+        if: ${{ matrix.name == 'Linux' && env.SHOULD_STRIP_SYMBOLS == 'true' }}
+        run: |
+          # Standalone
+          echo "Standalone Binary Path: ${{ env.STANDALONE_PATH_LINUX }}"
+          if [ -f "${{ env.STANDALONE_PATH_LINUX }}" ]; then
+            if objcopy --only-keep-debug "${{ env.STANDALONE_PATH_LINUX }}" "${{ env.STANDALONE_PATH_LINUX }}.debug"; then
+              echo "Successfully created debug symbols for Standalone Binary"
+            else
+              echo "Failed to create debug symbols for Standalone Binary"
+              exit 1
+            fi
+
+            if strip --strip-unneeded "${{ env.STANDALONE_PATH_LINUX }}"; then
+              echo "Successfully stripped Standalone Binary"
+            else
+              echo "Failed to strip Standalone Binary"
+              exit 1
+            fi
+
+            if objcopy --add-gnu-debuglink="${{ env.STANDALONE_PATH_LINUX }}.debug" "${{ env.STANDALONE_PATH_LINUX }}"; then
+              echo "Successfully added debug link to Standalone Binary"
+            else
+              echo "Failed to add debug link to Standalone Binary"
+              exit 1
+            fi
+          else
+            echo "Standalone Binary not found at ${{ env.STANDALONE_PATH_LINUX }}"
+            exit 1
+          fi
+
+          # VST3
+          if [ -f "$VST3_SO_PATH" ]; then
+            if objcopy --only-keep-debug "$VST3_SO_PATH" "$VST3_SO_PATH.debug"; then
+              echo "Successfully created debug symbols for VST3 Plugin"
+            else
+              echo "Failed to create debug symbols for VST3 Plugin"
+              exit 1
+            fi
+
+            if strip --strip-unneeded "$VST3_SO_PATH"; then
+              echo "Successfully stripped VST3 Plugin"
+            else
+              echo "Failed to strip VST3 Plugin"
+              exit 1
+            fi
+
+            if objcopy --add-gnu-debuglink="$VST3_SO_PATH.debug" "$VST3_SO_PATH"; then
+              echo "Successfully added debug link to VST3 Plugin"
+            else
+              echo "Failed to add debug link to VST3 Plugin"
+              exit 1
+            fi
+
+            # Export VST3_SO_PATH to the environment
+            echo "VST3_SO_PATH=$VST3_SO_PATH" >> $GITHUB_ENV
+          else
+            echo "VST3 Plugin not found at $VST3_SO_PATH"
+            exit 1
+          fi
+
+      - name: Test if symbol was stripped (Linux)
+        if: ${{ matrix.name == 'Linux' && env.SHOULD_STRIP_SYMBOLS == 'true' }}
+        run: |
+          # Standalone
+          if nm "${{ env.STANDALONE_PATH_LINUX }}" | c++filt | grep -F "${{ env.TEST_SYMBOL }}" > /dev/null; then
+            echo "Symbol we were expecting to be stripped is still present in Standalone!"
+            exit 1
+          fi
+
+          # VST3
+          if nm "$VST3_SO_PATH" | c++filt | grep -F "${{ env.TEST_SYMBOL }}" > /dev/null; then
+            echo "Symbol we were expecting to be stripped is still present in VST3!"
+            exit 1
+          fi
+
+          echo "Symbols were successfully stripped from all binaries"
+  
+      - name: Upload symbol files (Linux)
+        if: ${{ matrix.name == 'Linux' && env.SHOULD_STRIP_SYMBOLS == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT_NAME }}-symbols-Linux
+          path: |
+            ${{ env.STANDALONE_PATH_LINUX }}.debug
+            ${{ env.VST3_SO_PATH }}.debug
+      
+      - name: Test if symbol exists (macOS)
+        if: ${{ matrix.name == 'macOS' && env.SHOULD_STRIP_SYMBOLS == 'true' }}
+        run: |
+          # Standalone
+          if nm "$STANDALONE_BIN" | c++filt | grep -F "${{ env.TEST_SYMBOL }}" > /dev/null; then
+            echo "Symbol ${{ env.TEST_SYMBOL }} found in Standalone!"
+          else
+            echo "Symbol we were expecting to exist in Standalone was not found!"
+            exit 1
+          fi
+
+          # VST3
+          if nm "$VST3_BIN" | c++filt | grep -F "${{ env.TEST_SYMBOL }}" > /dev/null; then
+            echo "Symbol ${{ env.TEST_SYMBOL }} found in VST3!"
+          else
+            echo "Symbol we were expecting to exist in VST3 was not found!"
+            exit 1
+          fi
+
+          # AU
+          if nm "$AU_BIN" | c++filt | grep -F "${{ env.TEST_SYMBOL }}" > /dev/null; then
+            echo "Symbol ${{ env.TEST_SYMBOL }} found in AU!"
+          else
+            echo "Symbol we were expecting to exist in AU was not found!"
+            exit 1
+          fi
+
+      - name: Generate symbol files, strip binaries (macOS)
+        if: ${{ matrix.name == 'macOS' && env.SHOULD_STRIP_SYMBOLS == 'true' }}
+        run: |
+          # Standalone
+          echo "Standalone Binary Path: $STANDALONE_BIN"
+          if [ -f "$STANDALONE_BIN" ]; then
+            if dsymutil "$STANDALONE_BIN" -o "$STANDALONE_BIN.dSYM"; then
+              echo "Successfully created dSYM for Standalone Binary"
+            else
+              echo "Failed to create dSYM for Standalone Binary"
+              exit 1
+            fi
+
+            if strip -x "$STANDALONE_BIN"; then
+              echo "Successfully stripped Standalone Binary"
+            else
+              echo "Failed to strip Standalone Binary"
+              exit 1
+            fi
+          else
+            echo "Standalone Binary not found at $STANDALONE_BIN"
+            exit 1
+          fi
+
+          # VST3
+          echo "VST3 Binary Path: $VST3_BIN"
+          if [ -f "$VST3_BIN" ]; then
+            if dsymutil "$VST3_BIN" -o "$VST3_BIN.dSYM"; then
+              echo "Successfully created dSYM for VST3 Plugin"
+            else
+              echo "Failed to create dSYM for VST3 Plugin"
+              exit 1
+            fi
+
+            if strip -x "$VST3_BIN"; then
+              echo "Successfully stripped VST3 Plugin"
+            else
+              echo "Failed to strip VST3 Plugin"
+              exit 1
+            fi
+          else
+            echo "VST3 Plugin binary not found at $VST3_BIN"
+            exit 1
+          fi
+
+          # AU
+          echo "AU Binary Path: $AU_BIN"
+          if [ -f "$AU_BIN" ]; then
+            if dsymutil "$AU_BIN" -o "$AU_BIN.dSYM"; then
+              echo "Successfully created dSYM for AU Plugin"
+            else
+              echo "Failed to create dSYM for AU Plugin"
+              exit 1
+            fi
+
+            if strip -x "$AU_BIN"; then
+              echo "Successfully stripped AU Plugin"
+            else
+              echo "Failed to strip AU Plugin"
+              exit 1
+            fi
+          else
+            echo "AU Plugin binary not found at $AU_BIN"
+            exit 1
+          fi
+
+          # Export paths for later steps
+          echo "STANDALONE_DSYM_PATH=$STANDALONE_BIN.dSYM" >> $GITHUB_ENV
+          echo "VST3_DSYM_PATH=$VST3_BIN.dSYM" >> $GITHUB_ENV
+          echo "AU_DSYM_PATH=$AU_BIN.dSYM" >> $GITHUB_ENV
+
+      - name: Test if symbol was stripped (macOS)
+        if: ${{ matrix.name == 'macOS' && env.SHOULD_STRIP_SYMBOLS == 'true' }}
+        run: |
+          # Standalone
+          if nm "$STANDALONE_BIN" | c++filt | grep -F "${{ env.TEST_SYMBOL }}" > /dev/null; then
+            echo "Symbol we were expecting to be stripped is still present in Standalone!"
+            exit 1
+          fi
+
+          # VST3
+          if nm "$VST3_BIN" | c++filt | grep -F "${{ env.TEST_SYMBOL }}" > /dev/null; then
+            echo "Symbol we were expecting to be stripped is still present in VST3!"
+            exit 1
+          fi
+
+          # AU
+          if nm "$AU_BIN" | c++filt | grep -F "${{ env.TEST_SYMBOL }}" > /dev/null; then
+            echo "Symbol we were expecting to be stripped is still present in AU!"
+            exit 1
+          fi
+
+          echo "Symbols were successfully stripped from all binaries"
+
+      - name: Upload symbol files (macOS)
+        if: ${{ matrix.name == 'macOS' && env.SHOULD_STRIP_SYMBOLS == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT_NAME }}-symbols-macOS
+          path: |
+            ${{ env.STANDALONE_DSYM_PATH }}
+            ${{ env.VST3_DSYM_PATH }}
+            ${{ env.AU_DSYM_PATH }}
 
       - name: Codesign (macOS)
         if: ${{ matrix.name == 'macOS' }}
