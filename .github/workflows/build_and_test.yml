@@ -103,7 +103,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          submodules: true # Get JUCE populated
+          submodules: recursive
 
       - name: Cache the build
         uses: mozilla-actions/sccache-action@v0.0.7
