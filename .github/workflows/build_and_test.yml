@@ -195,7 +195,7 @@ jobs:
           pkgbuild --identifier "${{ env.BUNDLE_ID }}.app.pkg" --version $VERSION --root "$(dirname "${{ env.STANDALONE_PATH }}")" --component-plist standalone.plist --install-location "/Applications" --sign "${{ secrets.DEVELOPER_ID_INSTALLER }}" --timestamp "packaging/${{ env.PRODUCT_NAME }}.app.pkg"
           
           cd packaging
-          ~/brew/bin/envsubst < distribution.xml.template > distribution.xml
+          envsubst < distribution.xml.template > distribution.xml
           productbuild --resources ./resources --distribution distribution.xml --sign "${{ secrets.DEVELOPER_ID_INSTALLER }}" --timestamp "${{ env.ARTIFACT_NAME }}.pkg" 
 
           xcrun notarytool submit "${{ env.ARTIFACT_NAME }}.pkg" --apple-id ${{ secrets.NOTARIZATION_USERNAME }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --team-id ${{ secrets.TEAM_ID }} --wait
