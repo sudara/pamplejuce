@@ -115,6 +115,16 @@ jobs:
           p12-file-base64: ${{ secrets.DEV_ID_APP_CERT }}
           p12-password: ${{ secrets.DEV_ID_APP_PASSWORD }}
 
+      - name: Import Certificates (macOS)
+        uses: sudara/basic-macos-keychain-action@v1
+        id: keychain
+        if: ${{ matrix.name == 'macOS'}}
+        with:
+          dev-id-app-cert: ${{ secrets.DEV_ID_APP_CERT }}
+          dev-id-app-password: ${{ secrets.DEV_ID_APP_PASSWORD }}
+          dev-id-installer-cert: ${{ secrets.DEV_ID_INSTALLER_CERT }}
+          dev-id-installer-password: ${{ secrets.DEV_ID_INSTALLER_PASSWORD }}
+
       - name: Configure
         run: cmake -B ${{ env.BUILD_DIR }} -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache ${{ matrix.extra-flags }} .
 
@@ -179,27 +189,23 @@ jobs:
           SetFile -a C "${{ env.AU_PATH }}"
           SetFile -a C "${{ env.CLAP_PATH }}"
 
-      - name: Create DMG, Notarize and Staple (macOS)
+      - name: pkgbuild, Productbuild and Notarize
         if: ${{ matrix.name == 'macOS' }}
         run: |
-          # workaround for https://github.com/LinusU/node-appdmg/issues/234
-          python3 -m pip install setuptools --break-system-packages
-          npm install -g appdmg
-          mkdir -p packaging/dmg
+          pkgbuild --identifier "${{ env.BUNDLE_ID }}.au.pkg" --version $VERSION --component "${{ env.AU_PATH }}" --install-location "/Library/Audio/Plug-Ins/Components" --sign "${{ secrets.DEVELOPER_ID_INSTALLER }}" --timestamp "packaging/${{ env.PRODUCT_NAME }}.au.pkg"
+          pkgbuild --identifier "${{ env.BUNDLE_ID }}.vst3.pkg" --version $VERSION --component "${{ env.VST3_PATH }}" --install-location "/Library/Audio/Plug-Ins/VST3" --sign "${{ secrets.DEVELOPER_ID_INSTALLER }}" --timestamp "packaging/${{ env.PRODUCT_NAME }}.vst3.pkg"
+          pkgbuild --identifier "${{ env.BUNDLE_ID }}.clap.pkg" --version $VERSION --component "${{ env.CLAP_PATH }}" --install-location "/Library/Audio/Plug-Ins/CLAP" --sign "${{ secrets.DEVELOPER_ID_INSTALLER }}" --timestamp "packaging/${{ env.PRODUCT_NAME }}.clap.pkg"
+          
+          # Standalone is special, needs a boolean to always install in /Applications
+          pkgbuild --analyze --root "$(dirname "${{ env.STANDALONE_PATH }}")" standalone.plist
+          plutil -replace BundleIsRelocatable -bool NO standalone.plist
+          pkgbuild --identifier "${{ env.BUNDLE_ID }}.app.pkg" --version $VERSION --root "$(dirname "${{ env.STANDALONE_PATH }}")" --component-plist standalone.plist --install-location "/Applications" --sign "${{ secrets.DEVELOPER_ID_INSTALLER }}" --timestamp "packaging/${{ env.PRODUCT_NAME }}.app.pkg"
+          
+          ~/brew/bin/envsubst < distribution.xml.template > distribution.xml
+          productbuild --resources ./resources --distribution distribution.xml --sign "${{ secrets.DEVELOPER_ID_INSTALLER }}" --timestamp "${{ env.ARTIFACT_NAME }}.pkg" 
 
-          # Create directories for the dmg symlinks
-          sudo mkdir -m 755 -p /Library/Audio/Plug-Ins/Components && sudo mkdir -m 755 -p /Library/Audio/Plug-Ins/VST3
-          ln -s /Library/Audio/Plug-Ins/Components "packaging/dmg/Your Mac's Component folder"
-          ln -s /Library/Audio/Plug-Ins/VST3 "packaging/dmg/Your Mac's VST3 folder"
-          mv "${{ env.VST3_PATH }}" packaging/dmg
-          mv "${{ env.AU_PATH }}" packaging/dmg
-          mv "${{ env.STANDALONE_PATH }}" packaging/dmg
-
-          # Run appdmg to create the .dmg
-          cd packaging && appdmg dmg.json "${{ env.ARTIFACT_NAME}}.dmg"
-          codesign -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" --timestamp -i ${{ env.BUNDLE_ID }} --force "${{ env.ARTIFACT_NAME }}.dmg"
-          xcrun notarytool submit "${{ env.ARTIFACT_NAME }}.dmg" --apple-id ${{ secrets.NOTARIZATION_USERNAME }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --team-id ${{ secrets.TEAM_ID }} --wait
-          xcrun stapler staple "${{ env.ARTIFACT_NAME }}.dmg"
+          xcrun notarytool submit "${{ env.ARTIFACT_NAME }}.pkg" --apple-id ${{ secrets.NOTARIZATION_USERNAME }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --team-id ${{ secrets.TEAM_ID }} --wait
+          xcrun stapler staple "${{ env.ARTIFACT_NAME }}.pkg"
 
       - name: Zip
         if: ${{ matrix.name == 'Linux' }}

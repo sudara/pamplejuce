@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='utf8'?>
+<installer-gui-script minSpecVersion="2">
+	<title>Install ${PRODUCT_NAME}</title>
+	<os-version min="10.13" />
+	<license file="EULA" />
+	<readme file="readme.rtf" />
+	<background file="background.png" mime-type="image/png" scaling="tofit" alignment="bottomleft"/>
+	<background-darkAqua file="background.png" mime-type="image/png" scaling="tofit" alignment="bottomleft"/>
+	<options customize="always" rootVolumeOnly="true" hostArchitectures="x86_64,arm64" />
+	<domain enable_anywhere="false" enable_currentUserHome="false" enable_localSystem="true" />
+
+	<choices-outline>
+		<line choice="${BUNDLE_ID}.app.pkg" />
+		<line choice="${BUNDLE_ID}.vst3.pkg" />
+		<line choice="${BUNDLE_ID}.au.pkg" />
+		<line choice="${BUNDLE_ID}.clap.pkg" />
+	</choices-outline>
+
+	<pkg-ref id="${BUNDLE_ID}.app.pkg" version="${VERSION}" onConclusion="none">${PRODUCT_NAME}.app.pkg</pkg-ref>
+	<pkg-ref id="${BUNDLE_ID}.vst3.pkg" version="${VERSION}" onConclusion="none">${PRODUCT_NAME}.vst3.pkg</pkg-ref>
+    <pkg-ref id="${BUNDLE_ID}.au.pkg" version="${VERSION}" onConclusion="none">${PRODUCT_NAME}.au.pkg</pkg-ref>
+    <pkg-ref id="${BUNDLE_ID}.clap.pkg" version="${VERSION}" onConclusion="none">${PRODUCT_NAME}.clap.pkg</pkg-ref>
+
+	<choice id="${BUNDLE_ID}.app.pkg" visible="true" start_selected="true" title="${PRODUCT_NAME} Standalone">
+		<pkg-ref id="${BUNDLE_ID}.app.pkg" />
+	</choice>
+
+    <choice id="${BUNDLE_ID}.vst3.pkg" visible="true" start_selected="true" title="${PRODUCT_NAME} VST3">
+        <pkg-ref id="${BUNDLE_ID}.vst3.pkg" />
+    </choice>
+
+    <choice id="${BUNDLE_ID}.au.pkg" visible="true" start_selected="true" title="${PRODUCT_NAME} AU">
+        <pkg-ref id="${BUNDLE_ID}.au.pkg" />
+	</choice>
+
+	<choice id="${BUNDLE_ID}.clap.pkg" visible="true" start_selected="true" title="${PRODUCT_NAME} CLAP">
+        <pkg-ref id="${BUNDLE_ID}.clap.pkg" />
+	</choice>
+</installer-gui-script>
