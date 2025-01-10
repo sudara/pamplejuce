@@ -141,6 +141,7 @@ jobs:
           echo "VST3_PATH=$ARTIFACTS_PATH/VST3/${{ env.PRODUCT_NAME }}.vst3" >> $GITHUB_ENV
           echo "AU_PATH=$ARTIFACTS_PATH/AU/${{ env.PRODUCT_NAME }}.component" >> $GITHUB_ENV
           echo "AUV3_PATH=$ARTIFACTS_PATH/AUv3/${{ env.PRODUCT_NAME }}.appex" >> $GITHUB_ENV
+          echo "CLAP_PATH=$ARTIFACTS_PATH/CLAP/${{ env.PRODUCT_NAME }}.clap" >> $GITHUB_ENV
           echo "STANDALONE_PATH=$ARTIFACTS_PATH/Standalone/${{ env.PRODUCT_NAME }}.app" >> $GITHUB_ENV
           echo "ARTIFACT_NAME=${{ env.PRODUCT_NAME }}-${{ env.VERSION }}-${{ matrix.name }}" >> $GITHUB_ENV
 
@@ -156,6 +157,7 @@ jobs:
           # Each plugin must be code signed
           codesign --force -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" -v "${{ env.VST3_PATH }}" --deep --strict --options=runtime --timestamp
           codesign --force -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" -v "${{ env.AU_PATH }}" --deep --strict --options=runtime --timestamp
+          codesign --force -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" -v "${{ env.CLAP_PATH }}" --deep --strict --options=runtime --timestamp
           codesign --force -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" -v "${{ env.STANDALONE_PATH }}" --deep --strict --options=runtime --timestamp
 
       - name: Add Custom Icons (macOS)
@@ -170,10 +172,12 @@ jobs:
           # Stuff the resource into the strange Icon? file's resource fork
           Rez -a /tmp/icons -o "${{ env.VST3_PATH }}/Icon"$'\r'
           Rez -a /tmp/icons -o "${{ env.AU_PATH }}/Icon"$'\r'
+          Rez -a /tmp/icons -o "${{ env.CLAP_PATH }}/Icon"$'\r'
 
           # Set custom icon attribute
           SetFile -a C "${{ env.VST3_PATH }}"
           SetFile -a C "${{ env.AU_PATH }}"
+          SetFile -a C "${{ env.CLAP_PATH }}"
 
       - name: Create DMG, Notarize and Staple (macOS)
         if: ${{ matrix.name == 'macOS' }}
