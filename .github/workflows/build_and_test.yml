@@ -127,7 +127,9 @@ jobs:
 
       - name: Test
         working-directory: ${{ env.BUILD_DIR }}
-        run: ./Tests
+        run: |
+          ls -ahl
+          ./Tests
 
       - name: Run Benchmarks
         working-directory: ${{ env.BUILD_DIR }}
