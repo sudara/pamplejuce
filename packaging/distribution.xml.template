@@ -3,7 +3,7 @@
 	<title>Install ${PRODUCT_NAME}</title>
 	<os-version min="10.13" />
 	<license file="EULA" />
-	<readme file="readme.rtf" />
+	<readme file="README" />
 	<background file="background.png" mime-type="image/png" scaling="tofit" alignment="bottomleft"/>
 	<background-darkAqua file="background.png" mime-type="image/png" scaling="tofit" alignment="bottomleft"/>
 	<options customize="always" rootVolumeOnly="true" hostArchitectures="x86_64,arm64" />
