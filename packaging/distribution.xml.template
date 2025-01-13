@@ -16,24 +16,19 @@
 		<line choice="${BUNDLE_ID}.clap.pkg" />
 	</choices-outline>
 
-	<pkg-ref id="${BUNDLE_ID}.app.pkg" version="${VERSION}" onConclusion="none">${PRODUCT_NAME}.app.pkg</pkg-ref>
-	<pkg-ref id="${BUNDLE_ID}.vst3.pkg" version="${VERSION}" onConclusion="none">${PRODUCT_NAME}.vst3.pkg</pkg-ref>
-    <pkg-ref id="${BUNDLE_ID}.au.pkg" version="${VERSION}" onConclusion="none">${PRODUCT_NAME}.au.pkg</pkg-ref>
-    <pkg-ref id="${BUNDLE_ID}.clap.pkg" version="${VERSION}" onConclusion="none">${PRODUCT_NAME}.clap.pkg</pkg-ref>
-
 	<choice id="${BUNDLE_ID}.app.pkg" visible="true" start_selected="true" title="${PRODUCT_NAME} Standalone">
-		<pkg-ref id="${BUNDLE_ID}.app.pkg" />
+		<pkg-ref id="${BUNDLE_ID}.app.pkg" version="${VERSION}" onConclusion="none">${PRODUCT_NAME}.app.pkg</pkg-ref>
 	</choice>
 
     <choice id="${BUNDLE_ID}.vst3.pkg" visible="true" start_selected="true" title="${PRODUCT_NAME} VST3">
-        <pkg-ref id="${BUNDLE_ID}.vst3.pkg" />
+		<pkg-ref id="${BUNDLE_ID}.vst3.pkg" version="${VERSION}" onConclusion="none">${PRODUCT_NAME}.vst3.pkg</pkg-ref>
     </choice>
 
     <choice id="${BUNDLE_ID}.au.pkg" visible="true" start_selected="true" title="${PRODUCT_NAME} AU">
-        <pkg-ref id="${BUNDLE_ID}.au.pkg" />
+    	<pkg-ref id="${BUNDLE_ID}.au.pkg" version="${VERSION}" onConclusion="none">${PRODUCT_NAME}.au.pkg</pkg-ref>
 	</choice>
 
 	<choice id="${BUNDLE_ID}.clap.pkg" visible="true" start_selected="true" title="${PRODUCT_NAME} CLAP">
-        <pkg-ref id="${BUNDLE_ID}.clap.pkg" />
+    	<pkg-ref id="${BUNDLE_ID}.clap.pkg" version="${VERSION}" onConclusion="none">${PRODUCT_NAME}.clap.pkg</pkg-ref>
 	</choice>
 </installer-gui-script>
