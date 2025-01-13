@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf8'?>
 <installer-gui-script minSpecVersion="2">
-	<title>Install ${PRODUCT_NAME}</title>
+	<title>${PRODUCT_NAME}</title>
 	<os-version min="10.13" />
 	<license file="EULA" />
 	<readme file="README" />
@@ -10,25 +10,25 @@
 	<domain enable_anywhere="false" enable_currentUserHome="false" enable_localSystem="true" />
 
 	<choices-outline>
-		<line choice="${BUNDLE_ID}.app.pkg" />
-		<line choice="${BUNDLE_ID}.vst3.pkg" />
-		<line choice="${BUNDLE_ID}.au.pkg" />
-		<line choice="${BUNDLE_ID}.clap.pkg" />
+		<line choice="app" />
+		<line choice="vst3" />
+		<line choice="au" />
+		<line choice="clap" />
 	</choices-outline>
 
-	<choice id="${BUNDLE_ID}.app.pkg" visible="true" start_selected="true" title="${PRODUCT_NAME} Standalone">
+	<choice id="app" visible="true" start_selected="true" title="${PRODUCT_NAME} Standalone">
 		<pkg-ref id="${BUNDLE_ID}.app.pkg" version="${VERSION}" onConclusion="none">${PRODUCT_NAME}.app.pkg</pkg-ref>
 	</choice>
 
-    <choice id="${BUNDLE_ID}.vst3.pkg" visible="true" start_selected="true" title="${PRODUCT_NAME} VST3">
+    <choice id="vst3" visible="true" start_selected="true" title="${PRODUCT_NAME} VST3">
 		<pkg-ref id="${BUNDLE_ID}.vst3.pkg" version="${VERSION}" onConclusion="none">${PRODUCT_NAME}.vst3.pkg</pkg-ref>
     </choice>
 
-    <choice id="${BUNDLE_ID}.au.pkg" visible="true" start_selected="true" title="${PRODUCT_NAME} AU">
+    <choice id="au" visible="true" start_selected="true" title="${PRODUCT_NAME} AU">
     	<pkg-ref id="${BUNDLE_ID}.au.pkg" version="${VERSION}" onConclusion="none">${PRODUCT_NAME}.au.pkg</pkg-ref>
 	</choice>
 
-	<choice id="${BUNDLE_ID}.clap.pkg" visible="true" start_selected="true" title="${PRODUCT_NAME} CLAP">
+	<choice id="clap" visible="true" start_selected="true" title="${PRODUCT_NAME} CLAP">
     	<pkg-ref id="${BUNDLE_ID}.clap.pkg" version="${VERSION}" onConclusion="none">${PRODUCT_NAME}.clap.pkg</pkg-ref>
 	</choice>
 </installer-gui-script>
