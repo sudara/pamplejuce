@@ -38,10 +38,11 @@ jobs:
           - name: Linux
             os: ubuntu-22.04
             pluginval-binary: ./pluginval
+            extra-flags: -G Ninja
           - name: macOS
             os: macos-14
             pluginval-binary: pluginval.app/Contents/MacOS/pluginval
-            extra-flags: -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
+            extra-flags: -G Ninja -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
           - name: Windows
             os: windows-latest
             pluginval-binary: ./pluginval.exe
@@ -103,31 +104,30 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          submodules: true # Get JUCE populated
+          submodules: recursive
 
       - name: Cache the build
-        uses: mozilla-actions/sccache-action@v0.0.5
+        uses: mozilla-actions/sccache-action@v0.0.7
 
       - name: Import Certificates (macOS)
-        uses: apple-actions/import-codesign-certs@v3
-        if: ${{ matrix.name == 'macOS' }}
+        uses: sudara/basic-macos-keychain-action@v1
+        id: keychain
+        if: ${{ matrix.name == 'macOS'}}
         with:
-          p12-file-base64: ${{ secrets.DEV_ID_APP_CERT }}
-          p12-password: ${{ secrets.DEV_ID_APP_PASSWORD }}
+          dev-id-app-cert: ${{ secrets.DEV_ID_APP_CERT }}
+          dev-id-app-password: ${{ secrets.DEV_ID_APP_PASSWORD }}
+          dev-id-installer-cert: ${{ secrets.DEV_ID_INSTALLER_CERT }}
+          dev-id-installer-password: ${{ secrets.DEV_ID_INSTALLER_PASSWORD }}
 
       - name: Configure
-        run: cmake -B ${{ env.BUILD_DIR }} -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache ${{ matrix.extra-flags }} .
+        run: cmake -B ${{ env.BUILD_DIR }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache ${{ matrix.extra-flags }} .
 
       - name: Build
         run: cmake --build ${{ env.BUILD_DIR }} --config ${{ env.BUILD_TYPE }} --parallel 4
 
-      - name: Test
+      - name: Test & Benchmarks
         working-directory: ${{ env.BUILD_DIR }}
-        run: ./Tests
-
-      - name: Run Benchmarks
-        working-directory: ${{ env.BUILD_DIR }}
-        run: ./Benchmarks
+        run: ctest --verbose --output-on-failure
 
       - name: Read in .env from CMake # see GitHubENV.cmake
         run: |
@@ -141,6 +141,7 @@ jobs:
           echo "VST3_PATH=$ARTIFACTS_PATH/VST3/${{ env.PRODUCT_NAME }}.vst3" >> $GITHUB_ENV
           echo "AU_PATH=$ARTIFACTS_PATH/AU/${{ env.PRODUCT_NAME }}.component" >> $GITHUB_ENV
           echo "AUV3_PATH=$ARTIFACTS_PATH/AUv3/${{ env.PRODUCT_NAME }}.appex" >> $GITHUB_ENV
+          echo "CLAP_PATH=$ARTIFACTS_PATH/CLAP/${{ env.PRODUCT_NAME }}.clap" >> $GITHUB_ENV
           echo "STANDALONE_PATH=$ARTIFACTS_PATH/Standalone/${{ env.PRODUCT_NAME }}.app" >> $GITHUB_ENV
           echo "ARTIFACT_NAME=${{ env.PRODUCT_NAME }}-${{ env.VERSION }}-${{ matrix.name }}" >> $GITHUB_ENV
 
@@ -156,6 +157,7 @@ jobs:
           # Each plugin must be code signed
           codesign --force -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" -v "${{ env.VST3_PATH }}" --deep --strict --options=runtime --timestamp
           codesign --force -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" -v "${{ env.AU_PATH }}" --deep --strict --options=runtime --timestamp
+          codesign --force -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" -v "${{ env.CLAP_PATH }}" --deep --strict --options=runtime --timestamp
           codesign --force -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" -v "${{ env.STANDALONE_PATH }}" --deep --strict --options=runtime --timestamp
 
       - name: Add Custom Icons (macOS)
@@ -170,32 +172,32 @@ jobs:
           # Stuff the resource into the strange Icon? file's resource fork
           Rez -a /tmp/icons -o "${{ env.VST3_PATH }}/Icon"$'\r'
           Rez -a /tmp/icons -o "${{ env.AU_PATH }}/Icon"$'\r'
+          Rez -a /tmp/icons -o "${{ env.CLAP_PATH }}/Icon"$'\r'
 
           # Set custom icon attribute
           SetFile -a C "${{ env.VST3_PATH }}"
           SetFile -a C "${{ env.AU_PATH }}"
+          SetFile -a C "${{ env.CLAP_PATH }}"
 
-      - name: Create DMG, Notarize and Staple (macOS)
+      - name: pkgbuild, Productbuild and Notarize
         if: ${{ matrix.name == 'macOS' }}
+        timeout-minutes: 5
         run: |
-          # workaround for https://github.com/LinusU/node-appdmg/issues/234
-          python3 -m pip install setuptools --break-system-packages
-          npm install -g appdmg
-          mkdir -p packaging/dmg
+          pkgbuild --identifier "${{ env.BUNDLE_ID }}.au.pkg" --version $VERSION --component "${{ env.AU_PATH }}" --install-location "/Library/Audio/Plug-Ins/Components" --sign "${{ secrets.DEVELOPER_ID_INSTALLER }}" --timestamp "packaging/${{ env.PRODUCT_NAME }}.au.pkg"
+          pkgbuild --identifier "${{ env.BUNDLE_ID }}.vst3.pkg" --version $VERSION --component "${{ env.VST3_PATH }}" --install-location "/Library/Audio/Plug-Ins/VST3" --sign "${{ secrets.DEVELOPER_ID_INSTALLER }}" --timestamp "packaging/${{ env.PRODUCT_NAME }}.vst3.pkg"
+          pkgbuild --identifier "${{ env.BUNDLE_ID }}.clap.pkg" --version $VERSION --component "${{ env.CLAP_PATH }}" --install-location "/Library/Audio/Plug-Ins/CLAP" --sign "${{ secrets.DEVELOPER_ID_INSTALLER }}" --timestamp "packaging/${{ env.PRODUCT_NAME }}.clap.pkg"
+          
+          # Standalone is special, needs a boolean to always install in /Applications
+          pkgbuild --analyze --root "$(dirname "${{ env.STANDALONE_PATH }}")" standalone.plist
+          plutil -replace BundleIsRelocatable -bool NO standalone.plist
+          pkgbuild --identifier "${{ env.BUNDLE_ID }}.app.pkg" --version $VERSION --root "$(dirname "${{ env.STANDALONE_PATH }}")" --component-plist standalone.plist --install-location "/Applications" --sign "${{ secrets.DEVELOPER_ID_INSTALLER }}" --timestamp "packaging/${{ env.PRODUCT_NAME }}.app.pkg"
+          
+          cd packaging
+          envsubst < distribution.xml.template > distribution.xml
+          productbuild --resources ./resources --distribution distribution.xml --sign "${{ secrets.DEVELOPER_ID_INSTALLER }}" --timestamp "${{ env.ARTIFACT_NAME }}.pkg" 
 
-          # Create directories for the dmg symlinks
-          sudo mkdir -m 755 -p /Library/Audio/Plug-Ins/Components && sudo mkdir -m 755 -p /Library/Audio/Plug-Ins/VST3
-          ln -s /Library/Audio/Plug-Ins/Components "packaging/dmg/Your Mac's Component folder"
-          ln -s /Library/Audio/Plug-Ins/VST3 "packaging/dmg/Your Mac's VST3 folder"
-          mv "${{ env.VST3_PATH }}" packaging/dmg
-          mv "${{ env.AU_PATH }}" packaging/dmg
-          mv "${{ env.STANDALONE_PATH }}" packaging/dmg
-
-          # Run appdmg to create the .dmg
-          cd packaging && appdmg dmg.json "${{ env.ARTIFACT_NAME}}.dmg"
-          codesign -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" --timestamp -i ${{ env.BUNDLE_ID }} --force "${{ env.ARTIFACT_NAME }}.dmg"
-          xcrun notarytool submit "${{ env.ARTIFACT_NAME }}.dmg" --apple-id ${{ secrets.NOTARIZATION_USERNAME }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --team-id ${{ secrets.TEAM_ID }} --wait
-          xcrun stapler staple "${{ env.ARTIFACT_NAME }}.dmg"
+          xcrun notarytool submit "${{ env.ARTIFACT_NAME }}.pkg" --apple-id ${{ secrets.NOTARIZATION_USERNAME }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --team-id ${{ secrets.TEAM_ID }} --wait
+          xcrun stapler staple "${{ env.ARTIFACT_NAME }}.pkg"
 
       - name: Zip
         if: ${{ matrix.name == 'Linux' }}
@@ -210,7 +212,7 @@ jobs:
 
       - name: Codesign with Azure Trusted Signing
         if: ${{ matrix.name == 'Windows' }}
-        uses: azure/trusted-signing-action@v0.4.0
+        uses: azure/trusted-signing-action@v0.5.0
         with:
           # The Azure Active Directory tenant (directory) ID.
           azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
@@ -248,12 +250,12 @@ jobs:
           name: ${{ env.ARTIFACT_NAME }}.zip
           path: "${{ env.ARTIFACTS_PATH }}/${{ env.ARTIFACT_NAME }}.zip"
 
-      - name: Upload DMG (macOS)
+      - name: Upload pkg (macOS)
         if: ${{ matrix.name == 'macOS' }}
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.ARTIFACT_NAME }}.dmg
-          path: packaging/${{ env.ARTIFACT_NAME }}.dmg
+          name: ${{ env.ARTIFACT_NAME }}.pkg
+          path: packaging/${{ env.ARTIFACT_NAME }}.pkg
 
   release:
     if: contains(github.ref, 'tags/v')

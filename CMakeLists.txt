@@ -1,11 +1,11 @@
-# 3.24.1 is bundled in Visual Studio 2022 v17.4
-# 3.24.1 is also bundled in CLion as of 2023
-cmake_minimum_required(VERSION 3.24.1)
-
+cmake_minimum_required(VERSION 3.25)
 
 # This tells cmake we have goodies in the /cmake folder
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include (PamplejuceVersion)
+
+# Modern concise way to add dependencies to your project
+include (CPM)
 
 # Configures universal binaries and decides which version of macOS to support
 include(PamplejuceMacOS)
@@ -46,6 +46,9 @@ project(${PROJECT_NAME} VERSION ${CURRENT_VERSION})
 # On Github Actions, this is done as a part of actions/checkout
 add_subdirectory(JUCE)
 
+# Add CLAP format
+add_subdirectory(modules/clap-juce-extensions EXCLUDE_FROM_ALL)
+
 # Add any other modules you want modules here, before the juce_add_plugin call
 # juce_add_module(modules/my_module)
 
@@ -85,8 +88,13 @@ juce_add_plugin("${PROJECT_NAME}"
 # Without running into ODR violations
 add_library(SharedCode INTERFACE)
 
+clap_juce_extensions_plugin(TARGET "${PROJECT_NAME}"
+    CLAP_ID "${BUNDLE_ID}"
+    CLAP_FEATURES audio-effect)
+
 # Enable fast math, C++20 and a few other target defaults
 include(SharedCodeDefaults)
+
 
 # Manually list all .h and .cpp files for the plugin
 # If you are like me, you'll use globs for your sanity.
