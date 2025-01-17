@@ -162,3 +162,14 @@ include(Benchmarks)
 
 # Output some config for CI (like our PRODUCT_NAME)
 include(GitHubENV)
+
+# sccache hack
+# on the fly modify juce_recommended_config_flags before juceaide builds
+# see # see https://forum.juce.com/t/fr-improve-the-performance-of-building-juceaide-by-forwarding-compiler-launcher-cmake-args/61543/15?u=sudara
+get_target_property(opts juce_recommended_config_flags INTERFACE_COMPILE_OPTIONS)
+message("Before: ${opts}")
+foreach(o IN LISTS opts)
+  string(REPLACE "/Zi" "" o "${o}")
+endforeach()
+message("After:  ${opts}")
+target_compile_options(juce_recommended_config_flags INTERFACE ${opts})
