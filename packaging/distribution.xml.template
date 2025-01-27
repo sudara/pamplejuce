@@ -1,7 +1,9 @@
 <?xml version='1.0' encoding='utf8'?>
 <installer-gui-script minSpecVersion="2">
     <title>${PRODUCT_NAME}</title>
-    <os-version min="10.13" />
+    <allowed-os-versions>
+        <os-version min="10.13" />
+    </allowed-os-versions>
     <license file="EULA" />
     <readme file="README" />
     <background file="background.png" mime-type="image/png" scaling="tofit" alignment="bottomleft"/>
