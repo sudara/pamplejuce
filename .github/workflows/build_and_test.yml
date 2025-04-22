@@ -92,7 +92,7 @@ jobs:
 
       - name: Install macOS Deps
         if: ${{ matrix.name == 'macOS' }}
-        run: brew install ninja osxutils
+        run: brew install osxutils
 
       # This block can be removed once 15.1 is default (JUCE requires it when building on macOS 14)
       - name: Use latest Xcode on system (macOS)
