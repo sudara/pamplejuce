@@ -40,6 +40,11 @@ set(FORMATS Standalone AU VST3 AUv3)
 # For simplicity, the name of the CMake project is also the name of the target
 project(${PROJECT_NAME} VERSION ${CURRENT_VERSION})
 
+# This lets you use the WITH_ADDRESS_SANITIZER and WITH_THREAD_SANITIZER oprtions
+# These can be set as part of your cmake options with -DWITH_ADDRESS_SANITIZER:BOOL=ON or -DWITH_THREAD_SANITIZER:BOOL=ON
+# or set as options in your IDE etc
+include(Sanitizers)
+
 # JUCE is setup as a submodule in the /JUCE folder
 # Locally, you must run `git submodule update --init --recursive` once
 # and later `git submodule update --remote --merge` to keep it up to date
