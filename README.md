@@ -5,7 +5,7 @@ Pamplejuce is a ~~template~~ lifestyle for creating and building JUCE plugins in
 
 Out-of-the-box, it:
 
-1. Supports C++20.
+1. Runs C++23
 2. Uses JUCE 8.x as a git submodule (tracking develop).
 3. Uses CPM for dependency management.
 3. Relies on CMake 3.25 and higher for cross-platform building.
