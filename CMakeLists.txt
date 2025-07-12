@@ -39,8 +39,8 @@ set(FORMATS Standalone AU VST3 AUv3)
 
 # Force JUCE to work with sccache
 # instruct MSVC to embed debug info (/Z7) instead of emitting a .pdb
-cmake_policy(SET CMP0141 NEW)
-set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "Embedded")
+set(CMAKE_POLICY_DEFAULT_CMP0141        NEW      CACHE STRING "" FORCE)
+set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT Embedded CACHE STRING "" FORCE)
 
 # For simplicity, the name of the CMake project is also the name of the target
 project(${PROJECT_NAME} VERSION ${CURRENT_VERSION})
