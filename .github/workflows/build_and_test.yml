@@ -138,10 +138,10 @@ jobs:
         timeout-minutes: 5
         run: |
           # Store debug symbols to use with symbolicatecrash
-          dsymutil "${{ env.VST3_PATH }}/Contents/MacOS/${{ env.PRODUCT_NAME }} -o vst3.dSYM"
-          dsymutil "${{ env.AU_PATH }}/Contents/MacOS/${{ env.PRODUCT_NAME }} -o au.dSYM"
-          dsymutil "${{ env.CLAP_PATH }}/Contents/MacOS/${{ env.PRODUCT_NAME }} -o clap.dSYM"
-          dsymutil "${{ env.STANDALONE_PATH }}/Contents/MacOS/${{ env.PRODUCT_NAME }} -o standalone.dSYM"
+          dsymutil "${{ env.VST3_PATH }}/Contents/MacOS/${{ env.PRODUCT_NAME }}" -o vst3.dSYM
+          dsymutil "${{ env.AU_PATH }}/Contents/MacOS/${{ env.PRODUCT_NAME }}" -o au.dSYM
+          dsymutil "${{ env.CLAP_PATH }}/Contents/MacOS/${{ env.PRODUCT_NAME }}" -o clap.dSYM
+          dsymutil "${{ env.STANDALONE_PATH }}/Contents/MacOS/${{ env.PRODUCT_NAME }}" -o standalone.dSYM
           
           # Strip the binaries, you can test via `nm -s __TEXT __text MyApp.app/Contents/MacOS/MyApp`
           strip -x "${{ env.VST3_PATH }}/Contents/MacOS/${{ env.PRODUCT_NAME }}"
