@@ -253,12 +253,6 @@ jobs:
           name: ${{ env.ARTIFACT_NAME }}.pkg
           path: packaging/${{ env.ARTIFACT_NAME }}.pkg
 
-      - name: Upload Symbols (macOS)
-        if: ${{ matrix.name == 'macOS' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: symbols
-
   release:
     if: contains(github.ref, 'tags/v')
     runs-on: ubuntu-latest
