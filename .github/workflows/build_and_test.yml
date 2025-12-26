@@ -16,8 +16,8 @@ env:
   DISPLAY: :0 # linux pluginval needs this
   HOMEBREW_NO_INSTALL_CLEANUP: 1
   SCCACHE_GHA_ENABLED: true
+  SCCACHE_GHA_VERSION: 2 # bump this to purge cache
   SCCACHE_CACHE_MULTIARCH: 1
-  IPP_DIR: C:\Program Files (x86)\Intel\oneAPI\ipp\latest\lib\cmake\ipp
 
 defaults:
   run:
@@ -38,11 +38,10 @@ jobs:
           - name: Linux
             os: ubuntu-22.04
             pluginval-binary: ./pluginval
-            extra-flags: -G Ninja
           - name: macOS
             os: macos-14
             pluginval-binary: pluginval.app/Contents/MacOS/pluginval
-            extra-flags: -G Ninja -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
+            extra-flags: -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
           - name: Windows
             os: windows-latest
             pluginval-binary: ./pluginval.exe
@@ -93,7 +92,7 @@ jobs:
         uses: mozilla-actions/sccache-action@v0.0.9
 
       - name: Configure
-        run: cmake -B ${{ env.BUILD_DIR }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache ${{ matrix.extra-flags }} .
+        run: cmake -B ${{ env.BUILD_DIR }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache -G Ninja ${{ matrix.extra-flags }} .
 
       - name: Build
         run: cmake --build ${{ env.BUILD_DIR }} --config ${{ env.BUILD_TYPE }}
@@ -134,10 +133,22 @@ jobs:
           dev-id-installer-cert: ${{ secrets.DEV_ID_INSTALLER_CERT }}
           dev-id-installer-password: ${{ secrets.DEV_ID_INSTALLER_PASSWORD }}
 
-      - name: Codesign (macOS)
+      - name: Strip symbols and Codesign (macOS)
         if: ${{ matrix.name == 'macOS' }}
         timeout-minutes: 5
         run: |
+          # Store debug symbols to use with symbolicatecrash
+          dsymutil "${{ env.VST3_PATH }}/Contents/MacOS/${{ env.PRODUCT_NAME }}" -o vst3.dSYM
+          dsymutil "${{ env.AU_PATH }}/Contents/MacOS/${{ env.PRODUCT_NAME }}" -o au.dSYM
+          dsymutil "${{ env.CLAP_PATH }}/Contents/MacOS/${{ env.PRODUCT_NAME }}" -o clap.dSYM
+          dsymutil "${{ env.STANDALONE_PATH }}/Contents/MacOS/${{ env.PRODUCT_NAME }}" -o standalone.dSYM
+          
+          # Strip the binaries, you can test via `nm -s __TEXT __text MyApp.app/Contents/MacOS/MyApp`
+          strip -x "${{ env.VST3_PATH }}/Contents/MacOS/${{ env.PRODUCT_NAME }}"
+          strip -x "${{ env.AU_PATH }}/Contents/MacOS/${{ env.PRODUCT_NAME }}"
+          strip -x "${{ env.CLAP_PATH }}/Contents/MacOS/${{ env.PRODUCT_NAME }}"
+          strip -x "${{ env.STANDALONE_PATH }}/Contents/MacOS/${{ env.PRODUCT_NAME }}"
+        
           # Each plugin must be code signed
           codesign --force --keychain ${{ steps.keychain.outputs.keychain-path }} -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" -v "${{ env.VST3_PATH }}" --deep --strict --options=runtime --timestamp
           codesign --force --keychain ${{ steps.keychain.outputs.keychain-path }} -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" -v "${{ env.AU_PATH }}" --deep --strict --options=runtime --timestamp
@@ -188,11 +199,12 @@ jobs:
         working-directory: ${{ env.ARTIFACTS_PATH }}
         run: 7z a -tzip "${{ env.ARTIFACT_NAME }}.zip" "-xr!lib${{ env.PRODUCT_NAME }}_SharedCode.a" .
 
-      - name: Generate Installer
+      - name: Strip symbols and Generate Installer
         if: ${{ matrix.name == 'Windows' }}
         run: |
           iscc "packaging\installer.iss"
           mv "packaging/Output/${{ env.ARTIFACT_NAME }}.exe" "${{ env.ARTIFACTS_PATH }}/"
+          dumpbin /symbols "${{ env.ARTIFACTS_PATH }}/${{ env.ARTIFACT_NAME }}.exe"  2>&1 | grep -v '^no symbols$' | grep -q . && { echo "❌ stray symbols!"; exit 1; } || { echo "✅ clean"; exit 0; }
 
       - name: Codesign with Azure Trusted Signing
         if: ${{ matrix.name == 'Windows' }}
