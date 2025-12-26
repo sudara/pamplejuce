@@ -29,7 +29,7 @@ jobs:
   build_and_test:
     # don't double run on PRs
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
-    name: ${{ matrix.name }}
+    name: ${{ runner.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false # show all errors for each platform (vs. cancel jobs on error)
@@ -78,12 +78,12 @@ jobs:
         run: choco install ninja
 
       - name: Install macOS Deps
-        if: ${{ matrix.name == 'macOS' }}
+        if: ${{ runner.os == 'macOS' }}
         run: brew install ninja osxutils
 
       # This block can be removed once 15.1 is default (JUCE requires it when building on macOS 14)
       - name: Use latest Xcode on system (macOS)
-        if: ${{ matrix.name == 'macOS' }}
+        if: ${{ runner.os == 'macOS' }}
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: latest-stable
@@ -120,18 +120,18 @@ jobs:
           echo "AUV3_PATH=$ARTIFACTS_PATH/AUv3/${{ env.PRODUCT_NAME }}.appex" >> $GITHUB_ENV
           echo "CLAP_PATH=$ARTIFACTS_PATH/CLAP/${{ env.PRODUCT_NAME }}.clap" >> $GITHUB_ENV
           echo "STANDALONE_PATH=$ARTIFACTS_PATH/Standalone/${{ env.PRODUCT_NAME }}.app" >> $GITHUB_ENV
-          echo "ARTIFACT_NAME=${{ env.PRODUCT_NAME }}-${{ env.VERSION }}-${{ matrix.name }}" >> $GITHUB_ENV
+          echo "ARTIFACT_NAME=${{ env.PRODUCT_NAME }}-${{ env.VERSION }}-${{ runner.os }}" >> $GITHUB_ENV
 
       - name: Pluginval
         run: |
-          curl -LO "https://github.com/Tracktion/pluginval/releases/download/v1.0.3/pluginval_${{ matrix.name }}.zip"
-          7z x pluginval_${{ matrix.name }}.zip
+          curl -LO "https://github.com/Tracktion/pluginval/releases/download/v1.0.3/pluginval_${{ runner.os }}.zip"
+          7z x pluginval_${{ runner.os }}.zip
           ${{ matrix.pluginval-binary }} --strictness-level 10 --verbose --validate "${{ env.VST3_PATH }}"
 
       - name: Import Certificates (macOS)
         uses: sudara/basic-macos-keychain-action@v1
         id: keychain
-        if: ${{ matrix.name == 'macOS'}}
+        if: ${{ runner.os == 'macOS'}}
         with:
           dev-id-app-cert: ${{ secrets.DEV_ID_APP_CERT }}
           dev-id-app-password: ${{ secrets.DEV_ID_APP_PASSWORD }}
@@ -139,7 +139,7 @@ jobs:
           dev-id-installer-password: ${{ secrets.DEV_ID_INSTALLER_PASSWORD }}
 
       - name: Codesign (macOS)
-        if: ${{ matrix.name == 'macOS' }}
+        if: ${{ runner.os == 'macOS' }}
         timeout-minutes: 5
         run: |
           # Each plugin must be code signed
@@ -149,7 +149,7 @@ jobs:
           codesign --force -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" -v "${{ env.STANDALONE_PATH }}" --deep --strict --options=runtime --timestamp
 
       - name: Add Custom Icons (macOS)
-        if: ${{ matrix.name == 'macOS' }}
+        if: ${{ runner.os == 'macOS' }}
         run: |
           # add the icns as its own icon resource (meta!)
           sips -i packaging/pamplejuce.icns
@@ -168,7 +168,7 @@ jobs:
           SetFile -a C "${{ env.CLAP_PATH }}"
 
       - name: pkgbuild, Productbuild and Notarize
-        if: ${{ matrix.name == 'macOS' }}
+        if: ${{ runner.os == 'macOS' }}
         timeout-minutes: 5
         run: |
           pkgbuild --identifier "${{ env.BUNDLE_ID }}.au.pkg" --version $VERSION --component "${{ env.AU_PATH }}" --install-location "/Library/Audio/Plug-Ins/Components"  "packaging/${{ env.PRODUCT_NAME }}.au.pkg"
@@ -188,18 +188,18 @@ jobs:
           xcrun stapler staple "${{ env.ARTIFACT_NAME }}.pkg"
 
       - name: Zip
-        if: ${{ matrix.name == 'Linux' }}
+        if: ${{ runner.os == 'Linux' }}
         working-directory: ${{ env.ARTIFACTS_PATH }}
         run: 7z a -tzip "${{ env.ARTIFACT_NAME }}.zip" "-xr!lib${{ env.PRODUCT_NAME }}_SharedCode.a" .
 
       - name: Generate Installer
-        if: ${{ matrix.name == 'Windows' }}
+        if: ${{ runner.os == 'Windows' }}
         run: |
           iscc "packaging\installer.iss"
           mv "packaging/Output/${{ env.ARTIFACT_NAME }}.exe" "${{ env.ARTIFACTS_PATH }}/"
 
       - name: Codesign with Azure Trusted Signing
-        if: ${{ matrix.name == 'Windows' }}
+        if: ${{ runner.os == 'Windows' }}
         uses: azure/trusted-signing-action@v0.5.1
         with:
           # The Azure Active Directory tenant (directory) ID.
@@ -225,21 +225,21 @@ jobs:
           files-folder-filter: exe
 
       - name: Upload Exe (Windows)
-        if: ${{ matrix.name == 'Windows' }}
+        if: ${{ runner.os == 'Windows' }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.ARTIFACT_NAME }}.exe
           path: "${{ env.ARTIFACTS_PATH }}/${{ env.ARTIFACT_NAME }}.exe"
 
       - name: Upload Zip (Linux)
-        if: ${{ matrix.name == 'Linux' }}
+        if: ${{ runner.os == 'Linux' }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.ARTIFACT_NAME }}.zip
           path: "${{ env.ARTIFACTS_PATH }}/${{ env.ARTIFACT_NAME }}.zip"
 
       - name: Upload pkg (macOS)
-        if: ${{ matrix.name == 'macOS' }}
+        if: ${{ runner.os == 'macOS' }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.ARTIFACT_NAME }}.pkg
