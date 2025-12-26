@@ -71,7 +71,7 @@ jobs:
       - name: Install IPP (Windows)
         if: (runner.os == 'Windows')
         run: |
-          nuget install intelipp.static.win-x64 -Version 2022.2.0.575
+          nuget install intelipp.static.win-x64 -Version 2022.3.0.387
 
       - name: Install Ninja (Windows)
         if: runner.os == 'Windows'
@@ -80,6 +80,14 @@ jobs:
       - name: Install macOS Deps
         if: ${{ runner.os == 'macOS' }}
         run: brew install ninja osxutils
+
+      - name: Install IPP (macOS)
+        if: ${{ runner.os == 'macOS' }}
+        run: |
+          curl -L -o ipp-include.whl "https://files.pythonhosted.org/packages/f0/a0/3b0329735b28f05cbb87ce86be09567a2ecdf9bcd92c50b05fd0a30b34b9/ipp_include-2021.9.1-py2.py3-none-macosx_10_15_x86_64.macosx_11_0_x86_64.whl"
+          curl -L -o ipp-static.whl "https://files.pythonhosted.org/packages/fa/19/8b5d54390389b5a9910a111bc033cb0045dc2e1614745c2c98dc54061370/ipp_static-2021.9.1-py2.py3-none-macosx_10_15_x86_64.macosx_11_0_x86_64.whl"
+          unzip ipp-include.whl -d ipp-macos
+          unzip ipp-static.whl -d ipp-macos
 
       # This block can be removed once 15.1 is default (JUCE requires it when building on macOS 14)
       - name: Use latest Xcode on system (macOS)
