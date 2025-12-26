@@ -17,12 +17,13 @@ env:
   HOMEBREW_NO_INSTALL_CLEANUP: 1
   SCCACHE_GHA_ENABLED: true
   SCCACHE_CACHE_MULTIARCH: 1
+  SCCACHE_IDLE_TIMEOUT: 0
 
 defaults:
   run:
     shell: bash
 
-# jobs are run in paralell on different machines
+# jobs are run in parallel on different machines
 # all steps run in series
 jobs:
   build_and_test:
@@ -91,15 +92,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
-
-      # Has to come after actions/checkout which otherwise wipes out the working directory
-      - name: Install IPP (macOS)
-        if: ${{ runner.os == 'macOS' }}
-        run: |
-          curl -L -o ipp-include.whl "https://files.pythonhosted.org/packages/f0/a0/3b0329735b28f05cbb87ce86be09567a2ecdf9bcd92c50b05fd0a30b34b9/ipp_include-2021.9.1-py2.py3-none-macosx_10_15_x86_64.macosx_11_0_x86_64.whl"
-          curl -L -o ipp-static.whl "https://files.pythonhosted.org/packages/fa/19/8b5d54390389b5a9910a111bc033cb0045dc2e1614745c2c98dc54061370/ipp_static-2021.9.1-py2.py3-none-macosx_10_15_x86_64.macosx_11_0_x86_64.whl"
-          unzip ipp-include.whl -d ipp-macos
-          unzip ipp-static.whl -d ipp-macos
 
       - name: Cache the build
         uses: mozilla-actions/sccache-action@v0.0.9
