@@ -81,13 +81,6 @@ jobs:
         if: ${{ runner.os == 'macOS' }}
         run: brew install ninja osxutils
 
-      # This block can be removed once 15.1 is default (JUCE requires it when building on macOS 14)
-      - name: Use latest Xcode on system (macOS)
-        if: ${{ runner.os == 'macOS' }}
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: latest-stable
-
       - name: Checkout code
         uses: actions/checkout@v4
         with:
