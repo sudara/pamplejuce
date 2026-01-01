@@ -17,13 +17,13 @@ env:
   HOMEBREW_NO_INSTALL_CLEANUP: 1
   SCCACHE_GHA_ENABLED: true
   SCCACHE_CACHE_MULTIARCH: 1
-  IPP_DIR: C:\Program Files (x86)\Intel\oneAPI\ipp\latest\lib\cmake\ipp
+  SCCACHE_IDLE_TIMEOUT: 0
 
 defaults:
   run:
     shell: bash
 
-# jobs are run in paralell on different machines
+# jobs are run in parallel on different machines
 # all steps run in series
 jobs:
   build_and_test:
@@ -61,28 +61,25 @@ jobs:
         if: runner.os == 'Linux'
         # Thanks to McMartin & co https://forum.juce.com/t/list-of-juce-dependencies-under-linux/15121/44
         run: |
-          sudo apt-get update && sudo apt install libasound2-dev libx11-dev libxinerama-dev libxext-dev libfreetype6-dev libwebkit2gtk-4.1-dev libglu1-mesa-dev xvfb ninja-build
-          sudo /usr/bin/Xvfb $DISPLAY &
+          # IPP stuff
+          wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | gpg --dearmor | sudo tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null
+          echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
+          
+          sudo apt-get update && sudo apt install libasound2-dev libx11-dev libxinerama-dev libxext-dev libfreetype6-dev libwebkit2gtk-4.1-dev libglu1-mesa-dev xvfb ninja-build intel-oneapi-ipp-devel
+          sudo /usr/bin/Xvfb $DISPLAY & 
 
       - name: Install IPP (Windows)
         if: (runner.os == 'Windows')
         run: |
-          nuget install intelipp.static.win-x64 -Version 2022.2.0.575
+          nuget install intelipp.static.win-x64 -Version 2022.3.0.387
 
       - name: Install Ninja (Windows)
         if: runner.os == 'Windows'
         run: choco install ninja
 
       - name: Install macOS Deps
-        if: ${{ matrix.name == 'macOS' }}
+        if: ${{ runner.os == 'macOS' }}
         run: brew install ninja osxutils
-
-      # This block can be removed once 15.1 is default (JUCE requires it when building on macOS 14)
-      - name: Use latest Xcode on system (macOS)
-        if: ${{ matrix.name == 'macOS' }}
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: latest-stable
 
       - name: Checkout code
         uses: actions/checkout@v4
@@ -116,18 +113,18 @@ jobs:
           echo "AUV3_PATH=$ARTIFACTS_PATH/AUv3/${{ env.PRODUCT_NAME }}.appex" >> $GITHUB_ENV
           echo "CLAP_PATH=$ARTIFACTS_PATH/CLAP/${{ env.PRODUCT_NAME }}.clap" >> $GITHUB_ENV
           echo "STANDALONE_PATH=$ARTIFACTS_PATH/Standalone/${{ env.PRODUCT_NAME }}.app" >> $GITHUB_ENV
-          echo "ARTIFACT_NAME=${{ env.PRODUCT_NAME }}-${{ env.VERSION }}-${{ matrix.name }}" >> $GITHUB_ENV
+          echo "ARTIFACT_NAME=${{ env.PRODUCT_NAME }}-${{ env.VERSION }}-${{ runner.os }}" >> $GITHUB_ENV
 
       - name: Pluginval
         run: |
-          curl -LO "https://github.com/Tracktion/pluginval/releases/download/v1.0.3/pluginval_${{ matrix.name }}.zip"
-          7z x pluginval_${{ matrix.name }}.zip
+          curl -LO "https://github.com/Tracktion/pluginval/releases/download/v1.0.3/pluginval_${{ runner.os }}.zip"
+          7z x pluginval_${{ runner.os }}.zip
           ${{ matrix.pluginval-binary }} --strictness-level 10 --verbose --validate "${{ env.VST3_PATH }}"
 
       - name: Import Certificates (macOS)
         uses: sudara/basic-macos-keychain-action@v1
         id: keychain
-        if: ${{ matrix.name == 'macOS'}}
+        if: ${{ runner.os == 'macOS'}}
         with:
           dev-id-app-cert: ${{ secrets.DEV_ID_APP_CERT }}
           dev-id-app-password: ${{ secrets.DEV_ID_APP_PASSWORD }}
@@ -135,7 +132,7 @@ jobs:
           dev-id-installer-password: ${{ secrets.DEV_ID_INSTALLER_PASSWORD }}
 
       - name: Codesign (macOS)
-        if: ${{ matrix.name == 'macOS' }}
+        if: ${{ runner.os == 'macOS' }}
         timeout-minutes: 5
         run: |
           # Each plugin must be code signed
@@ -145,7 +142,7 @@ jobs:
           codesign --force --keychain ${{ steps.keychain.outputs.keychain-path }} -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" -v "${{ env.STANDALONE_PATH }}" --deep --strict --options=runtime --timestamp
 
       - name: Add Custom Icons (macOS)
-        if: ${{ matrix.name == 'macOS' }}
+        if: ${{ runner.os == 'macOS' }}
         run: |
           # add the icns as its own icon resource (meta!)
           sips -i packaging/pamplejuce.icns
@@ -164,7 +161,7 @@ jobs:
           SetFile -a C "${{ env.CLAP_PATH }}"
 
       - name: pkgbuild, Productbuild and Notarize
-        if: ${{ matrix.name == 'macOS' }}
+        if: ${{ runner.os == 'macOS' }}
         timeout-minutes: 5
         run: |
           pkgbuild --identifier "${{ env.BUNDLE_ID }}.au.pkg" --version $VERSION --component "${{ env.AU_PATH }}" --install-location "/Library/Audio/Plug-Ins/Components"  "packaging/${{ env.PRODUCT_NAME }}.au.pkg"
@@ -184,19 +181,19 @@ jobs:
           xcrun stapler staple "${{ env.ARTIFACT_NAME }}.pkg"
 
       - name: Zip
-        if: ${{ matrix.name == 'Linux' }}
+        if: ${{ runner.os == 'Linux' }}
         working-directory: ${{ env.ARTIFACTS_PATH }}
         run: 7z a -tzip "${{ env.ARTIFACT_NAME }}.zip" "-xr!lib${{ env.PRODUCT_NAME }}_SharedCode.a" .
 
       - name: Generate Installer
-        if: ${{ matrix.name == 'Windows' }}
+        if: ${{ runner.os == 'Windows' }}
         run: |
           iscc "packaging\installer.iss"
           mv "packaging/Output/${{ env.ARTIFACT_NAME }}.exe" "${{ env.ARTIFACTS_PATH }}/"
 
       - name: Codesign with Azure Trusted Signing
-        if: ${{ matrix.name == 'Windows' }}
-        uses: azure/trusted-signing-action@v0.5.1
+        if: ${{ runner.os == 'Windows' }}
+        uses: azure/trusted-signing-action@v0.5.11
         with:
           # The Azure Active Directory tenant (directory) ID.
           azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
@@ -221,22 +218,22 @@ jobs:
           files-folder-filter: exe
 
       - name: Upload Exe (Windows)
-        if: ${{ matrix.name == 'Windows' }}
-        uses: actions/upload-artifact@v4
+        if: ${{ runner.os == 'Windows' }}
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ env.ARTIFACT_NAME }}.exe
           path: "${{ env.ARTIFACTS_PATH }}/${{ env.ARTIFACT_NAME }}.exe"
 
       - name: Upload Zip (Linux)
-        if: ${{ matrix.name == 'Linux' }}
-        uses: actions/upload-artifact@v4
+        if: ${{ runner.os == 'Linux' }}
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ env.ARTIFACT_NAME }}.zip
           path: "${{ env.ARTIFACTS_PATH }}/${{ env.ARTIFACT_NAME }}.zip"
 
       - name: Upload pkg (macOS)
-        if: ${{ matrix.name == 'macOS' }}
-        uses: actions/upload-artifact@v4
+        if: ${{ runner.os == 'macOS' }}
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ env.ARTIFACT_NAME }}.pkg
           path: packaging/${{ env.ARTIFACT_NAME }}.pkg
@@ -248,7 +245,7 @@ jobs:
 
     steps:
       - name: Get Artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
