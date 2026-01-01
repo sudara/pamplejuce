@@ -1,7 +1,7 @@
 ![PAMPLEJUCE](assets/images/pamplejuce.png)
 [![](https://github.com/sudara/pamplejuce/actions/workflows/build_and_test.yml/badge.svg)](https://github.com/sudara/pamplejuce/actions)
 
-Pamplejuce is a ~~template~~ lifestyle for creating and building JUCE plugins in 2025.
+Pamplejuce is a ~~template~~ lifestyle for creating and building JUCE plugins in 2026.
 
 Out-of-the-box, it:
 
