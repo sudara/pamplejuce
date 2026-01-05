@@ -54,7 +54,7 @@ jobs:
       # Use clang on Linux so we don't introduce a 3rd compiler (Windows and macOS use MSVC and Clang)
       - name: Set up Clang
         if: runner.os == 'Linux'
-        uses: egor-tensin/setup-clang@v1
+        uses: egor-tensin/setup-clang@v2
 
       # This also starts up our "fake" display (Xvfb), needed for pluginval
       - name: Install JUCE's Linux Deps
