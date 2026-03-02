@@ -245,7 +245,7 @@ jobs:
 
     steps:
       - name: Get Artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
