@@ -1,0 +1,37 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-linux:
+    uses: ./.github/workflows/build_linux.yml
+
+  build-macos:
+    uses: ./.github/workflows/build_macos.yml
+    secrets: inherit
+
+  build-windows:
+    uses: ./.github/workflows/build_windows.yml
+    secrets: inherit
+
+  release:
+    if: contains(github.ref, 'tags/v')
+    runs-on: ubuntu-latest
+    needs: [build-linux, build-macos, build-windows]
+
+    steps:
+      - name: Get Artifacts
+        uses: actions/download-artifact@v7
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          prerelease: true
+          files: |
+            */*.exe
+            */*.zip
+            */*.pkg

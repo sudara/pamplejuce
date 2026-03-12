@@ -2,6 +2,8 @@ name: Build macOS
 
 on:
   workflow_dispatch:
+  workflow_call:
+    secrets: inherit
 
 concurrency:
   group: macos-${{ github.ref }}

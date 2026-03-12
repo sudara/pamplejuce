@@ -2,6 +2,8 @@ name: Build Windows
 
 on:
   workflow_dispatch:
+  workflow_call:
+    secrets: inherit
 
 concurrency:
   group: windows-${{ github.ref }}
