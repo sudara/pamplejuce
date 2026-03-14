@@ -93,7 +93,17 @@ jobs:
         run: cmake -B ${{ env.BUILD_DIR }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache ${{ matrix.extra-flags }} .
 
       - name: Build
+        if: runner.os != 'Windows'
         run: cmake --build ${{ env.BUILD_DIR }} --config ${{ env.BUILD_TYPE }}
+
+      - name: Build
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: |
+          sccache --stop-server >nul 2>&1
+          sccache --start-server
+          cmake --build ${{ env.BUILD_DIR }} --config ${{ env.BUILD_TYPE }}
+          sccache --show-stats
 
       - name: Test & Benchmarks
         working-directory: ${{ env.BUILD_DIR }}
