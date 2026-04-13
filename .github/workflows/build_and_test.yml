@@ -249,7 +249,7 @@ jobs:
         uses: actions/download-artifact@v8
 
       - name: Create Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           prerelease: true
           # download-artifact puts these files in their own dirs...
