@@ -41,7 +41,7 @@ jobs:
             pluginval-binary: ./pluginval
             extra-flags: -G Ninja
           - name: macOS
-            os: macos-14
+            os: macos-15
             pluginval-binary: pluginval.app/Contents/MacOS/pluginval
             extra-flags: -G Ninja -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
           - name: Windows
@@ -72,7 +72,7 @@ jobs:
       - name: Install IPP (Windows)
         if: (runner.os == 'Windows')
         run: |
-          nuget install intelipp.static.win-x64 -Version 2022.3.0.387
+          nuget install intelipp.static.win-x64 -Version 2026.0.0.712
 
       - name: Install Ninja (Windows)
         if: runner.os == 'Windows'
@@ -88,7 +88,7 @@ jobs:
           submodules: recursive
 
       - name: Cache the build
-        uses: mozilla-actions/sccache-action@v0.0.9
+        uses: mozilla-actions/sccache-action@v0.0.10
 
       - name: Configure
         run: cmake -B ${{ env.BUILD_DIR }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE}} -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache ${{ matrix.extra-flags }} .
