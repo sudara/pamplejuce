@@ -194,7 +194,7 @@ jobs:
 
       - name: Codesign with Azure Trusted Signing
         if: ${{ runner.os == 'Windows' }}
-        uses: azure/artifact-signing-action@v1
+        uses: azure/artifact-signing-action@v2
         with:
           # The Azure Active Directory tenant (directory) ID.
           azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
