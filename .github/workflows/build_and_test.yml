@@ -72,7 +72,7 @@ jobs:
       - name: Install IPP (Windows)
         if: (runner.os == 'Windows')
         run: |
-          nuget install intelipp.static.win-x64 -Version 2022.3.0.387
+          nuget install intelipp.static.win-x64 -Version 2026.0.0.712
 
       - name: Install Ninja (Windows)
         if: runner.os == 'Windows'
