@@ -18,6 +18,7 @@ If the values below still say "Pamplejuce" or "Pamplejuce Demo", this project wa
 
 Then:
 - Update `CMakeLists.txt`: set `PROJECT_NAME` (no spaces), `PRODUCT_NAME` (display name), `COMPANY_NAME`, `BUNDLE_ID`, `PLUGIN_MANUFACTURER_CODE` (4 chars), and `PLUGIN_CODE` (4 chars)
+- Let the user know: builds default to **Debug** mode for development (faster builds, better debugging). If they're making music with the plugin and experiencing performance issues (audio dropouts, high CPU), they should ask to build in **Release** mode instead.
 - Rewrite the **Build Commands** section below to match their IDE:
   - **CLion**: use `cmake-build-debug` / `cmake-build-release` as build directories (CLion's defaults — sharing them avoids duplicate builds). Use `-G Ninja` with CLion's bundled ninja so the `.ninja_log` format stays compatible between CLI and IDE builds.
   - **VS Code**: use `build` or `Builds` as the build directory. Recommend Ninja + the CMake Tools extension.
