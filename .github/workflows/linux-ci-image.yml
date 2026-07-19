@@ -1,0 +1,24 @@
+name: Linux CI Image
+
+on:
+  workflow_dispatch:
+  push:
+    paths: ['.github/docker/linux-ci.Dockerfile']
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Login to ghcr
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build
+        run: docker build -t ghcr.io/sudara/pamplejuce-linux-ci:latest -f .github/docker/linux-ci.Dockerfile .
+
+      - name: Push
+        run: docker push ghcr.io/sudara/pamplejuce-linux-ci:latest
