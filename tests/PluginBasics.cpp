@@ -35,7 +35,7 @@ TEST_CASE ("IPP version", "[ipp]")
         // macOS uses 2021.9.1 from pip wheel (only x86_64 version available)
         CHECK_THAT (ippsGetLibVersion()->Version, Catch::Matchers::Equals ("2021.9.1 (r0x7e208212)"));
     #else
-        CHECK_THAT (ippsGetLibVersion()->Version, Catch::Matchers::Equals ("2026.0.0 (r0xa7ad6ebc)"));
+        CHECK_THAT (ippsGetLibVersion()->Version, Catch::Matchers::Equals ("2026.1.0 (r0xfd440fec)"));
     #endif
 }
 #endif

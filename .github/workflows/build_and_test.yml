@@ -67,13 +67,13 @@ jobs:
           wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | gpg --dearmor | sudo tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null
           echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
           
-          sudo apt-get update && sudo apt install libasound2-dev libx11-dev libxi-dev libxinerama-dev libxext-dev libfreetype6-dev libwebkit2gtk-4.1-dev libglu1-mesa-dev xvfb ninja-build intel-oneapi-ipp-devel-2026.0
+          sudo apt-get update && sudo apt install libasound2-dev libx11-dev libxi-dev libxinerama-dev libxext-dev libfreetype6-dev libwebkit2gtk-4.1-dev libglu1-mesa-dev xvfb ninja-build intel-oneapi-ipp-devel-2026.1
           sudo /usr/bin/Xvfb $DISPLAY & 
 
       - name: Install IPP (Windows)
         if: (runner.os == 'Windows')
         run: |
-          nuget install intelipp.static.win-x64 -Version 2026.0.0.712
+          nuget install intelipp.static.win-x64 -Version 2026.1.0.761
 
       - name: Install Ninja (Windows)
         if: runner.os == 'Windows'
