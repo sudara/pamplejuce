@@ -106,11 +106,6 @@ clap_juce_extensions_plugin(TARGET "${PROJECT_NAME}"
 # Enable fast math, C++23 and a few other target defaults
 pamplejuce_shared_code_defaults()
 
-if (MSVC)
-    # clang-cl fails on JUCE's libwebp SSE4.1 files if their target pragma is active when intrin.h is first included
-    target_compile_options(SharedCode INTERFACE $<$<COMPILE_LANG_AND_ID:C,Clang>:/FIintrin.h>)
-endif ()
-
 
 # Manually list all .h and .cpp files for the plugin
 # If you are like me, you'll use globs for your sanity.
