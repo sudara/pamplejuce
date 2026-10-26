@@ -25,6 +25,16 @@ TEST_CASE ("Plugin instance", "[instance]")
     }
 }
 
+TEST_CASE ("NaN checks survive fast math", "[fast math]")
+{
+    // volatile so this tests the NaN check, not constant folding
+    volatile float nan = std::numeric_limits<float>::quiet_NaN();
+    CHECK (std::isnan (nan));
+
+    const bool notEqualToItself = nan != nan;
+    CHECK (notEqualToItself);
+}
+
 
 #ifdef PAMPLEJUCE_IPP
     #include <ipp.h>
